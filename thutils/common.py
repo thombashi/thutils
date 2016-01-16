@@ -383,31 +383,31 @@ def humanreadable_to_kb(readable_size):
     return humanreadable_to_byte(readable_size) / 1024
 
 
+def _get_unit(byte):
+    kilo = 1024
+
+    unit_pair_list = [
+        [kilo ** 5, "PB"],
+        [kilo ** 4, "TB"],
+        [kilo ** 3, "GB"],
+        [kilo ** 2, "MB"],
+        [kilo ** 1, "KB"],
+    ]
+
+    for unit_pair in unit_pair_list:
+        unit_byte, unit_name = unit_pair
+        if byte >= unit_byte:
+            return unit_byte, unit_name
+
+    return 1, "B"
+
+
 def bytes_to_humanreadable(byte):
     byte = int(byte)
     if byte < 0:
         raise ValueError("argument must be greatar than 0")
 
-    kilo = 1024
-
-    if byte >= kilo ** 4:
-        divisor = kilo ** 4
-        unit = "TB"
-    elif byte >= kilo ** 3:
-        divisor = kilo ** 3
-        unit = "GB"
-    elif byte >= kilo ** 2:
-        divisor = kilo ** 2
-        unit = "MB"
-    elif byte >= kilo ** 1:
-        divisor = kilo ** 1
-        unit = "KB"
-    else:
-        divisor = 1
-        unit = "B"
-
-    if divisor == 1:
-        return str(byte) + " " + unit
+    divisor, unit = _get_unit(byte)
 
     if (byte % divisor) == 0 and byte >= 1:
         value = str(int(byte / divisor))
@@ -630,33 +630,6 @@ def get_var_name(var, symboltable):
 
 
 # dict ---
-
-def _convert_dump_dict(value):
-    if isInteger(value):
-        return int(value)
-
-    if isFloat(value):
-        return float(value)
-
-    try:
-        return dict(value)
-    except:
-        pass
-
-    try:
-        return list(value)
-    except:
-        pass
-
-    try:
-        return str(value)
-    except:
-        pass
-
-    try:
-        return str(type(value))
-    except:
-        pass
 
 
 def dump_dict(dict_input, indent=4):

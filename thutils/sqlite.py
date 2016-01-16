@@ -234,14 +234,6 @@ def copyTable(con_src, con_dst, table_name):
 
 
 def appendTable(con_src, con_dst, table_name):
-    if con_src is None:
-        logger.error("null source database")
-        return False
-
-    if con_dst is None:
-        logger.error("null destination database")
-        return False
-
     logger.debug("append '%s' table: %s -> %s" % (
         table_name, con_src.database_path, con_dst.database_path))
 
@@ -506,8 +498,7 @@ class SqliteWrapper(object):
         self.checkAccessPermission(["w", "a"])
 
         query = SqlQuery.make_insert(table_name, insert_record)
-        if self.is_logging_query:
-            logger.debug("execute query: %s %s" % (query, insert_record))
+        self.__logging("execute query: %s %s" % (query, insert_record))
 
         if self.dry_run:
             return True
@@ -532,9 +523,8 @@ class SqliteWrapper(object):
             return True
 
         query = SqlQuery.make_insert(table_name, insert_record_list[0])
-        if self.is_logging_query:
-            logger.debug("insert many record: query=%s, size=%d, db=%s" % (
-                query, len(insert_record_list), self.database_path))
+        self.__logging("insert many record: query=%s, size=%d, db=%s" % (
+            query, len(insert_record_list), self.database_path))
 
         if self.dry_run:
             return True
@@ -947,6 +937,19 @@ class SqliteWrapper(object):
         )
 
     @staticmethod
+    def __get_value_type(value):
+        if common.isInteger(value):
+            return "INTEGER"
+
+        if common.isFloat(value):
+            return "REAL"
+
+        if gtime.is_datetime(value):
+            return "DATETIME"
+
+        return "TEXT"
+
+    @staticmethod
     def __get_column_valuetype(value_matrix):
         """
         get value type of column
@@ -970,6 +973,18 @@ class SqliteWrapper(object):
                 if cursor_value is None:
                     continue
 
+                cursor_value_type = self.__get_value_type(cursor_value)
+                if all([
+                    dict_column_valuetype[col] == "INTEGER",
+                    cursor_value_type == "INTEGER"
+                ]):
+                    continue
+
+                dict_column_valuetype[col] = cursor_value_type
+                if cursor_value_type == "TEXT":
+                    break
+
+                """
                 if dict_column_valuetype[col] == "INTEGER" and common.isInteger(cursor_value):
                     continue
 
@@ -980,6 +995,7 @@ class SqliteWrapper(object):
                 else:
                     dict_column_valuetype[col] = "TEXT"
                     break
+                    """
 
             col += 1
 
@@ -994,15 +1010,15 @@ class SqliteWrapper(object):
     def __execute(self, query, caller=None):
         import time
 
-        if self.is_logging_query:
-            if caller is None:
-                message = "execute query: " + query
-            else:
-                file_path, line_no, func_name = caller
-                message = "execute query from %s(%d) %s: %s" % (
-                    os.path.basename(os.path.realpath(file_path)),
-                    line_no, func_name, query)
-            logger.debug(message + " (%s)" % (self.database_path))
+        if caller is None:
+            message = "execute query: " + query
+        else:
+            file_path, line_no, func_name = caller
+            message = "execute query from %s(%d) %s: %s" % (
+                os.path.basename(os.path.realpath(file_path)),
+                line_no, func_name, query)
+        message += " (%s)" % (self.database_path)
+        self.__logging(message)
 
         if self.dry_run:
             return None

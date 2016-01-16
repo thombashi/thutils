@@ -174,23 +174,20 @@ class FileManager:
             logger.debug("no need to rename: src_path == dst_path")
             return True
 
-        if common.isEmptyString(src_path):
-            logger.error("empty source path")
-            return False
-
-        if not os.path.exists(src_path):
-            if not cls.__dry_run:
-                logger.debug("directory not found: %s" % (src_path))
+        try:
+            check_file_existence(src_path)
+        except (InvalidFilePathError, FileNotFoundError):
+            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
+            logger.exception(e)
             return False
 
         if common.isEmptyString(dst_path):
             logger.error("empty destination path")
             return False
 
-        if os.path.isdir(dst_path):
-            if os.path.exists(dst_path):
-                logger.error("%s already exists" % (dst_path))
-                return False
+        if os.path.lexists(dst_path):
+            logger.error("'%s' already exists" % (dst_path))
+            return False
 
         logger.info("rename: %s -> %s" % (src_path, dst_path))
         if not cls.__dry_run:
@@ -221,20 +218,12 @@ class FileManager:
 
     @classmethod
     def removeFile(cls, path):
-        if common.isEmptyString(path):
-            logger.warn("null path")
-            return False
+        try:
+            file_type = check_file_existence(path)
+        except (InvalidFilePathError, FileNotFoundError):
+            return True
 
-        if not os.path.lexists(path):
-            logger.debug("file not found: %s" % (path))
-            return False
-
-        if os.path.isfile(path) or os.path.islink(path):
-            if os.path.isfile(path):
-                logger.debug("remove file: %s" % (path))
-            elif os.path.islink(path):
-                logger.debug("remove link: %s" % (path))
-
+        if file_type in [FileType.FILE, FileType.LINK]:
             if not cls.__dry_run:
                 try:
                     os.remove(path)
@@ -242,12 +231,10 @@ class FileManager:
                     _, e, _ = sys.exc_info()  # for python 2.5 compatibility
                     logger.exception(e)
                     return False
-            return True
-        elif os.path.isdir(path):
+        elif file_type in [FileType.DIRECTORY]:
             return cls.removeDirectory(path)
-        else:
-            logger.error("unknown file type: %s" % (path))
-            return False
+
+        raise ValueError("unknown file type: %s" % (path))
 
     @classmethod
     def removeMatchFileInDir(cls, search_dir_path, re_target_list):
@@ -369,7 +356,7 @@ def check_file_existence(path):
 
     validatePath(path)
 
-    if not os.path.exists(path):
+    if not os.path.lexists(path):
         raise FileNotFoundError(path)
 
     if os.path.isfile(path):
@@ -403,60 +390,6 @@ def getFileNameFromPath(path):
     return os.path.splitext(os.path.basename(path))[0]
 
 
-def getRelativePath(target_path_org, root_dir_path):
-    import platform
-
-    major, minor, _patchlevel = platform.python_version_tuple()
-
-    if common.isEmptyString(target_path_org):
-        logger.debug("empty target path")
-        return None
-
-    target_path = target_path_org.strip()
-
-    if os.path.isfile(root_dir_path):
-        root_dir_path = os.path.dirname(root_dir_path)
-
-    if int(major) >= 2 and int(minor) >= 6:
-        return os.path.relpath(target_path, root_dir_path)
-    else:
-        try:
-            validatePath(target_path)
-        except InvalidFilePathError:
-            return None
-
-        target_path_list = os.path.abspath(
-            target_path).lstrip(os.path.sep).split(os.path.sep)
-        start_path_list = os.path.abspath(root_dir_path).lstrip(
-            os.path.sep).split(os.path.sep)
-
-        prefix_path_list = []
-        common_path_list = []
-
-        is_match = True
-        for target, start in zip(target_path_list, start_path_list):
-            if is_match and target != start:
-                is_match = False
-
-            if is_match:
-                common_path_list.append(target)
-            else:
-                prefix_path_list.append("..")
-
-        if common.isEmptyListOrTuple(common_path_list):
-            return target_path_org
-
-        replace_path = os.path.normpath(
-            os.path.sep + os.path.sep.join(common_path_list))
-        relative_path = target_path.replace(replace_path, ".")
-        if common.isEmptyListOrTuple(prefix_path_list):
-            return relative_path
-
-        return os.path.join(os.path.join(*prefix_path_list), relative_path)
-        # return os.path.join(".".join(prefix_path_list), relative_path)
-        # return relative_path
-
-
 def findFile(search_root_dir_path, re_pattern_text):
     result = findFileAll(
         search_root_dir_path, os.path.isfile, re_pattern_text, find_count=1)
@@ -470,14 +403,6 @@ def findFile(search_root_dir_path, re_pattern_text):
 def findFileAll(
         search_root_dir_path, check_func,
         re_pattern_text, find_count=sys.maxint):
-
-    if common.isEmptyString(search_root_dir_path):
-        logger.warn("null directory path")
-        return []
-
-    if common.isEmptyString(re_pattern_text):
-        logger.warn("null regular expression")
-        return []
 
     re_compile = re.compile(re_pattern_text)
     path_list = []
@@ -496,15 +421,9 @@ def findFileAll(
             if len(path_list) >= find_count:
                 return path_list
 
-    if len(path_list) > 0:
-        logger.debug("file found: count=%d, files=(%s)" % (
-            len(path_list), ", ".join(path_list)))
-        return path_list
-
-    logger.debug(
-        "%s does not contain '%s'" % (search_root_dir_path, re_pattern_text))
-
-    return []
+    logger.debug("find file result: count=%d, files=(%s)" % (
+        len(path_list), ", ".join(path_list)))
+    return path_list
 
 
 def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
