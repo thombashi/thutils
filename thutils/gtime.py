@@ -399,11 +399,8 @@ def convertHumanReadableToSecond(readable_time):
     if common.isEmptyString(readable_time):
         raise ValueError("empty input")
 
-    size = readable_time[:-1]
+    size = float(readable_time[:-1])
     unit = readable_time[-1]
-    if not common.isFloat(size):
-        raise ValueError("invalid value: '%s'" % (size))
-    size = float(size)
 
     if size < 0:
         raise ValueError("minus size")

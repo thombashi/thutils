@@ -127,12 +127,12 @@ class BinaryWriter:
         ]
 
     def __verify_size(self, size, min_value=None, max_value=None):
-        if common.isFloat(min_value):
+        if common.is_float(min_value):
             if size < min_value:
                 raise ValueError(
                     "invalid size: expected>%d, value=%d" % (min_value, size))
 
-        if common.isFloat(max_value):
+        if common.is_float(max_value):
             if size > max_value:
                 raise ValueError(
                     "invalid size: expected<%d, value=%d" % (max_value, size))

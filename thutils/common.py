@@ -115,7 +115,7 @@ def isHex(value):
     return True
 
 
-def isFloat(value):
+def is_float(value):
     if any([isinstance(value, float), value == float("inf")]):
         return True
 
@@ -301,7 +301,7 @@ def removeListFromList(input_list, remove_list):
 def convertValue(value):
     if isInteger(value):
         value = int(value)
-    elif isFloat(value):
+    elif is_float(value):
         value = float(value)
 
     return value
@@ -347,12 +347,7 @@ def humanreadable_to_byte(readable_size):
 
     size = readable_size[:-1]
     unit = readable_size[-1]
-    if not isFloat(size):
-        raise ValueError(
-            "invalid value: size='%s', input=%s" % (size, readable_size))
-    if not unit.isalpha():
-        raise ValueError(
-            "invalid unit: unit=%s, input=%s" % (unit, readable_size))
+
     size = float(size)
     unit = unit.lower()
 
@@ -598,7 +593,7 @@ def dump_dict(dict_input, indent=4):
     dict_work = dict(dict_input)
     """
     for key, value in six.iteritems(dict_input):
-        if any([f(value) for f in (isFloat, isDict, isListOrTuple)]):
+        if any([f(value) for f in (is_float, isDict, isListOrTuple)]):
             dict_work[key] = value
             continue
 

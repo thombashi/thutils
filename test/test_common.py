@@ -75,7 +75,7 @@ class Test_isHex:
         assert not isHex(value)
 
 
-class Test_isFloat:
+class Test_is_float:
 
     @pytest.mark.parametrize(["value"], [
         [0.0], [0.1], [-0.1], [1], [-1],
@@ -85,7 +85,7 @@ class Test_isFloat:
         [nan], [inf],
     ])
     def test_normal(self, value):
-        assert isFloat(value)
+        assert is_float(value)
 
     @pytest.mark.parametrize(["value"], [
         [None],
@@ -95,7 +95,7 @@ class Test_isFloat:
         [True],
     ])
     def test_abnormal(self, value):
-        assert not isFloat(value)
+        assert not is_float(value)
 
 
 class Test_isNaN:
