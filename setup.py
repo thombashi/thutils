@@ -10,6 +10,14 @@ with open("README.rst") as fp:
 with open("requirements.txt", "r") as fp:
     requirements = fp.read().splitlines()
 
+major, minor = sys.version_info[:2]
+
+if major == 2 and minor <= 5:
+    requirements.extend([
+        "argparse",
+        "simplejson",
+    ])
+
 setuptools.setup(
     name="thutils",
     version="0.1.8",
@@ -23,7 +31,10 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['test*']),
     install_requires=requirements,
     setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
+    tests_require=[
+        "pytest",
+        "pytest-cov",
+    ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python :: 2",
