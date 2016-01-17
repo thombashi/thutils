@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/thutils.svg)](https://pypi.python.org/pypi/thutils)
 
 
-# Abount
+# About
 Personal python utility library
 
 
