@@ -92,7 +92,7 @@ class FileManager:
         return True
 
     @classmethod
-    def copyFile(cls, src_path, dst_path):
+    def copy_file(cls, src_path, dst_path):
         import shutil
 
         try:
@@ -423,9 +423,6 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
 
 
 def sanitizeFileName(path, replacement_text=""):
-    # if not common.isNotEmptyString(path):
-    #    return None
-
     path = path.strip()
     re_replace = re.compile("[%s]" % re.escape('\:/*?"<>|'))
 
