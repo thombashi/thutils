@@ -43,7 +43,7 @@ class CommandCache:
 
             if os.path.isdir(cache_dir_path):
                 shutil.rmtree(cache_dir_path, False)
-        except Exception:
+        except (OSError, os.error):
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.exception(e)
             return False

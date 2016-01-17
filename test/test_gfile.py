@@ -42,9 +42,9 @@ class Test_validatePath:
         validatePath(value)
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, AttributeError],
-        [1, AttributeError],
-        [True, AttributeError],
+        [None, InvalidFilePathError],
+        [1.1, InvalidFilePathError],
+        [True, InvalidFilePathError],
 
         ["", InvalidFilePathError],
         ["/", InvalidFilePathError],
@@ -81,9 +81,9 @@ class Test_check_file_existence:
         assert check_file_existence(str(tmpdir)) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, AttributeError],
-        [1, AttributeError],
-        [True, AttributeError],
+        [None, InvalidFilePathError],
+        [1.1, InvalidFilePathError],
+        [True, InvalidFilePathError],
         ["", InvalidFilePathError],
         ["/not/existing/file/__path__", FileNotFoundError],
     ])

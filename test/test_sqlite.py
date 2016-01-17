@@ -297,17 +297,17 @@ class Test_SqliteWrapper_abnormal:
             con.getTotalChanges()
 
     @pytest.mark.parametrize(["value", "mode", "expected"], [
-        [None, "r", AttributeError],
-        [inf, "r", AttributeError],
+        [None, "r", gfile.InvalidFilePathError],
+        [nan, "r", gfile.InvalidFilePathError],
         ["", "r", gfile.InvalidFilePathError],
         ["/not/existing/file/__path__", "r", gfile.FileNotFoundError],
 
-        [None, "w", AttributeError],
-        [inf, "w", AttributeError],
+        [None, "w", gfile.InvalidFilePathError],
+        [inf, "w", gfile.InvalidFilePathError],
         ["", "w", gfile.InvalidFilePathError],
 
-        [None, "a", AttributeError],
-        [inf, "a", AttributeError],
+        [None, "a", gfile.InvalidFilePathError],
+        [1, "a", gfile.InvalidFilePathError],
         ["", "a", gfile.InvalidFilePathError],
 
         ["empty_file.txt", None, TypeError],
