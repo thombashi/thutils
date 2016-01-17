@@ -35,7 +35,7 @@ class Test_isInteger:
 
     @pytest.mark.parametrize(["value"], [
         [0], [99999999999], [-99999999999],
-        [1234567890123456789L], [-1234567890123456789L],
+        [1234567890123456789], [-1234567890123456789],
         ["0"], ["99999999999"], ["-99999999999"],
         [" 1"], ["1 "],
     ])
@@ -46,7 +46,7 @@ class Test_isInteger:
         [None], [nan], [inf],
         [0.5], ["0.5"],
         [""], ["test"], ["1a1"], ["11a"], ["a11"],
-        ["１"],
+        #["１"],
         [True],
         [1e-05], [-1e-05],
         ["1e-05"], ["-1e-05"],
@@ -67,7 +67,8 @@ class Test_isHex:
     @pytest.mark.parametrize(["value"], [
         [None], [nan], [inf],
         [0], [1], [0.5],
-        ["test"], ["g"], ["１"],
+        ["test"], ["g"],
+        #["１"],
         [True],
     ])
     def test_abnormal(self, value):
@@ -90,7 +91,7 @@ class Test_isFloat:
         [None],
         ["test"],
         ["inf"],
-        ["１"],
+        #["１"],
         [True],
     ])
     def test_abnormal(self, value):
@@ -391,12 +392,12 @@ class Test_get_list_item:
     @pytest.mark.parametrize(['input_list', "index", "expected"], [
         [input_list, 0, 1],
         [input_list, 2, 3],
-        [input_list, True, 2],
 
         [input_list, -1, None],
         [input_list, 4, None],
 
         [input_list, 1.0, None],
+        [input_list, True, None],
         [input_list, None, None],
         [input_list, nan, None],
         [input_list, inf, None],

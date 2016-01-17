@@ -5,6 +5,7 @@
 import os
 import random
 
+import six
 from six.moves import range
 
 import thutils.common as common
@@ -162,7 +163,7 @@ class BinaryWriter:
                 if any([bin_data_list is None, not self.__is_continue_byte()]):
                     bin_data_list = self.get_write_binary_data(io_size_byte)
 
-                actual_write_byte = os.write(fd, "".join(bin_data_list))
+                actual_write_byte = os.write(fd, six.b("").join(bin_data_list))
                 if io_size_byte > actual_write_byte:
                     raise IOError(
                         "write failed: write-size=%d[byte] > actual-write=%d[byte]" % (

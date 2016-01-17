@@ -5,11 +5,14 @@
 '''
 
 from __future__ import with_statement
-import sys
 import os.path
 import re
+import sys
 
-import thutils.common as common
+import six
+
+#import thutils.common as common
+import thutils.common
 from thutils.logger import logger
 
 
@@ -171,7 +174,7 @@ class FileManager:
         except EmptyFileError:
             pass
 
-        if common.isEmptyString(dst_path):
+        if thutils.common.isEmptyString(dst_path):
             logger.error("empty destination path")
             return False
 
@@ -260,7 +263,7 @@ class FileManager:
         re_compile_list = [
             re.compile(re_pattern)
             for re_pattern in re_remove_list
-            if common.isNotEmptyString(remove_fileattern)
+            if thutils.common.isNotEmptyString(remove_fileattern)
         ]
 
         dict_result_pathlist = {}
@@ -277,7 +280,7 @@ class FileManager:
                 result = cls.remove_object(remove_path)
                 dict_result_pathlist.setdefault(result, []).append(remove_path)
 
-        common.debug_dict(dict_result_pathlist, locals())
+        thutils.common.debug_dict(dict_result_pathlist, locals())
 
         return dict_result_pathlist
 
@@ -319,7 +322,7 @@ class FileManager:
 
 
 def validatePath(path):
-    if common.isEmptyString(path):
+    if thutils.common.isEmptyString(path):
         raise InvalidFilePathError("null path")
 
     work_path = os.path.normpath(path)
@@ -380,7 +383,7 @@ def findFile(search_root_dir_path, re_pattern_text):
     result = findFileAll(
         search_root_dir_path, os.path.isfile, re_pattern_text, find_count=1)
 
-    if common.isEmptyListOrTuple(result):
+    if thutils.common.isEmptyListOrTuple(result):
         return None
 
     return result[0]
@@ -388,7 +391,7 @@ def findFile(search_root_dir_path, re_pattern_text):
 
 def findFileAll(
         search_root_dir_path, check_func,
-        re_pattern_text, find_count=sys.maxint):
+        re_pattern_text, find_count=six.MAXSIZE):
 
     re_compile = re.compile(re_pattern_text)
     path_list = []
@@ -416,7 +419,7 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     result = findFileAll(
         search_root_dir_path, os.path.isdir, re_pattern, find_count=1)
 
-    if common.isEmptyListOrTuple(result):
+    if thutils.common.isEmptyListOrTuple(result):
         return None
 
     return result[0]
@@ -434,7 +437,7 @@ def adjustFileName(file_name, replacement_text=""):
     if fname is None:
         return None
 
-    fname = common.RE_SPACE.sub("_", fname)
+    fname = thutils.common.RE_SPACE.sub("_", fname)
     return re.sub("[%s]" % (re.escape(",().%")), "", fname)
 
 

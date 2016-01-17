@@ -1,13 +1,14 @@
-import cache
-import common
-import data_property
-import gfile
-import gtime
-import loader
-import logger
-import main
-import option
-import syswrapper
+
+import thutils.cache
+import thutils.common
+import thutils.data_property
+import thutils.gfile
+import thutils.gtime
+import thutils.loader
+import thutils.logger
+import thutils.main
+import thutils.option
+import thutils.syswrapper
 
 
 LIB_TMP_DIR = "/tmp/__golib__"

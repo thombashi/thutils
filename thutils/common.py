@@ -201,8 +201,7 @@ def safe_division(dividend, divisor):
 
 
 def get_list_item(input_list, index):
-    if isEmptyList(input_list):
-        logger.debug("null input_list")
+    if not isInteger(index):
         return None
 
     list_size = len(input_list)
@@ -583,7 +582,7 @@ def sleep_wrapper(sleep_second, dry_run=False):
 
 
 def get_var_name(var, symboltable):
-    for name, v in symboltable.iteritems():
+    for name, v in six.iteritems(symboltable):
         if id(v) == id(var):
             return name
 

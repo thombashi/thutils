@@ -534,7 +534,7 @@ class SqliteWrapper(object):
         except Exception:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             caller = logging.getLogger().findCaller()
-            file_path, line_no, func_name = caller
+            file_path, line_no, func_name = caller[:3]
             logger.error(
                 "%s(%d) %s: failed to execute query:\n" % (
                     file_path, line_no, func_name) +
@@ -991,7 +991,7 @@ class SqliteWrapper(object):
         if caller is None:
             message = "execute query: " + query
         else:
-            file_path, line_no, func_name = caller
+            file_path, line_no, func_name = caller[:3]
             message = "execute query from %s(%d) %s: %s" % (
                 os.path.basename(os.path.realpath(file_path)),
                 line_no, func_name, query)
@@ -1014,7 +1014,7 @@ class SqliteWrapper(object):
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             if caller is None:
                 caller = logging.getLogger().findCaller()
-            file_path, line_no, func_name = caller
+            file_path, line_no, func_name = caller[:3]
             message_list = [
                 "failed to execute query at %s(%d) %s" % (
                     file_path, line_no, func_name),
