@@ -4,29 +4,11 @@ import setuptools
 from setuptools.command.test import test as TestCommand
 
 
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
-
 with open("README.rst") as fp:
     long_description = fp.read()
 
 with open("requirements.txt", "r") as fp:
-    requirements_list = fp.read().splitlines()
+    requirements = fp.read().splitlines()
 
 setuptools.setup(
     name="thutils",
@@ -39,9 +21,9 @@ setuptools.setup(
     license="GNU Lesser General Public License v3 (LGPLv3)",
     include_package_data=True,
     packages=setuptools.find_packages(exclude=['test*']),
-    install_requires=requirements_list,
+    install_requires=requirements,
+    setup_requires=["pytest-runner"],
     tests_require=["pytest"],
-    cmdclass={'test': PyTest},
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python :: 2",

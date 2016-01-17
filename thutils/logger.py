@@ -274,7 +274,7 @@ class logger:
 
     @classmethod
     def __get_message(cls, caller_info_list, msg):
-        file_path, line_no, func_name = caller_info_list
+        file_path, line_no, func_name = caller_info_list[:3]
         return "from %s(%d) %s: %s" % (
             os.path.basename(file_path), line_no, str(func_name), str(msg))
 

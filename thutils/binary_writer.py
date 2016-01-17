@@ -5,6 +5,7 @@
 import os
 import random
 
+import six
 from six.moves import range
 
 import thutils.common as common
@@ -23,14 +24,6 @@ class BinaryWriter:
 
         self.__verify_size(
             io_size_byte, min_value=1, max_value=self.__MAX_IO_SIZE)
-        """
-        if io_size_byte <= 0:
-            raise ValueError("block size must be greater than zero.")
-
-        if io_size_byte > self.__MAX_IO_SIZE:
-            raise ValueError(
-                "block size must be less than %s byte." % (self.__MAX_IO_SIZE))
-        """
 
         self.__io_size_byte = int(io_size_byte)  # [byte]
         self.__byte_continuity = byte_continuity  # [%]
@@ -170,7 +163,7 @@ class BinaryWriter:
                 if any([bin_data_list is None, not self.__is_continue_byte()]):
                     bin_data_list = self.get_write_binary_data(io_size_byte)
 
-                actual_write_byte = os.write(fd, "".join(bin_data_list))
+                actual_write_byte = os.write(fd, six.b("").join(bin_data_list))
                 if io_size_byte > actual_write_byte:
                     raise IOError(
                         "write failed: write-size=%d[byte] > actual-write=%d[byte]" % (

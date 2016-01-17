@@ -201,8 +201,7 @@ def safe_division(dividend, divisor):
 
 
 def get_list_item(input_list, index):
-    if isEmptyList(input_list):
-        logger.debug("null input_list")
+    if not isInteger(index):
         return None
 
     list_size = len(input_list)
@@ -246,20 +245,6 @@ def _get_decimal_places(value, integer_digits):
             float_digit_len = int(float_text) - 1
 
     abs_digit = 0
-    """
-    integer_digits = int(integer_digits)
-    if integer_digits <= 1:
-        if abs_value < 0.01:
-            abs_digit = 5
-        elif abs_value < 0.1:
-            abs_digit = 4
-        else:
-            abs_digit = 3
-    elif integer_digits <= 2:
-        abs_digit = 2
-    elif integer_digits <= 3:
-        abs_digit = 1
-    """
     pair_list = [
         [0.01, 5],
         [0.1, 4],
@@ -329,20 +314,6 @@ def diffItemList(item_list, remove_list):
         removeItemFromList(work_list, remove_item)
 
     return work_list
-
-
-"""
-def makeRandomString(self, min_len, max_len):
-    import random
-    import string
-
-    name_len = random.randint(min_len, max_len)
-    name = "".join([
-        random.choice(string.ascii_letters + string.digits) for _ in range(name_len)
-    ])
-
-    return "%s.%s" % (name)
-#"""
 
 
 def _unit_to_byte(unit):
@@ -611,7 +582,7 @@ def sleep_wrapper(sleep_second, dry_run=False):
 
 
 def get_var_name(var, symboltable):
-    for name, v in symboltable.iteritems():
+    for name, v in six.iteritems(symboltable):
         if id(v) == id(var):
             return name
 
@@ -666,17 +637,3 @@ def debug_dict(dict_input, symbol_table, convert_func=dump_dict):
     logger.debug("%s keys=%d %s" % (
         get_var_name(dict_input, symbol_table),
         len(dict_input), convert_func(dict_input)))
-
-
-def dict_to_matrix(input_dict, key_list=()):
-    if isEmptyListOrTuple(key_list):
-        key_list = six.iterkeys(input_dict)
-
-    matrix = []
-    for key in key_list:
-        value = input_dict.get(key)
-        if isListOrTuple(value):
-            value = ", ".join([str(x) for x in value])
-        matrix.append([key, value])
-
-    return matrix

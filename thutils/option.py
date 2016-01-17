@@ -156,19 +156,6 @@ class ArgumentParserObject(object):
             const=MakeOption.OVERWRITE, default=MakeOption.MAKE,
             help="overwrite existing file")
 
-    """
-    def addPlotOption(self):
-        import thutils.GGPlotWrapper as plot
-
-        plot_choices = [plot.EXT_PNG, plot.EXT_SVG]
-
-        group = self.add_argument_group("Plot Options")
-        group.add_argument(
-            "--image-file-format",
-            choices=plot_choices, default=plot_choices[0],
-            help="image file format: " + " (default=%(default))")
-    #"""
-
     def addSarArgumentGroup(self):
         import thutils.sysstat as sysstat
 
@@ -254,16 +241,10 @@ class ArgumentParserObject(object):
 
         import thutils.gtime as gtime
 
-        options.start_datetime = None
-        # if common.isNotEmptyString(options.start_time):
         options.start_datetime = gtime.toDateTimeEx(
             options.start_time, valid_time_format_list)
-
-        options.end_datetime = None
-        # if common.isNotEmptyString(options.end_time):
         options.end_datetime = gtime.toDateTimeEx(
             options.end_time, valid_time_format_list)
-
         options.datetime_range = gtime.DateTimeRange(
             options.start_datetime, options.end_datetime)
 
@@ -327,71 +308,3 @@ def getGeneralOptionList(options):
         option_list.append("--stacktrace")
 
     return option_list
-
-# sysstat ---
-
-
-def isAnySarOption(options):
-    return any([
-        options.is_sar_block,
-        options.is_sar_disk,
-        len(options.network_arg_list) > 0,
-        options.is_sar_interrupts,
-        options.is_sar_memory_and_swap_util,
-        options.is_sar_queue,
-        options.is_sar_inode,
-        options.is_sar_swap,
-        options.is_sar_paging,
-        options.is_sar_task,
-        options.is_sar_memory,
-        options.is_sar_system_switching,
-    ])
-
-
-def setAllSarOption(options):
-    options.is_sar_cpu_util = True
-    options.is_sar_block = True
-    options.is_sar_disk = True
-    options.is_sar_memory_and_swap_util = True
-    options.is_sar_memory = True
-    options.is_sar_paging = True
-    options.is_sar_interrupts = True
-    options.is_sar_queue = True
-    options.is_sar_inode = True
-    options.is_sar_swap = True
-    options.is_sar_task = True
-    options.is_sar_system_switching = True
-    # options.is_show_tty_device	= True
-    options.network_arg_list = ["ALL"]
-
-
-def getDict_TableName_SarOption(options):
-    import thutils.sysstat as sysstat
-
-    return {
-        sysstat.TN_CpuUtil			: ["-u", options.is_sar_cpu_util],
-        sysstat.TN_BlockIO			: ["-b", options.is_sar_block],
-        sysstat.TN_Paging			: ["-B", options.is_sar_paging],
-        sysstat.TN_TaskCreated		: ["-c", options.is_sar_task],
-        sysstat.TN_DiskIO			: ["-d", options.is_sar_disk],
-        sysstat.TN_Queue			: ["-q", options.is_sar_queue],
-        sysstat.TN_MemoryUtil		: ["-r", options.is_sar_memory_and_swap_util],
-        sysstat.TN_Memory			: ["-R", options.is_sar_memory],
-        sysstat.TN_inode			: ["-v", options.is_sar_inode],
-        sysstat.TN_SystemSwitch		: ["-w", options.is_sar_system_switching],
-        sysstat.TN_Swap				: ["-W", options.is_sar_swap],
-        sysstat.TN_Interrupt		: ["-I", options.is_sar_interrupts],
-        sysstat.TN_NetworkPrefix	: ["-n", len(options.network_arg_list) > 0]
-        # TABLE_TtyDevice		: ["-y", options.is_show_tty_device]
-    }
-
-
-def checkSarNetworkOption(parser, options):
-    valid_arg_list = ["DEV", "EDEV", "NFS", "NFSD", "SOCK"]
-
-    for n_arg in options.network_arg_list:
-        if n_arg not in valid_arg_list and n_arg != "ALL":
-            parser.print_help()
-            parser.error("-n: invalid option " + n_arg)
-        if n_arg == "ALL":
-            options.network_arg_list = valid_arg_list
