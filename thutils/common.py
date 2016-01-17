@@ -245,8 +245,8 @@ def _get_decimal_places(value, integer_digits):
             float_text = text_value.split("e-")[1]
             float_digit_len = int(float_text) - 1
 
-    """
     abs_digit = 0
+    """
     integer_digits = int(integer_digits)
     if integer_digits <= 1:
         if abs_value < 0.01:

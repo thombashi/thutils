@@ -547,16 +547,16 @@ class Test_get_number_of_digit:
     def test_normal(self, value, expected):
         assert get_number_of_digit(value) == expected
 
-    @pytest.mark.parametrize(["value", "expected"], [
-        [True, 1],
+    @pytest.mark.parametrize(["value", "expected1", "expected2"], [
+        [True, 1, 1],
     ])
-    def test_annormal(self, value, expected):
+    def test_annormal(self, value, expected1, expected2):
         sig_digit, float_digit = get_number_of_digit(value)
-        assert sig_digit == expected
-        assert float_digit == 1
+        assert sig_digit == expected1
+        assert float_digit == expected2
 
     @pytest.mark.parametrize(["value"], [
-        [None], [nan],
+        [None],
         ["0xff"], ["test"], ["テスト"],
     ])
     def test_abnormal(self, value):
