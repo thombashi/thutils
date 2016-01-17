@@ -92,10 +92,6 @@ class DateTimeRange(common.BaseObject):
                 str(self.start_datetime), str(self.end_datetime))
             raise ValueError(message)
 
-    def verifyTimeFormat(self):
-        if re.search(re.escape("%"), self.time_format) is None:
-            raise ValueError("invalid time format: " + self.time_format)
-
     def isValidTimeRange(self):
         try:
             self.verifyTimeRange()
@@ -110,23 +106,13 @@ class DateTimeRange(common.BaseObject):
         return self.start_datetime <= input_datetime <= self.end_datetime
 
     def getStartTimeText(self):
-        if not is_datetime(self.start_datetime):
-            return ""
-
-        self.verifyTimeFormat()
-
-        return self.start_datetime.strftime(self.time_format)
+        return self.__to_datetime_text(self.start_datetime)
 
     def getEndTimeText(self):
-        if not is_datetime(self.end_datetime):
-            return ""
-
-        self.verifyTimeFormat()
-
-        return self.end_datetime.strftime(self.time_format)
+        return self.__to_datetime_text(self.end_datetime)
 
     def getOptionString(self):
-        self.verifyTimeFormat()
+        self.__verify_time_format()
 
         options_list = []
 
@@ -238,6 +224,18 @@ class DateTimeRange(common.BaseObject):
         self.__end_datetime -= discard_time
 
         return True
+
+    def __verify_time_format(self):
+        if re.search(re.escape("%"), self.time_format) is None:
+            raise ValueError("invalid time format: " + self.time_format)
+
+    def __to_datetime_text(self, dt):
+        if not is_datetime(dt):
+            return ""
+
+        self.__verify_time_format()
+
+        return dt.strftime(self.time_format)
 
 
 class TimeMeasure(object):
@@ -357,11 +355,17 @@ def findValidTimeFormat(datetime_string, time_format_list):
 
 
 def getTimeUnitSecondsCoefficient(unit):
-    if not unit.isalpha():
-        raise ValueError("invalid unit: " + unit)
-
     unit = unit.lower()
 
+    unit_table = {
+        "s": 1,
+        "m": 60,
+        "h": 60 ** 2,
+        "d": 60 ** 2 * 24,
+        "w": 60 ** 2 * 24 * 7,
+    }
+
+    """
     if unit == "s":
         return 1
     if unit == "m":
@@ -372,8 +376,15 @@ def getTimeUnitSecondsCoefficient(unit):
         return 60 ** 2 * 24
     if unit == "w":
         return 60 ** 2 * 24 * 7
-
     raise ValueError("unknown unit: " + unit)
+    """
+
+    coef_second = unit_table.get(unit)
+
+    if coef_second is None:
+        raise ValueError("invalid unit: " + str(unit))
+
+    return coef_second
 
 
 def getTimeDeltaSecond(start_datetime, end_datetime):
