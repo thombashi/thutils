@@ -37,12 +37,6 @@ class Test_DateTimeRange:
         datetime_range.time_format = Format.ISO.DATETIME
         return datetime_range
 
-    def test_verifyTimeRange(self, datetime_range):
-        datetime_range.verifyTimeRange()
-
-    def test_verifyTimeFormat(self, datetime_range):
-        datetime_range.verifyTimeFormat()
-
     def test_isValidTimeRange(self, datetime_range):
         assert datetime_range.isValidTimeRange()
 
@@ -163,14 +157,6 @@ class Test_DateTimeRange_abnormal:
         value = DateTimeRange(None, TEST_END_DATETIME)
         value.time_format = None
         return value
-
-    def test_verifyTimeRange(self, datetime_range):
-        with pytest.raises(TypeError):
-            datetime_range.verifyTimeRange()
-
-    def test_verifyTimeFormat(self, datetime_range):
-        with pytest.raises(TypeError):
-            datetime_range.verifyTimeFormat()
 
     def test_isValidTimeRange(self, datetime_range):
         assert not datetime_range.isValidTimeRange()
