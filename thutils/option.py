@@ -11,32 +11,6 @@ from thutils.logger import logger
 TN_ExecuteOption = "Execute Option"
 
 
-def createExecuteOptionTable(con, options):
-    import os.path
-    import sys
-
-    con.checkAccessPermission(["w", "a"])
-
-    table_name = TN_ExecuteOption
-    if con.hasTable(table_name):
-        logger.debug("'%s' table already exists" % (table_name))
-        return True
-
-    value_listlist = [
-        ["command option", " ".join(sys.argv[1:])],
-    ]
-
-    for option, value in sorted(six.iteritems(options.__dict__)):
-        value = str(value)
-        if os.path.exists(value):
-            value = os.path.realpath(value)
-
-        value_listlist.append([str(option), value])
-
-    return con.create_table_with_data(
-        table_name, common.KEY_VALUE_HEADER, value_listlist)
-
-
 class MakeOption:
     MAKE = "make"
     OVERWRITE = "overwrite"
@@ -155,84 +129,6 @@ class ArgumentParserObject(object):
             "--overwrite", dest=dest, action="store_const",
             const=MakeOption.OVERWRITE, default=MakeOption.MAKE,
             help="overwrite existing file")
-
-    def addSarArgumentGroup(self):
-        import thutils.sysstat as sysstat
-
-        help_format = "%s (table = %s)"
-
-        group = self.add_argument_group("Sar Options")
-        group.add_argument(
-            "-u", action="store_true",
-            dest="is_sar_cpu_util", default=False,
-            help=help_format % ("CPU utilization.", sysstat.TN_CpuUtil))
-        group.add_argument(
-            "-b", action="store_true",
-            dest="is_sar_block", default=False,
-            help=help_format % (
-                "I/O and transfer rate statistics.", sysstat.TN_BlockIO))
-        group.add_argument(
-            "-B", action="store_true",
-            dest="is_sar_paging", default=False,
-            help=help_format % ("paging statistics.", sysstat.TN_Paging))
-        group.add_argument(
-            "-c", action="store_true",
-            dest="is_sar_task", default=False,
-            help=help_format % (
-                "task creation activity", sysstat.TN_TaskCreated))
-        group.add_argument(
-            "-d", action="store_true",
-            dest="is_sar_disk", default=False,
-            help=help_format % (
-                "activity for each block device", sysstat.TN_DiskIO))
-
-        choice_list = ["DEV", "EDEV", "NFS", "NFSD", "SOCK", "ALL"]
-        group.add_argument(
-            "-n", action="append",
-            type=str, choices=choice_list,
-            dest="network_arg_list", default=[], metavar="|".join(choice_list),
-            help=help_format % (
-                "network statistics.",
-                sysstat.TN_NetworkFormat % ("|".join(choice_list))))
-
-        group.add_argument(
-            "-I", action="store_true",
-            dest="is_sar_interrupts", default=False,
-            help=help_format % (
-                "statistics for a given interrupt.", sysstat.TN_Interrupt))
-        group.add_argument(
-            "-q", action="store_true",
-            dest="is_sar_queue", default=False,
-            help=help_format % (
-                "queue length and load averages.", sysstat.TN_Queue))
-        group.add_argument(
-            "-r", action="store_true",
-            dest="is_sar_memory_and_swap_util", default=False,
-            help=help_format % (
-                "memory and swap space utilization statistics.",
-                sysstat.TN_MemoryUtil))
-        group.add_argument(
-            "-R", action="store_true",
-            dest="is_sar_memory", default=False,
-            help=help_format % ("memory statistics", sysstat.TN_Memory))
-        group.add_argument(
-            "-v", action="store_true",
-            dest="is_sar_inode", default=False,
-            help=help_format % (
-                "status of inode, file and other kernel tables.",
-                sysstat.TN_inode))
-        group.add_argument(
-            "-w", action="store_true",
-            dest="is_sar_system_switching", default=False,
-            help=help_format % (
-                "system switching activity.", sysstat.TN_SystemSwitch))
-        group.add_argument(
-            "-W", action="store_true",
-            dest="is_sar_swap", default=False,
-            help=help_format % ("swapping statistics.", sysstat.TN_Swap))
-        group.add_argument(
-            "-A", action="store_true",
-            dest="is_show_all", default=False, help="all.")
 
     @staticmethod
     def validate_time_range_option(
