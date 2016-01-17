@@ -77,16 +77,16 @@ class FileManager:
     def makeDirectory(cls, path, force=False):
         try:
             check_file_existence(path)
-        except (FileNotFoundError, EmptyFileError):
+        except FileNotFoundError:
             pass
-        except InvalidFilePathError:
+        except (InvalidFilePathError, EmptyFileError):
             return False
         else:
             logger.debug("already exists: " + path)
             return False
 
         logger.debug("make directory: " + path)
-        if not cls.__dry_run or force:
+        if any([not cls.__dry_run, force]):
             os.makedirs(path)
 
         return True
@@ -103,14 +103,6 @@ class FileManager:
             return False
         except EmptyFileError:
             pass
-
-        dst_file_type = None
-        try:
-            dst_file_type = check_file_existence(dst_path)
-        except:
-            pass
-        if dst_file_type == FileType.DIRECTORY:
-            return False
 
         logger.debug("copy: %s -> %s" % (src_path, dst_path))
         if cls.__dry_run:
