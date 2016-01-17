@@ -21,7 +21,6 @@ from thutils.logger import logger
 
 
 DB_DATETIME_FORMAT = "%Y%m%d%H%M%S"
-AUTO_INCREMENT = "_auto_increment"
 SQLITE_EXTENSION = ".sqlite"
 
 MEMORY_DB_NAME = ":memory:"
@@ -462,7 +461,7 @@ class SqliteWrapper(object):
                     pass
 
                 if mode == "w":
-                    gfile.FileManager.removeFile(database_path)
+                    gfile.FileManager.remove_file(database_path)
         else:
             raise ValueError("unknown connection mode: " + mode)
 
@@ -656,9 +655,6 @@ class SqliteWrapper(object):
         return True
 
     def get_profile(self, get_profile_count=50):
-        if not self.__is_profile:
-            return [], []
-
         con_tmp = connect_sqlite_db_mem()
 
         value_matrix = []
@@ -829,24 +825,12 @@ class SqliteWrapper(object):
             logger.warn(msg)
             return True
 
-            """
-            msg = "empty input data to '%s (%s)': presume all the fields are text" % (
-                table_name, ", ".join(attribute_name_list))
-            # logger.warn(msg)
-            #"""
-
         self.__verify_value_matrix(attribute_name_list, data_matrix)
-
-        dict_Column_ValueType = self.__get_column_valuetype(data_matrix)
-
-        for col in range(len(attribute_name_list)):
-            if re.search(AUTO_INCREMENT, attribute_name_list[col]):
-                dict_Column_ValueType[
-                    col] = "INTEGER PRIMARY KEY AUTOINCREMENT"
 
         attr_description_list = []
         table_config_matrix = []
-        for col, value_type in sorted(six.iteritems(dict_Column_ValueType)):
+        for col, value_type in sorted(
+                six.iteritems(self.__get_column_valuetype(data_matrix))):
             attr_name = attribute_name_list[col]
             attr_description_list.append(
                 "'%s' %s" % (attr_name, value_type))
@@ -959,22 +943,16 @@ class SqliteWrapper(object):
         """
 
         dict_column_valuetype = {}
-
-        if len(value_matrix) == 0:
-            logger.warn("empty list list")
-            return {}
-
-        for col in range(len(value_matrix[0])):
+        # for col in range(len(value_matrix[0])):
+        for col, _ in enumerate(value_matrix[0]):
             dict_column_valuetype[col] = "INTEGER"
 
         col = 0
         for col_value_list in zip(*value_matrix):
             for cursor_value in col_value_list:
-                if cursor_value is None:
-                    continue
-
                 cursor_value_type = self.__get_value_type(cursor_value)
                 if all([
+                    cursor_value is not None,
                     dict_column_valuetype[col] == "INTEGER",
                     cursor_value_type == "INTEGER"
                 ]):
@@ -1028,13 +1006,11 @@ class SqliteWrapper(object):
             return None
 
         if self.__is_profile:
-            begin_time = time.time()
-            self.__dict_query_count[
-                query] = self.__dict_query_count.get(query, 0) + 1
+            exec_start_time = time.time()
 
         try:
             result = self.connection.execute(query)
-        except Exceptio:
+        except Exception:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             if caller is None:
                 caller = logging.getLogger().findCaller()
@@ -1048,10 +1024,13 @@ class SqliteWrapper(object):
             ]
             logger.exception(e, os.linesep.join(message_list))
             # return None
-            raise
+            raise e
 
         if self.__is_profile:
-            elapse_time = time.time() - begin_time
+            self.__dict_query_count[
+                query] = self.__dict_query_count.get(query, 0) + 1
+
+            elapse_time = time.time() - exec_start_time
             self.__dict_query_totalexectime[query] = (
                 self.__dict_query_totalexectime.get(query, 0) + elapse_time)
 
@@ -1103,11 +1082,7 @@ def connect_sqlite_database(
             con.check_database_name(db_name)
 
         if common.isNotEmptyString(db_version):
-            try:
-                con.check_database_version(db_version)
-            except MissmatchError:
-                _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-                logger.exception(e)
+            con.check_database_version(db_version)
     elif mode == "w":
         if all([
             common.isNotEmptyString(db_name),

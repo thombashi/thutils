@@ -170,16 +170,14 @@ class FileManager:
 
     @classmethod
     def renameFile(cls, src_path, dst_path):
-        if src_path == dst_path:
-            logger.debug("no need to rename: src_path == dst_path")
-            return True
-
         try:
             check_file_existence(src_path)
         except (InvalidFilePathError, FileNotFoundError):
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.exception(e)
             return False
+        except EmptyFileError:
+            pass
 
         if common.isEmptyString(dst_path):
             logger.error("empty destination path")
@@ -196,82 +194,81 @@ class FileManager:
         return True
 
     @classmethod
-    def removeDirectory(cls, path):
-        if common.isEmptyString(path):
-            return False
-
-        if not os.path.isdir(path):
-            return False
-
-        logger.debug("remove directory: " + path)
-        if not cls.__dry_run:
-            try:
-                import shutil
-
-                shutil.rmtree(path, False)
-            except (ImportError, IOError):
-                _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-                logger.exception(e)
-                return False
-
-        return True
-
-    @classmethod
-    def removeFile(cls, path):
+    def remove_directory(cls, path):
         try:
             file_type = check_file_existence(path)
         except (InvalidFilePathError, FileNotFoundError):
             return True
 
-        if file_type in [FileType.FILE, FileType.LINK]:
-            if not cls.__dry_run:
-                try:
-                    os.remove(path)
-                except Exception:
-                    _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-                    logger.exception(e)
-                    return False
-        elif file_type in [FileType.DIRECTORY]:
-            return cls.removeDirectory(path)
+        if file_type not in [FileType.DIRECTORY]:
+            logger.error("not a directory: '%s'" % (path))
+            return False
 
-        raise ValueError("unknown file type: %s" % (path))
+        logger.debug("remove directory: " + path)
+        if cls.__dry_run:
+            return True
+
+        try:
+            import shutil
+            shutil.rmtree(path, False)
+        except (ImportError, IOError):
+            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
+            logger.exception(e)
+            return False
+
+        return True
 
     @classmethod
-    def removeMatchFileInDir(cls, search_dir_path, re_target_list):
-        logger.debug("remove matched file: search-dir=%s, re=%s" % (
-            search_dir_path, str(re_target_list)))
+    def remove_file(cls, path):
+        try:
+            file_type = check_file_existence(path)
+        except (InvalidFilePathError, FileNotFoundError):
+            return True
+        except EmptyFileError:
+            pass
 
-        if common.isEmptyString(search_dir_path) or not os.path.isdir(search_dir_path):
-            logger.debug("directory not found: " + str(search_dir_path))
-            return {}
+        if file_type not in [FileType.FILE, FileType.LINK]:
+            logger.error("not a file: '%s'" % (path))
+            return False
 
-        dict_result_pathlist = {}
-        for filename in os.listdir(search_dir_path):
-            for re_pattern in re_target_list:
-                if re.search(re_pattern, filename):
-                    break
-            else:
-                continue
+        if cls.__dry_run:
+            return True
 
-            remove_path = os.path.join(search_dir_path, filename)
-            result = cls.removeFile(remove_path)
-            dict_result_pathlist.setdefault(result, []).append(remove_path)
+        try:
+            os.remove(path)
+        except Exception:
+            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
+            logger.exception(e)
+            return False
 
-        return dict_result_pathlist
+        return True
+
+    @classmethod
+    def remove_object(cls, path):
+        try:
+            file_type = check_file_existence(path)
+        except (InvalidFilePathError, FileNotFoundError):
+            return True
+        except EmptyFileError:
+            pass
+
+        if file_type not in [FileType.FILE, FileType.LINK]:
+            return cls.remove_file(path)
+
+        if file_type not in [FileType.DIRECTORY]:
+            return cls.remove_directory(path)
+
+        return False
 
     @classmethod
     def removeMatchFileRecursively(cls, search_dir_path, re_remove_list):
         logger.debug("remove matched file: search-root=%s, re=%s" % (
             search_dir_path, str(re_remove_list)))
 
-        if not os.path.isdir(search_dir_path):
-            logger.debug("directory not found: " + search_dir_path)
-            return {}
-
         re_compile_list = [
             re.compile(re_pattern)
             for re_pattern in re_remove_list
-            if common.isNotEmptyString(re_pattern)
+            if common.isNotEmptyString(remove_fileattern)
         ]
 
         dict_result_pathlist = {}
@@ -285,7 +282,7 @@ class FileManager:
                     continue
 
                 remove_path = os.path.join(dir_path, filename)
-                result = cls.removeFile(remove_path)
+                result = cls.remove_object(remove_path)
                 dict_result_pathlist.setdefault(result, []).append(remove_path)
 
         common.debug_dict(dict_result_pathlist, locals())
@@ -319,7 +316,7 @@ class FileManager:
                     try:
                         shutil.rmtree(remove_path, False)
                         result = True
-                    except Exception:
+                    except (OSError, os.error):
                         # for python 2.5 compatibility
                         _, e, _ = sys.exc_info()
                         logger.exception(e)
@@ -330,10 +327,10 @@ class FileManager:
 
 
 def validatePath(path):
-    work_path = os.path.normpath(path)
-
     if common.isEmptyString(path):
         raise InvalidFilePathError("null path")
+
+    work_path = os.path.normpath(path)
 
     if all([w == ".." for w in work_path.split(os.path.sep)]):
         raise InvalidFilePathError(work_path)
@@ -381,9 +378,6 @@ def getFileNameFromPath(path):
     """
     フルパスから拡張子を除くファイル名を返す。
     """
-
-    # if common.isEmptyString(path):
-    #    return ""
 
     path = path.strip().strip(os.path.sep)
 

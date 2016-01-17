@@ -230,7 +230,7 @@ def get_integer_digit(value):
     return max(1, int(math.log10(abs_value) + 1.0))
 
 
-def _get_decimal_places(value, significant_digit):
+def _get_decimal_places(value, integer_digits):
     float_digit_len = 0
     if isInteger(value):
         abs_value = abs(int(value))
@@ -245,19 +245,33 @@ def _get_decimal_places(value, significant_digit):
             float_text = text_value.split("e-")[1]
             float_digit_len = int(float_text) - 1
 
+    """
     abs_digit = 0
-    significant_digit = int(significant_digit)
-    if significant_digit <= 1:
+    integer_digits = int(integer_digits)
+    if integer_digits <= 1:
         if abs_value < 0.01:
             abs_digit = 5
         elif abs_value < 0.1:
             abs_digit = 4
         else:
             abs_digit = 3
-    elif significant_digit <= 2:
+    elif integer_digits <= 2:
         abs_digit = 2
-    elif significant_digit <= 3:
+    elif integer_digits <= 3:
         abs_digit = 1
+    """
+    pair_list = [
+        [0.01, 5],
+        [0.1, 4],
+        [1.0, 3],
+        [10.0, 2],
+        [100.0, 3],
+    ]
+    for pair in pair_list:
+        threshold_value, digit = pair
+        if abs_value < threshold_value:
+            abs_digit = digit
+            break
 
     return min(abs_digit, float_digit_len)
 
@@ -480,33 +494,6 @@ def splitLineListByRe(
     return block_list
 
 
-def splitLineListByReEx(
-        line_list, re_separator, is_include_matched_line=False, is_strip=True):
-    block_list = []
-    block = []
-
-    for line in line_list:
-        if is_strip:
-            line = line.strip()
-
-        if re_separator.search(line):
-            if is_include_matched_line:
-                block.append(line)
-            block_list.append(block)
-            block = []
-            continue
-
-        block.append(line)
-
-    if len(block) > 0:
-        block_list.append(block)
-
-    logger.debug(
-        "splitLineListByRe: block-count=%s" % (len(block_list)))
-
-    return block_list
-
-
 def is_install_command(command):
     import subprocess
     import platform
@@ -657,18 +644,12 @@ def dump_dict(dict_input, indent=4):
         return json.dumps(dict_work, sort_keys=True, indent=indent)
     except ImportError:
         pass
-    except Exception:
-        _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-        logger.exception(e)
 
     try:
         import simplejson as json
         return json.dumps(dict_work, sort_keys=True, indent=indent)
     except ImportError:
         pass
-    except Exception:
-        _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-        logger.exception(e)
 
     logger.error("failed to import json library")
 
