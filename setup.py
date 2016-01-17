@@ -23,7 +23,10 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['test*']),
     install_requires=requirements,
     setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
+    tests_require=[
+        "pytest",
+        "pytest-cov",
+    ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python :: 2",
