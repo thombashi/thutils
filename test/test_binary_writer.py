@@ -43,7 +43,7 @@ class Test_BinaryWriter:
         BinaryWriter(io_size_byte)
 
     @pytest.mark.parametrize(["io_size_byte", "expected"], [
-        [None, ValueError],
+        [None, TypeError],
         [0, ValueError],
         [-1, ValueError],
         [1024 ** 3, ValueError],
@@ -53,8 +53,8 @@ class Test_BinaryWriter:
             BinaryWriter(io_size_byte)
 
     @pytest.mark.parametrize(["write_size", "expected"], [
+        [None, TypeError],
         [-1, ValueError],
-        [None, ValueError],
     ])
     def test_writeBinary_exception(
             self, tmpdir, write_size, expected):

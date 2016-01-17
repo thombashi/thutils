@@ -20,27 +20,23 @@ class BinaryWriter:
     def __init__(
             self, io_size_byte=__DEFAULT_IO_SIZE,
             byte_continuity=__BYTE_CONTINUITY):
-        import platform
 
+        self.__verify_size(
+            io_size_byte, min_value=1, max_value=self.__MAX_IO_SIZE)
+        """
         if io_size_byte <= 0:
             raise ValueError("block size must be greater than zero.")
 
         if io_size_byte > self.__MAX_IO_SIZE:
             raise ValueError(
                 "block size must be less than %s byte." % (self.__MAX_IO_SIZE))
+        """
 
         self.__io_size_byte = int(io_size_byte)  # [byte]
         self.__byte_continuity = byte_continuity  # [%]
 
         # get open flag ---
-        os_type = platform.system()
-        if os_type == "Linux":
-            self.__open_flag = os.O_WRONLY | os.O_CREAT
-        elif os_type == "Windows":
-            self.__open_flag = (
-                os.O_WRONLY | os.O_CREAT | os.O_BINARY | os.O_SEQUENTIAL)
-        else:
-            raise OSError("not supported os: " + os_type)
+        self.__open_flag = self.__get_open_flag()
 
         # get minimum write data block size ---
         self.__min_data_block_size = 1024
@@ -50,12 +46,10 @@ class BinaryWriter:
 
             self.__min_data_block_size = int(self.__min_data_block_size / 2)
 
-        logger.debug("""
-        BinaryWriter initialize:
-            os=%s
+        logger.debug("""BinaryWriter initialize:
             io-size=%d[byte]
             min-block-size=%d[byte]
-        """ % (os_type, io_size_byte, self.__min_data_block_size)
+        """ % (io_size_byte, self.__min_data_block_size)
         )
 
         # make write data ---
@@ -87,6 +81,18 @@ class BinaryWriter:
             remain_byte -= self.__min_data_block_size
 
         return return_data_list
+
+    @staticmethod
+    def __get_open_flag():
+        import platform
+
+        os_type = platform.system()
+        if os_type == "Linux":
+            return os.O_WRONLY | os.O_CREAT
+        elif os_type == "Windows":
+            return os.O_WRONLY | os.O_CREAT | os.O_BINARY | os.O_SEQUENTIAL
+        else:
+            raise OSError("not supported os: " + os_type)
 
     def __is_continue_byte(self):
         return random.randint(0, 99) < self.__byte_continuity
@@ -127,12 +133,22 @@ class BinaryWriter:
             for _i in range(self.__TABLE_SIZE)
         ]
 
+    def __verify_size(self, size, min_value=None, max_value=None):
+        if common.isFloat(min_value):
+            if size < min_value:
+                raise ValueError(
+                    "invalid size: expected>%d, value=%d" % (min_value, size))
+
+        if common.isFloat(max_value):
+            if size > max_value:
+                raise ValueError(
+                    "invalid size: expected<%d, value=%d" % (max_value, size))
+
     def __write_binary(
             self, file_path, write_size_byte, permission):
         import thutils.gfile
 
-        if write_size_byte < 0:
-            raise ValueError("write size must be greater or equal than zero.")
+        self.__verify_size(write_size_byte, min_value=1)
 
         fd = None
         write_size_byte_count = 0
@@ -149,9 +165,7 @@ class BinaryWriter:
                 io_size_byte = min(
                     int(self.__io_size_byte),
                     self.__get_block_size_byte(bytes_to_write))
-                if io_size_byte == 0:
-                    logger.error("invalid block size")
-                    break
+                self.__verify_size(io_size_byte, min_value=1)
 
                 if any([bin_data_list is None, not self.__is_continue_byte()]):
                     bin_data_list = self.get_write_binary_data(io_size_byte)
