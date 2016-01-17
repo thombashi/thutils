@@ -1,7 +1,7 @@
 thutils
 =======
 
-|PyPI| |Build Status| |Code Climate| |Coverage Status| |PyPI|
+|Python Versions| |Build Status| |Code Climate| |Coverage Status| |PyPI|
 
 Abount
 ======
@@ -15,8 +15,8 @@ Installation
 
     pip install thutils
 
-.. |PyPI| image:: https://img.shields.io/pypi/pyversions/thutils.svg
-   :target: https://pypi.python.org/pypi/thutils
+.. |Python Versions| image:: https://img.shields.io/pypi/pyversions/thutils.svg
+   :target: 
 .. |Build Status| image:: https://travis-ci.org/thombashi/thutils.svg?branch=master
    :target: https://travis-ci.org/thombashi/thutils
 .. |Code Climate| image:: https://codeclimate.com/github/thombashi/thutils/badges/gpa.svg
