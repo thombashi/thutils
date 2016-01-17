@@ -743,28 +743,6 @@ class Test_strtobool_wrapper:
             strtobool_wrapper(value)
 
 
-class Test_dict_to_matrix:
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [
-            {"a": 1, "b": 2},
-            [["a", 1], ["b", 2]]
-        ],
-        [{}, []]
-    ])
-    def test_normal(self, value, expected):
-        assert dict_to_matrix(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [1.0, AttributeError],
-        [None, AttributeError],
-        [nan, AttributeError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            dict_to_matrix(value)
-
-
 class Test_splitLineList:
 
     @pytest.mark.parametrize(["value", "separator", "expected"], [

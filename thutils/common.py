@@ -638,17 +638,3 @@ def debug_dict(dict_input, symbol_table, convert_func=dump_dict):
     logger.debug("%s keys=%d %s" % (
         get_var_name(dict_input, symbol_table),
         len(dict_input), convert_func(dict_input)))
-
-
-def dict_to_matrix(input_dict, key_list=()):
-    if isEmptyListOrTuple(key_list):
-        key_list = six.iterkeys(input_dict)
-
-    matrix = []
-    for key in key_list:
-        value = input_dict.get(key)
-        if isListOrTuple(value):
-            value = ", ".join([str(x) for x in value])
-        matrix.append([key, value])
-
-    return matrix
