@@ -49,7 +49,7 @@ class BaseObject(object):
     def __init__(self):
         pass
 
-    def toString(self):
+    def to_string(self):
         return "%s: %s" % (
             self.__class__.__name__, dump_dict(self.__dict__))
 
@@ -316,9 +316,7 @@ def diffItemList(item_list, remove_list):
     return work_list
 
 
-def _unit_to_byte(unit):
-    kilo = int(1024)
-
+def _unit_to_byte(unit, kilo_size):
     re_exp_pair_list = [
         [re.compile("^b$", re.IGNORECASE), 0],
         [re.compile("^k$", re.IGNORECASE), 1],
@@ -332,12 +330,12 @@ def _unit_to_byte(unit):
         re_pattern, exp = re_exp_pair
 
         if re_pattern.search(unit):
-            return kilo ** exp
+            return kilo_size ** exp
 
     raise ValueError("unknown unit: %s" % (unit))
 
 
-def humanreadable_to_byte(readable_size):
+def humanreadable_to_byte(readable_size, kilo_size=1024):
     """
     :argument:
         readable size:
@@ -354,7 +352,7 @@ def humanreadable_to_byte(readable_size):
     if size < 0:
         raise ValueError("minus size")
 
-    coefficient = _unit_to_byte(unit)
+    coefficient = _unit_to_byte(unit, kilo_size)
 
     return size * coefficient
 
