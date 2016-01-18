@@ -52,8 +52,11 @@ class Test_ArgumentParserObject_make:
 
 class Test_ArgumentParserObject_parse_args:
 
-    def test_normal(self, maked_parser):
-        maked_parser.parse_args()
+    def test_normal(self):
+        parser = ArgumentParserObject()
+        parser.make(VERSION, "", "")
+
+        assert parser.parse_args() is not None
 
 
 class Test_ArgumentParserObject_add_argument_group:
@@ -135,9 +138,15 @@ class Test_ArgumentParserObject_addMakeArgumentGroup:
 
 class Test_getGeneralOptionList:
 
-    def test_smoke_1(self, maked_parser):
-        getGeneralOptionList(maked_parser.parse_args())
+    def test_smoke_1(self):
+        parser = ArgumentParserObject()
+        parser.make(VERSION, "", "")
+
+        assert getGeneralOptionList(parser.parse_args()) is not None
 
     def test_smoke_2(self, maked_parser):
-        maked_parser.add_dry_run_option()
-        getGeneralOptionList(maked_parser.parse_args())
+        parser = ArgumentParserObject()
+        parser.make(VERSION, "", "")
+        parser.add_dry_run_option()
+
+        assert getGeneralOptionList(parser.parse_args()) is not None
