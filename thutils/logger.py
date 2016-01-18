@@ -135,36 +135,35 @@ class logger:
             output_dir_path = "."
 
         log_format_base = '[%(levelname)s] %(message)s'
-        #log_file_format	= '%(asctime)s %(name)s %(filename)s(%(lineno)d) ' + log_format_base
+        log_file_path = ""
 
-        gfile.FileManager.makeDirectory(output_dir_path)
-        log_file_name = gfile.getFileNameFromPath(
-            program_filename) + cls.LOG_EXTENSION
-        log_file_path = os.path.join(output_dir_path, log_file_name)
-        # set up logging to file - see previous section for more details
         if with_no_log:
             args = {
                 "level"		: stdout_log_level,
                 "format"	: log_format_base,
                 "datefmt"	: '%Y-%m-%d %H:%M:%S',
             }
+            logging.basicConfig(**args)
         else:
+            # set up logging to file
+
+            gfile.FileManager.makeDirectory(output_dir_path)
+            log_file_name = gfile.getFileNameFromPath(
+                program_filename) + cls.LOG_EXTENSION
+            log_file_path = os.path.join(output_dir_path, log_file_name)
+
             args = {
                 "level"		: file_log_level,
                 "format"	:
-                '%(asctime)s %(filename)s(%(lineno)d) %(funcName)s ' +
-                log_format_base,
-                    "datefmt"	: '%Y-%m-%d %H:%M:%S',
-                    "filemode"	: 'w',
-                    "filename"	: log_file_path,
+                    '%(asctime)s %(filename)s(%(lineno)d) %(funcName)s ' +
+                    log_format_base,
+                "datefmt"	: '%Y-%m-%d %H:%M:%S',
+                "filemode"	: 'w',
+                "filename"	: log_file_path,
             }
+            cls.debug("log file path: " + log_file_path)
+            logging.basicConfig(**args)
 
-        logging.basicConfig(**args)
-
-        if stdout_log_level == logging.NOTSET:
-            logging.disable(logging.FATAL)
-
-        if not with_no_log:
             # define a Handler which writes INFO messages or higher to the
             # sys.stderr
             console = logging.StreamHandler()
@@ -179,7 +178,8 @@ class logger:
             # add the handler to the root logger
             logging.getLogger('').addHandler(console)
 
-        cls.debug("log file path: " + log_file_path)
+        if stdout_log_level == logging.NOTSET:
+            logging.disable(logging.FATAL)
 
         cls.__writer = _LoggingWriter()
 

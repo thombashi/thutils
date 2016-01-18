@@ -141,7 +141,7 @@ class DateTimeRange(common.BaseObject):
             dt.days * getTimeUnitSecondsCoefficient("d") +
             float(dt.seconds) + float(dt.microseconds / (1000.0 ** 2)))
 
-    def toString(self, joint=" - ", time_format=None):
+    def to_string(self, joint=" - ", time_format=None):
         if not self.isValidTimeRange():
             return ""
 
@@ -286,7 +286,7 @@ class TimeMeasure(object):
         datetimerange = self.stop()
         complete_msg = self.__MF_COMPLETE % (
             self.message,
-            datetimerange.toString())
+            datetimerange.to_string())
         logger.write(complete_msg, self.__log_level)
 
 
