@@ -47,7 +47,10 @@ class ArgumentParserObject(object):
     def parse_args(self):
         return self.parser.parse_args()
 
-    def add_argument_group(self, group_name, title=None, description=None):
+    def add_argument_group(self, group_name):
+        if common.isEmptyString(group_name):
+            raise ValueError("null argument group name")
+
         group = self.parser.add_argument_group(group_name)
         self.dict_group[group_name] = group
 
@@ -88,8 +91,7 @@ class ArgumentParserObject(object):
         import re
 
         if common.isEmptyListOrTuple(valid_time_format_list):
-            logger.error("required at least a valid time format")
-            return
+            raise ValueError("required at least a valid time format")
 
         # convert datetime format to human readable text
         help_time_format_list = []
@@ -194,8 +196,8 @@ def getGeneralOptionList(options):
 
     if hasattr(options, "dry_run") and options.dry_run:
         option_list.append("--dry-run")
-    if options.with_no_log:
-        option_list.append("--with-no-log")
+    if not options.with_no_log:
+        option_list.append("--logging")
     if options.log_level == logging.DEBUG:
         option_list.append("--debug")
     if options.log_level == logging.NOTSET:
