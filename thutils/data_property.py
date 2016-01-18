@@ -105,7 +105,7 @@ class DataPeroperty(common.BaseObject):
         if common.isInteger(data):
             return Typecode.INT
 
-        if common.isFloat(data):
+        if common.is_float(data):
             return Typecode.FLOAT
 
         return Typecode.STRING
@@ -191,7 +191,7 @@ class PropertyExtractor:
     def getTypeFormat(value, decimal_places):
         if common.isInteger(value):
             return "d"
-        if common.isFloat(value):
+        if common.is_float(value):
             if common.isNaN(value):
                 return "f"
             return ".%df" % (decimal_places)
@@ -207,7 +207,7 @@ class PropertyExtractor:
 
     @staticmethod
     def getAdditionalFormatLen(data):
-        if not common.isFloat(data):
+        if not common.is_float(data):
             return 0
 
         format_len = 0

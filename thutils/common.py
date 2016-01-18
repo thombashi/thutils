@@ -49,7 +49,7 @@ class BaseObject(object):
     def __init__(self):
         pass
 
-    def toString(self):
+    def to_string(self):
         return "%s: %s" % (
             self.__class__.__name__, dump_dict(self.__dict__))
 
@@ -115,7 +115,7 @@ def isHex(value):
     return True
 
 
-def isFloat(value):
+def is_float(value):
     if any([isinstance(value, float), value == float("inf")]):
         return True
 
@@ -301,7 +301,7 @@ def removeListFromList(input_list, remove_list):
 def convertValue(value):
     if isInteger(value):
         value = int(value)
-    elif isFloat(value):
+    elif is_float(value):
         value = float(value)
 
     return value
@@ -316,9 +316,7 @@ def diffItemList(item_list, remove_list):
     return work_list
 
 
-def _unit_to_byte(unit):
-    kilo = int(1024)
-
+def _unit_to_byte(unit, kilo_size):
     re_exp_pair_list = [
         [re.compile("^b$", re.IGNORECASE), 0],
         [re.compile("^k$", re.IGNORECASE), 1],
@@ -332,12 +330,12 @@ def _unit_to_byte(unit):
         re_pattern, exp = re_exp_pair
 
         if re_pattern.search(unit):
-            return kilo ** exp
+            return kilo_size ** exp
 
     raise ValueError("unknown unit: %s" % (unit))
 
 
-def humanreadable_to_byte(readable_size):
+def humanreadable_to_byte(readable_size, kilo_size=1024):
     """
     :argument:
         readable size:
@@ -347,19 +345,14 @@ def humanreadable_to_byte(readable_size):
 
     size = readable_size[:-1]
     unit = readable_size[-1]
-    if not isFloat(size):
-        raise ValueError(
-            "invalid value: size='%s', input=%s" % (size, readable_size))
-    if not unit.isalpha():
-        raise ValueError(
-            "invalid unit: unit=%s, input=%s" % (unit, readable_size))
+
     size = float(size)
     unit = unit.lower()
 
     if size < 0:
         raise ValueError("minus size")
 
-    coefficient = _unit_to_byte(unit)
+    coefficient = _unit_to_byte(unit, kilo_size)
 
     return size * coefficient
 
@@ -598,7 +591,7 @@ def dump_dict(dict_input, indent=4):
     dict_work = dict(dict_input)
     """
     for key, value in six.iteritems(dict_input):
-        if any([f(value) for f in (isFloat, isDict, isListOrTuple)]):
+        if any([f(value) for f in (is_float, isDict, isListOrTuple)]):
             dict_work[key] = value
             continue
 

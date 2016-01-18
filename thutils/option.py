@@ -161,7 +161,7 @@ class ArgumentParserObject(object):
             const=logging.INFO, default=logging.DEBUG,
             help="measuring execution time.")
         group.add_argument(
-            "--with-no-log", action="store_true", default=False,
+            "--logging", dest="with_no_log", action="store_false", default=True,
             help="suppress output of execution log files.")
         group.add_argument(
             "--stacktrace", action="store_true", default=False,

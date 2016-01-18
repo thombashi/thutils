@@ -141,7 +141,7 @@ class DateTimeRange(common.BaseObject):
             dt.days * getTimeUnitSecondsCoefficient("d") +
             float(dt.seconds) + float(dt.microseconds / (1000.0 ** 2)))
 
-    def toString(self, joint=" - ", time_format=None):
+    def to_string(self, joint=" - ", time_format=None):
         if not self.isValidTimeRange():
             return ""
 
@@ -286,7 +286,7 @@ class TimeMeasure(object):
         datetimerange = self.stop()
         complete_msg = self.__MF_COMPLETE % (
             self.message,
-            datetimerange.toString())
+            datetimerange.to_string())
         logger.write(complete_msg, self.__log_level)
 
 
@@ -399,11 +399,8 @@ def convertHumanReadableToSecond(readable_time):
     if common.isEmptyString(readable_time):
         raise ValueError("empty input")
 
-    size = readable_time[:-1]
+    size = float(readable_time[:-1])
     unit = readable_time[-1]
-    if not common.isFloat(size):
-        raise ValueError("invalid value: '%s'" % (size))
-    size = float(size)
 
     if size < 0:
         raise ValueError("minus size")

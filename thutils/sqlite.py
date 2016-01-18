@@ -77,7 +77,7 @@ class SqlQuery:
         if value is None:
             return "NULL"
 
-        if common.isInteger(value) or common.isFloat(value):
+        if common.isInteger(value) or common.is_float(value):
             return str(value)
 
         return "'%s'" % (value)
@@ -925,7 +925,7 @@ class SqliteWrapper(object):
         if common.isInteger(value):
             return "INTEGER"
 
-        if common.isFloat(value):
+        if common.is_float(value):
             return "REAL"
 
         if gtime.is_datetime(value):
@@ -961,19 +961,6 @@ class SqliteWrapper(object):
                 dict_column_valuetype[col] = cursor_value_type
                 if cursor_value_type == "TEXT":
                     break
-
-                """
-                if dict_column_valuetype[col] == "INTEGER" and common.isInteger(cursor_value):
-                    continue
-
-                if common.isFloat(cursor_value):
-                    dict_column_valuetype[col] = "REAL"
-                elif gtime.is_datetime(cursor_value):
-                    dict_column_valuetype[col] = "DATETIME"
-                else:
-                    dict_column_valuetype[col] = "TEXT"
-                    break
-                    """
 
             col += 1
 

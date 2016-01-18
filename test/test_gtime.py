@@ -109,7 +109,7 @@ class Test_DateTimeRange:
         ],
     ])
     def test_toString(self, datetime_range, joint, time_format, expected):
-        assert datetime_range.toString(joint, time_format) == expected
+        assert datetime_range.to_string(joint, time_format) == expected
 
     @pytest.mark.parametrize(["joint", "time_format", "expected"], [
         [
@@ -119,7 +119,7 @@ class Test_DateTimeRange:
     def test_toString_abnormal(
             self, datetime_range, joint, time_format, expected):
         with pytest.raises(expected):
-            datetime_range.toString(joint, time_format)
+            datetime_range.to_string(joint, time_format)
 
     def test_squeezeTimeRange(self, datetime_range):
 
@@ -188,7 +188,7 @@ class Test_DateTimeRange_abnormal:
         [" - ", "", ""],
     ])
     def test_toString(self, datetime_range, joint, time_format, expected):
-        assert datetime_range.toString(joint, time_format) == expected
+        assert datetime_range.to_string(joint, time_format) == expected
 
     def test_squeezeTimeRange(self, datetime_range):
         value = DateTimeRange(

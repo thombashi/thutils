@@ -75,7 +75,7 @@ class Test_isHex:
         assert not isHex(value)
 
 
-class Test_isFloat:
+class Test_is_float:
 
     @pytest.mark.parametrize(["value"], [
         [0.0], [0.1], [-0.1], [1], [-1],
@@ -85,7 +85,7 @@ class Test_isFloat:
         [nan], [inf],
     ])
     def test_normal(self, value):
-        assert isFloat(value)
+        assert is_float(value)
 
     @pytest.mark.parametrize(["value"], [
         [None],
@@ -95,7 +95,7 @@ class Test_isFloat:
         [True],
     ])
     def test_abnormal(self, value):
-        assert not isFloat(value)
+        assert not is_float(value)
 
 
 class Test_isNaN:
@@ -652,30 +652,50 @@ class Test_removeListFromList:
 
 class Test_humanreadable_to_byte:
 
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["2b", 2],
-        ["2 b", 2],
-        ["2 B", 2],
-        ["2k", 2 * 1024 ** 1],
-        ["2 k", 2 * 1024 ** 1],
-        ["2 k", 2 * 1024 ** 1],
-        ["2m", 2 * 1024 ** 2],
-        ["2 m", 2 * 1024 ** 2],
-        ["2 M", 2 * 1024 ** 2],
-        ["2g", 2 * 1024 ** 3],
-        ["2 g", 2 * 1024 ** 3],
-        ["2 G", 2 * 1024 ** 3],
-        ["2t", 2 * 1024 ** 4],
-        ["2 t", 2 * 1024 ** 4],
-        ["2 T", 2 * 1024 ** 4],
-        ["2p", 2 * 1024 ** 5],
-        ["2 p", 2 * 1024 ** 5],
-        ["2 P", 2 * 1024 ** 5],
-        ["2.5 M", int(2.5 * 1024 ** 2)],
-        ["2.5 m", int(2.5 * 1024 ** 2)],
+    @pytest.mark.parametrize(["value", "kilo_size", "expected"], [
+        ["2b", 1024, 2],
+        ["2 b", 1024, 2],
+        ["2 B", 1024, 2],
+        ["2k", 1024, 2 * 1024 ** 1],
+        ["2 k", 1024, 2 * 1024 ** 1],
+        ["2 K", 1024, 2 * 1024 ** 1],
+        ["2m", 1024, 2 * 1024 ** 2],
+        ["2 m", 1024, 2 * 1024 ** 2],
+        ["2 M", 1024, 2 * 1024 ** 2],
+        ["2g", 1024, 2 * 1024 ** 3],
+        ["2 g", 1024, 2 * 1024 ** 3],
+        ["2 G", 1024, 2 * 1024 ** 3],
+        ["2t", 1024, 2 * 1024 ** 4],
+        ["2 t", 1024, 2 * 1024 ** 4],
+        ["2 T", 1024, 2 * 1024 ** 4],
+        ["2p", 1024, 2 * 1024 ** 5],
+        ["2 p", 1024, 2 * 1024 ** 5],
+        ["2 P", 1024, 2 * 1024 ** 5],
+        ["2.5 M", 1024, int(2.5 * 1024 ** 2)],
+        ["2.5 m", 1024, int(2.5 * 1024 ** 2)],
+        ["2b", 1000, 2],
+        ["2 b", 1000, 2],
+        ["2 B", 1000, 2],
+        ["2k", 1000, 2 * 1000 ** 1],
+        ["2 k", 1000, 2 * 1000 ** 1],
+        ["2 K", 1000, 2 * 1000 ** 1],
+        ["2m", 1000, 2 * 1000 ** 2],
+        ["2 m", 1000, 2 * 1000 ** 2],
+        ["2 M", 1000, 2 * 1000 ** 2],
+        ["2g", 1000, 2 * 1000 ** 3],
+        ["2 g", 1000, 2 * 1000 ** 3],
+        ["2 G", 1000, 2 * 1000 ** 3],
+        ["2t", 1000, 2 * 1000 ** 4],
+        ["2 t", 1000, 2 * 1000 ** 4],
+        ["2 T", 1000, 2 * 1000 ** 4],
+        ["2p", 1000, 2 * 1000 ** 5],
+        ["2 p", 1000, 2 * 1000 ** 5],
+        ["2 P", 1000, 2 * 1000 ** 5],
+        ["2.5 M", 1000, int(2.5 * 1000 ** 2)],
+        ["2.5 m", 1000, int(2.5 * 1000 ** 2)],
     ])
-    def test_normal(self, value, expected):
-        assert humanreadable_to_byte(value) == expected
+    def test_normal(self, value, kilo_size, expected):
+        assert humanreadable_to_byte(value, kilo_size) == expected
 
     @pytest.mark.parametrize(["value", "exception"], [
         [None, TypeError],
