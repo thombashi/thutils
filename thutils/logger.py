@@ -131,7 +131,7 @@ class logger:
         cls.__dict_logging_count = {}
         cls.__print_stack_trace = print_stack_trace
 
-        if common.isEmptyString(output_dir_path) or dry_run:
+        if common.is_empty_string(output_dir_path) or dry_run:
             output_dir_path = "."
 
         log_format_base = '[%(levelname)s] %(message)s'
@@ -147,7 +147,7 @@ class logger:
         else:
             # set up logging to file
 
-            gfile.FileManager.makeDirectory(output_dir_path)
+            gfile.FileManager.make_directory(output_dir_path)
             log_file_name = gfile.getFileNameFromPath(
                 program_filename) + cls.LOG_EXTENSION
             log_file_path = os.path.join(output_dir_path, log_file_name)

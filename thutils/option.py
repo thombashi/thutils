@@ -47,7 +47,10 @@ class ArgumentParserObject(object):
     def parse_args(self):
         return self.parser.parse_args()
 
-    def add_argument_group(self, group_name, title=None, description=None):
+    def add_argument_group(self, group_name):
+        if common.is_empty_string(group_name):
+            raise ValueError("null argument group name")
+
         group = self.parser.add_argument_group(group_name)
         self.dict_group[group_name] = group
 
@@ -65,7 +68,7 @@ class ArgumentParserObject(object):
             "--run", dest="dry_run", action="store_false", default=True,
             help="execute")
 
-    def addSqlArgumentGroup(self):
+    def add_sql_argument_group(self):
         group = self.add_argument_group(self.GroupName.SQL)
         group.add_argument(
             "--sql-logging", action="store_true", default=False,
@@ -87,9 +90,8 @@ class ArgumentParserObject(object):
 
         import re
 
-        if common.isEmptyListOrTuple(valid_time_format_list):
-            logger.error("required at least a valid time format")
-            return
+        if common.is_empty_list_or_tuple(valid_time_format_list):
+            raise ValueError("required at least a valid time format")
 
         # convert datetime format to human readable text
         help_time_format_list = []
@@ -192,10 +194,15 @@ def getGeneralOptionList(options):
 
     option_list = []
 
-    if hasattr(options, "dry_run") and options.dry_run:
-        option_list.append("--dry-run")
-    if options.with_no_log:
-        option_list.append("--with-no-log")
+    try:
+        if options.dry_run:
+            option_list.append("--dry-run")
+    except AttributeError:
+        pass
+    # if hasattr(options, "dry_run") and options.dry_run:
+    #    option_list.append("--dry-run")
+    if not options.with_no_log:
+        option_list.append("--logging")
     if options.log_level == logging.DEBUG:
         option_list.append("--debug")
     if options.log_level == logging.NOTSET:

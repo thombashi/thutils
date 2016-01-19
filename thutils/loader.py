@@ -20,16 +20,15 @@ class JsonLoader:
     def load(cls, json_file_path, schema=None):
         """
         input:
-                json_file_path: path of the json file to be read
-                schema: voluptuous schema
+            json_file_path: path of the json file to be read
+            schema: voluptuous schema
 
         exception:
-                - ImportError
-                - InvalidFilePathError
-                - FileNotFoundError
-                - EmptyFileError
-                - RuntimeError
-                - ValueError
+            - ImportError
+            - InvalidFilePathError
+            - FileNotFoundError
+            - RuntimeError
+            - ValueError
 
         return value:
                 dictionary

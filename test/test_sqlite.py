@@ -16,6 +16,7 @@ import thutils.gfile as gfile
 
 nan = float("nan")
 inf = float("inf")
+TEST_TABLE_NAME = "test_table"
 
 
 class Test_sanitize:
@@ -271,7 +272,130 @@ class Test_make_where:
             SqlQuery.make_where(key, value, operation)
 
 
-class Test_SqliteWrapper_abnormal:
+class Test_make_where_in:
+
+    @pytest.mark.parametrize(["key", "value", "expected"], [
+        ["key", ["a", "b"], "key IN ('a', 'b')"],
+    ])
+    def test_normal(self, key, value, expected):
+        assert SqlQuery.make_where_in(key, value) == expected
+
+    @pytest.mark.parametrize(["key", "value", "expected"], [
+        ["key", None, TypeError],
+        ["key", 1, TypeError],
+        [None, ["a", "b"], TypeError],
+        [None, None, TypeError],
+    ])
+    def test_exception(self, key, value, expected):
+        with pytest.raises(expected):
+            SqlQuery.make_where_in(key, value)
+
+
+class Test_make_where_not_in:
+
+    @pytest.mark.parametrize(["key", "value", "expected"], [
+        ["key", ["a", "b"], "key NOT IN ('a', 'b')"],
+    ])
+    def test_normal(self, key, value, expected):
+        assert SqlQuery.make_where_not_in(key, value) == expected
+
+    @pytest.mark.parametrize(["key", "value", "expected"], [
+        ["key", None, TypeError],
+        ["key", 1, TypeError],
+        [None, ["a", "b"], TypeError],
+        [None, None, TypeError],
+    ])
+    def test_exception(self, key, value, expected):
+        with pytest.raises(expected):
+            SqlQuery.make_where_not_in(key, value)
+
+
+class Test_SqliteWrapper_conmem:
+
+    @pytest.fixture
+    def con(self):
+        con_mem = connect_sqlite_db_mem()
+        con_mem.create_table_with_data(
+            table_name=TEST_TABLE_NAME,
+            attribute_name_list=["a", "b"],
+            data_matrix=[
+                [1, 2],
+                [3, 4],
+            ])
+
+        return con_mem
+
+    def test_is_connected(self, con):
+        assert con.is_connected()
+
+    def test_check_connection(self, con):
+        con.check_connection()
+
+    def test_check_database_name(self, con):
+        with pytest.raises(TableNotFoundError):
+            con.check_database_name("hoge")
+
+    def test_check_database_version(self, con):
+        with pytest.raises(TableNotFoundError):
+            con.check_database_version("hoge")
+
+    def test_get_total_changes(self, con):
+        con.get_total_changes()
+
+    @pytest.mark.parametrize(["value", "mode", "expected"], [
+        [None, "r", gfile.InvalidFilePathError],
+        [nan, "r", gfile.InvalidFilePathError],
+        ["", "r", gfile.InvalidFilePathError],
+        ["/not/existing/file/__path__", "r", gfile.FileNotFoundError],
+
+        [None, "w", gfile.InvalidFilePathError],
+        [inf, "w", gfile.InvalidFilePathError],
+        ["", "w", gfile.InvalidFilePathError],
+
+        [None, "a", gfile.InvalidFilePathError],
+        [1, "a", gfile.InvalidFilePathError],
+        ["", "a", gfile.InvalidFilePathError],
+
+        ["empty_file.txt", None, TypeError],
+        ["empty_file.txt", inf, TypeError],
+        ["empty_file.txt", "", ValueError],
+        ["empty_file.txt", "invalid_mode", ValueError],
+    ])
+    def test_connect(self, con, value, mode, expected):
+        with pytest.raises(expected):
+            con.connect(value, mode)
+
+    def test_execute_select(self, con):
+        con.execute_select(select="*", table=TEST_TABLE_NAME)
+
+    def test_rollback(self, con):
+        assert con.rollback()
+
+    def test_commit(self, con):
+        assert con.commit()
+
+    def test_close(self, con):
+        assert con.close()
+
+    def test_verify_table_existence_normal(self, con):
+        con.verify_table_existence(TEST_TABLE_NAME)
+
+    def test_verify_table_existence_exception(self, con):
+        with pytest.raises(TableNotFoundError):
+            con.verify_table_existence("not_exist_table")
+
+    @pytest.mark.parametrize(["table", "attr", "expected"], [
+        [TEST_TABLE_NAME, "not_exist_attr", AttributeNotFoundError],
+        ["not_exist_table", "a", TableNotFoundError],
+        [None, "a", TypeError],
+        ["", "a", TypeError],
+    ])
+    def test_verify_attribute_existence_normal(self, con, table, attr, expected):
+        with pytest.raises(expected):
+            con.verify_attribute_existence(table, attr)
+
+
+class Test_SqliteWrapper_empty:
 
     @pytest.fixture
     def con(self):
@@ -292,9 +416,9 @@ class Test_SqliteWrapper_abnormal:
         with pytest.raises(NullDatabaseConnectionError):
             con.check_database_version("hoge")
 
-    def test_getTotalChanges(self, con):
+    def test_get_total_changes(self, con):
         with pytest.raises(NullDatabaseConnectionError):
-            con.getTotalChanges()
+            con.get_total_changes()
 
     @pytest.mark.parametrize(["value", "mode", "expected"], [
         [None, "r", gfile.InvalidFilePathError],
@@ -321,7 +445,7 @@ class Test_SqliteWrapper_abnormal:
 
     def test_execute_select(self, con):
         with pytest.raises(NullDatabaseConnectionError):
-            con.execute_select(select="*", table="table")
+            con.execute_select(select="*", table=TEST_TABLE_NAME)
 
     def test_rollback(self, con):
         assert con.rollback()

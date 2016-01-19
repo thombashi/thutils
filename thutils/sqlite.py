@@ -4,9 +4,10 @@
 @author: Tsuyoshi Hombashi
 '''
 
+import logging
 import os
 import re
-import logging
+import sys
 import sqlite3
 
 import six
@@ -57,14 +58,14 @@ class SqlQuery:
         else:
             sql_name = name
 
-        if common.isNotEmptyString(operation_query):
+        if common.is_not_empty_string(operation_query):
             sql_name = "%s(%s)" % (operation_query, sql_name)
 
         return sql_name
 
     @classmethod
     def to_attr_str_list(cls, name_list, operation_query=None):
-        if common.isEmptyString(operation_query):
+        if common.is_empty_string(operation_query):
             return map(cls.to_attr_str, name_list)
 
         return [
@@ -77,7 +78,7 @@ class SqlQuery:
         if value is None:
             return "NULL"
 
-        if common.isInteger(value) or common.is_float(value):
+        if common.is_integer(value) or common.is_float(value):
             return str(value)
 
         return "'%s'" % (value)
@@ -96,10 +97,10 @@ class SqlQuery:
         """
 
         """
-        if common.isEmptyString(select):
+        if common.is_empty_string(select):
             raise ValueError("empty select query")
 
-        if common.isEmptyString(table):
+        if common.is_empty_string(table):
             logger.error("empty table name")
             return ""
         """
@@ -108,9 +109,9 @@ class SqlQuery:
             "SELECT " + select,
             "FROM " + SqlQuery.to_table_str(table),
         ]
-        if common.isNotEmptyString(where):
+        if common.is_not_empty_string(where):
             query_list.append("WHERE " + where)
-        if common.isNotEmptyString(extra):
+        if common.is_not_empty_string(extra):
             query_list.append(extra)
 
         return " ".join(query_list)
@@ -118,10 +119,10 @@ class SqlQuery:
     @classmethod
     def make_insert(cls, table_name, insert_tuple):
         table_name = SqlQuery.to_table_str(table_name)
-        if common.isEmptyString(table_name):
+        if common.is_empty_string(table_name):
             raise ValueError("table name is empty")
 
-        if common.isEmptyListOrTuple(insert_tuple):
+        if common.is_empty_list_or_tuple(insert_tuple):
             logger.error("empty insert list/tuple")
             return ""
 
@@ -140,24 +141,18 @@ class SqlQuery:
             cls.to_attr_str(key), operation, cls.to_value_str(value))
 
     @classmethod
-    def makeWhereIn(cls, key, value_list):
-        if common.isEmptyListOrTuple(value_list):
-            return ""
-
+    def make_where_in(cls, key, value_list):
         return "%s IN (%s)" % (
-            cls.to_attr_str(key), ", ".join(cls.to_value_str(value_list)))
+            cls.to_attr_str(key), ", ".join(cls.to_value_str_list(value_list)))
 
     @classmethod
-    def makeWhereNotIn(cls, key, value_list):
-        if common.isEmptyListOrTuple(value_list):
-            return ""
-
+    def make_where_not_in(cls, key, value_list):
         return "%s NOT IN (%s)" % (
-            cls.to_attr_str(key), ", ".join(cls.to_value_str(value_list)))
+            cls.to_attr_str(key), ", ".join(cls.to_value_str_list(value_list)))
 
     @classmethod
-    def makeDatetimeRangeWhereList(
-            cls, datetime_range, start_attribute_name, end_attribute_name):
+    def make_datetimerange_where_list(
+            cls, datetime_range, start_attr_name, end_attr_name):
         import copy
 
         if datetime_range is None:
@@ -169,14 +164,14 @@ class SqlQuery:
 
         if gtime.is_datetime(dtr_work.start_datetime):
             where_query = cls.make_where(
-                start_attribute_name,
+                start_attr_name,
                 dtr_work.getStartTimeText(),
                 operation=">=")
             where_query_list.append(where_query)
 
         if gtime.is_datetime(datetime_range.end_datetime):
             where_query = cls.make_where(
-                end_attribute_name,
+                end_attr_name,
                 dtr_work.getEndTimeText(),
                 operation="<=")
             where_query_list.append(where_query)
@@ -358,24 +353,24 @@ class SqliteWrapper(object):
         if self.connection is None:
             raise NullDatabaseConnectionError("null database connection")
 
-        if common.isEmptyString(self.database_path):
+        if common.is_empty_string(self.database_path):
             raise NullDatabaseConnectionError("null database file path")
 
     def check_database_name(self, expected_name):
         """
         raise:
-                TableNotFoundError: table not found in the database
-                AttributeError: attribute not found in the database
-                MissmatchError: database name missmatch found
+            TableNotFoundError: table not found in the database
+            AttributeError: attribute not found in the database
+            MissmatchError: database name missmatch found
         """
 
         table_name = self.TN_DB_INFO
 
         self.check_connection()
-        self.verifyTableExistence(table_name)
+        self.verify_table_existence(table_name)
 
         database_name = self.getDatabaseName()
-        if common.isEmptyString(database_name):
+        if common.is_empty_string(database_name):
             message = "'%s' attribute not found in '%s' table" % (
                 self.AN_DB_NAME, table_name)
             raise AttributeError(message)
@@ -403,7 +398,7 @@ class SqliteWrapper(object):
         self.check_connection()
 
         database_version = self.getDatabaseVersion()
-        if common.isEmptyString(database_version):
+        if common.is_empty_string(database_version):
             message = "%s attribute not found in %s table" % (
                 self.AN_DB_VERSION, self.TN_DB_INFO)
             raise AttributeError(message)
@@ -448,7 +443,7 @@ class SqliteWrapper(object):
                 nothing
         """
 
-        gfile.validatePath(database_path)
+        gfile.validate_path(database_path)
         self.close()
 
         if mode == "r":
@@ -457,7 +452,7 @@ class SqliteWrapper(object):
             if database_path != MEMORY_DB_NAME:
                 try:
                     gfile.check_file_existence(database_path)
-                except (gfile.FileNotFoundError, gfile.EmptyFileError):
+                except gfile.FileNotFoundError:
                     pass
 
                 if mode == "w":
@@ -517,7 +512,7 @@ class SqliteWrapper(object):
                 table_name, self.database_path))
             return False
 
-        if common.isEmptyList(insert_record_list):
+        if common.is_empty_list_or_tuple(insert_record_list):
             logger.debug("empty record list")
             return True
 
@@ -546,7 +541,7 @@ class SqliteWrapper(object):
 
             return False
 
-    def getTotalChanges(self):
+    def get_total_changes(self):
         if self.dry_run:
             return 0
 
@@ -572,7 +567,7 @@ class SqliteWrapper(object):
 
     def getDatabaseName(self):
         table_name = self.TN_DB_INFO
-        self.verifyTableExistence(table_name)
+        self.verify_table_existence(table_name)
 
         return self.getValue(
             select=common.AN_GeneralValue,
@@ -581,7 +576,7 @@ class SqliteWrapper(object):
 
     def getDatabaseVersion(self):
         table_name = self.TN_DB_INFO
-        self.verifyTableExistence(table_name)
+        self.verify_table_existence(table_name)
 
         return self.getValue(
             select=common.AN_GeneralValue,
@@ -692,14 +687,19 @@ class SqliteWrapper(object):
 
         self.commit()
         logger.debug("close database: path=%s, changes=%d" % (
-            self.database_path, self.getTotalChanges()))
+            self.database_path, self.get_total_changes()))
 
         self.connection.close()
         self.__init__()
 
+        return True
+
     def hasTable(self, table_name):
         if self.dry_run:
             return True
+
+        if common.is_empty_string(table_name):
+            return False
 
         return table_name in self.getTableNameList()
 
@@ -719,12 +719,15 @@ class SqliteWrapper(object):
 
         return True
 
-    def verifyTableExistence(self, table_name):
+    def verify_table_existence(self, table_name):
         """
         raise:
                 TypeError
                 TableNotFoundError
         """
+
+        if common.is_empty_string(table_name):
+            raise TypeError("null string")
 
         found_table = self.hasTable(table_name)
 
@@ -740,7 +743,7 @@ class SqliteWrapper(object):
         else:
             raise TableNotFoundError(message)
 
-    def verifyAttributeExistence(self, table_name, attribute_name):
+    def verify_attribute_existence(self, table_name, attribute_name):
         """
         raise:
                 TypeError
@@ -748,7 +751,7 @@ class SqliteWrapper(object):
                 AttributeNotFoundError
         """
 
-        self.verifyTableExistence(table_name)
+        self.verify_table_existence(table_name)
 
         found_attr = self.hasAttribute(table_name, attribute_name)
 
@@ -804,7 +807,7 @@ class SqliteWrapper(object):
     def createIndexList(self, table_name, attribute_name_list):
         self.checkAccessPermission(["w", "a"])
 
-        if common.isEmptyListOrTuple(attribute_name_list):
+        if common.is_empty_list_or_tuple(attribute_name_list):
             return
 
         for attribute in attribute_name_list:
@@ -819,7 +822,7 @@ class SqliteWrapper(object):
         strip_index_attribute_list = list(
             set(attribute_name_list).intersection(set(index_attribute_list)))
 
-        if common.isEmptyListOrTuple(data_matrix):
+        if common.is_empty_list_or_tuple(data_matrix):
             msg = "null input data: '%s (%s)'" % (
                 table_name, ", ".join(attribute_name_list))
             logger.warn(msg)
@@ -922,7 +925,7 @@ class SqliteWrapper(object):
 
     @staticmethod
     def __get_value_type(value):
-        if common.isInteger(value):
+        if common.is_integer(value):
             return "INTEGER"
 
         if common.is_float(value):
@@ -933,8 +936,7 @@ class SqliteWrapper(object):
 
         return "TEXT"
 
-    @staticmethod
-    def __get_column_valuetype(value_matrix):
+    def __get_column_valuetype(self, value_matrix):
         """
         get value type of column
 
@@ -989,7 +991,7 @@ class SqliteWrapper(object):
             return None
 
         self.check_connection()
-        if common.isEmptyString(query):
+        if common.is_empty_string(query):
             return None
 
         if self.__is_profile:
@@ -1065,15 +1067,15 @@ def connect_sqlite_database(
     con.connect(db_path, mode)
 
     if mode in ["r", "a"]:
-        if common.isNotEmptyString(db_name):
+        if common.is_not_empty_string(db_name):
             con.check_database_name(db_name)
 
-        if common.isNotEmptyString(db_version):
+        if common.is_not_empty_string(db_version):
             con.check_database_version(db_version)
     elif mode == "w":
         if all([
-            common.isNotEmptyString(db_name),
-            common.isNotEmptyString(db_version),
+            common.is_not_empty_string(db_name),
+            common.is_not_empty_string(db_version),
         ]):
             con.create_db_info_table(db_name, db_version)
     else:
@@ -1102,7 +1104,7 @@ def adjustDataMatrix(
                 else:
                     value = sampling_datetime.strftime(time_format)
             else:
-                value = common.convertValue(value)
+                value = common.convert_value(value)
 
             data_list.append(value)
 
