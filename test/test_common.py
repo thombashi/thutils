@@ -40,7 +40,7 @@ class Test_isInteger:
         [" 1"], ["1 "],
     ])
     def test_normal(self, value):
-        assert isInteger(value)
+        assert is_integer(value)
 
     @pytest.mark.parametrize(["value"], [
         [None], [nan], [inf],
@@ -53,7 +53,7 @@ class Test_isInteger:
         [-0.00001],
     ])
     def test_abnormal(self, value):
-        assert not isInteger(value)
+        assert not is_integer(value)
 
 
 class Test_isHex:
@@ -62,7 +62,7 @@ class Test_isHex:
         ["0x00"], ["0xffffffff"], ["a"], ["f"],
     ])
     def test_normal(self, value):
-        assert isHex(value)
+        assert is_hex(value)
 
     @pytest.mark.parametrize(["value"], [
         [None], [nan], [inf],
@@ -72,7 +72,7 @@ class Test_isHex:
         [True],
     ])
     def test_abnormal(self, value):
-        assert not isHex(value)
+        assert not is_hex(value)
 
 
 class Test_is_float:
@@ -112,7 +112,7 @@ class Test_isNaN:
         [True, False],
     ])
     def test_normal(self, value, expected):
-        assert isNaN(value) == expected
+        assert is_nan(value) == expected
 
 
 class Test_isNotEmptyString:
@@ -131,7 +131,7 @@ class Test_isNotEmptyString:
         [True, False],
     ])
     def test_normal(self, value, expected):
-        assert isNotEmptyString(value) == expected
+        assert is_not_empty_string(value) == expected
 
 
 class Test_isEmptyString:
@@ -150,7 +150,7 @@ class Test_isEmptyString:
         [1, True],
     ])
     def test_normal(self, value, expected):
-        assert isEmptyString(value) == expected
+        assert is_empty_string(value) == expected
 
 
 class Test_isList:
@@ -374,7 +374,7 @@ class Test_safe_division:
         [True, False],
     ])
     def test_abnormal_1(self, dividend, divisor):
-        assert isNaN(safe_division(dividend, divisor))
+        assert is_nan(safe_division(dividend, divisor))
 
     @pytest.mark.parametrize(['dividend', "divisor", "expected"], [
         [inf, 2, inf],
@@ -562,15 +562,15 @@ class Test_get_number_of_digit:
     ])
     def test_abnormal(self, value):
         sig_digit, float_digit = get_number_of_digit(value)
-        assert isNaN(sig_digit)
-        assert isNaN(float_digit)
+        assert is_nan(sig_digit)
+        assert is_nan(float_digit)
 
 
 class Test_getTextLen:
 
     def test_normal_1(self):
-        assert getTextLen("") == 0
-        assert getTextLen(
+        assert get_text_len("") == 0
+        assert get_text_len(
             "aaaaaaaaaaaaaaaaaaaa"
             "aaaaaaaaaaaaaaaaaaaa"
             "aaaaaaaaaaaaaaaaaaaa"
@@ -579,14 +579,14 @@ class Test_getTextLen:
         ) == 100
 
     def test_normal_2(self):
-        assert getTextLen(u"あ") == 1
+        assert get_text_len(u"あ") == 1
 
     def test_abnormal_1(self):
-        assert getTextLen(None) == 4
+        assert get_text_len(None) == 4
 
     def test_abnormal_2(self):
-        assert getTextLen(nan) == 3
-        assert getTextLen(inf) == 3
+        assert get_text_len(nan) == 3
+        assert get_text_len(inf) == 3
 
 
 class Test_convertValue:
@@ -610,7 +610,7 @@ class Test_convertValue:
         assert convertValue(None) is None
 
     def test_abnormal_2(self):
-        assert isNaN(convertValue(nan))
+        assert is_nan(convertValue(nan))
         assert convertValue(inf) == inf
 
 

@@ -70,8 +70,7 @@ class Test_check_file_existence:
         p = tmpdir.join(EMPTY_FILE_NAME)
         p.write("")
 
-        with pytest.raises(EmptyFileError):
-            check_file_existence(str(p))
+        check_file_existence(str(p))
 
     @pytest.mark.parametrize(["value", "expected"], [
         [EMPTY_DIR_NAME, FileType.DIRECTORY],

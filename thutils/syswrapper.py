@@ -44,7 +44,7 @@ class SystemWrapper(object):
         import re
         import thutils.common as common
 
-        if common.isEmptyString(command):
+        if common.is_empty_string(command):
             logger.error("null command")
             return -1
 

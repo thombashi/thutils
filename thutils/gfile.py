@@ -82,8 +82,6 @@ class FileManager:
             check_file_existence(path)
         except FileNotFoundError:
             pass
-        except (InvalidFilePathError, EmptyFileError):
-            return False
         else:
             logger.debug("already exists: " + path)
             return False
@@ -104,8 +102,6 @@ class FileManager:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.debug(e)
             return False
-        except EmptyFileError:
-            pass
 
         logger.debug("copy: %s -> %s" % (src_path, dst_path))
         if cls.__dry_run:
@@ -129,8 +125,6 @@ class FileManager:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.debug(e)
             return False
-        except EmptyFileError:
-            pass
 
         if os.path.realpath(src_path) == os.path.realpath(dst_path):
             logger.debug("%s and %s are the same file" % (
@@ -156,8 +150,6 @@ class FileManager:
             logger.debug(e)
             logger.debug(e)
             return False
-        except EmptyFileError:
-            pass
 
         logger.debug("chmod %s %s" % (path, permission_text))
 
@@ -171,10 +163,8 @@ class FileManager:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.exception(e)
             return False
-        except EmptyFileError:
-            pass
 
-        if thutils.common.isEmptyString(dst_path):
+        if thutils.common.is_empty_string(dst_path):
             logger.error("empty destination path")
             return False
 
@@ -219,8 +209,6 @@ class FileManager:
             file_type = check_file_existence(path)
         except (InvalidFilePathError, FileNotFoundError):
             return True
-        except EmptyFileError:
-            pass
 
         if file_type not in [FileType.FILE, FileType.LINK]:
             logger.error("not a file: '%s'" % (path))
@@ -244,8 +232,6 @@ class FileManager:
             file_type = check_file_existence(path)
         except (InvalidFilePathError, FileNotFoundError):
             return True
-        except EmptyFileError:
-            pass
 
         if file_type not in [FileType.FILE, FileType.LINK]:
             return cls.remove_file(path)
@@ -263,7 +249,7 @@ class FileManager:
         re_compile_list = [
             re.compile(re_pattern)
             for re_pattern in re_remove_list
-            if thutils.common.isNotEmptyString(remove_fileattern)
+            if thutils.common.is_not_empty_string(remove_fileattern)
         ]
 
         dict_result_pathlist = {}
@@ -322,7 +308,7 @@ class FileManager:
 
 
 def validatePath(path):
-    if thutils.common.isEmptyString(path):
+    if thutils.common.is_empty_string(path):
         raise InvalidFilePathError("null path")
 
     work_path = os.path.normpath(path)
@@ -337,13 +323,12 @@ def validatePath(path):
 def check_file_existence(path):
     """
     return value:
-            FileType
+        FileType
 
     raise:
-            - InvalidFilePathError
-            - FileNotFoundError
-            - EmptyFileError
-            - RuntimeError
+        - InvalidFilePathError
+        - FileNotFoundError
+        - RuntimeError
     """
 
     validatePath(path)
@@ -351,11 +336,9 @@ def check_file_existence(path):
     if not os.path.lexists(path):
         raise FileNotFoundError(path)
 
+    # TODO: 別関数にする。
     if os.path.isfile(path):
         logger.debug("file found: " + path)
-        if os.path.getsize(path) <= 0:
-            raise EmptyFileError(path)
-
         return FileType.FILE
 
     if os.path.isdir(path):

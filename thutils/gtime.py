@@ -146,7 +146,7 @@ class DateTimeRange(common.BaseObject):
             return ""
 
         old_time_format = None
-        if common.isNotEmptyString(time_format):
+        if common.is_not_empty_string(time_format):
             old_time_format = self.time_format
             self.time_format = time_format
 
@@ -159,7 +159,7 @@ class DateTimeRange(common.BaseObject):
             " (%s)" % (self.end_datetime - self.start_datetime)
         )
 
-        if common.isNotEmptyString(old_time_format):
+        if common.is_not_empty_string(old_time_format):
             self.time_format = old_time_format
 
         return return_value
@@ -396,7 +396,7 @@ def getTimeDeltaSecond(start_datetime, end_datetime):
 
 
 def convertHumanReadableToSecond(readable_time):
-    if common.isEmptyString(readable_time):
+    if common.is_empty_string(readable_time):
         raise ValueError("empty input")
 
     size = float(readable_time[:-1])

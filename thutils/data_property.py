@@ -102,7 +102,7 @@ class DataPeroperty(common.BaseObject):
         if data is None:
             return Typecode.NONE
 
-        if common.isInteger(data):
+        if common.is_integer(data):
             return Typecode.INT
 
         if common.is_float(data):
@@ -122,7 +122,7 @@ class DataPeroperty(common.BaseObject):
                     self.integer_digits, self.decimal_places) +
                 PropertyExtractor.getAdditionalFormatLen(self.data))
 
-        return common.getTextLen(self.data)
+        return common.get_text_len(self.data)
 
 
 class ColumnDataPeroperty(common.BaseObject):
@@ -144,7 +144,7 @@ class ColumnDataPeroperty(common.BaseObject):
         import math
 
         avg = self.minmax_decimal_places.average()
-        if common.isNaN(avg):
+        if common.is_nan(avg):
             return float("nan")
 
         return int(math.ceil(avg))
@@ -189,10 +189,10 @@ class PropertyExtractor:
 
     @staticmethod
     def getTypeFormat(value, decimal_places):
-        if common.isInteger(value):
+        if common.is_integer(value):
             return "d"
         if common.is_float(value):
-            if common.isNaN(value):
+            if common.is_nan(value):
                 return "f"
             return ".%df" % (decimal_places)
         return "s"
@@ -274,7 +274,7 @@ class PropertyExtractor:
         if typecode == Typecode.INT:
             return "d"
         if typecode == Typecode.FLOAT:
-            if common.isNaN(decimal_places):
+            if common.is_nan(decimal_places):
                 return "f"
             return ".%df" % (decimal_places)
         return "s"

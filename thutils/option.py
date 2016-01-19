@@ -48,7 +48,7 @@ class ArgumentParserObject(object):
         return self.parser.parse_args()
 
     def add_argument_group(self, group_name):
-        if common.isEmptyString(group_name):
+        if common.is_empty_string(group_name):
             raise ValueError("null argument group name")
 
         group = self.parser.add_argument_group(group_name)
@@ -194,8 +194,13 @@ def getGeneralOptionList(options):
 
     option_list = []
 
-    if hasattr(options, "dry_run") and options.dry_run:
-        option_list.append("--dry-run")
+    try:
+        if options.dry_run:
+            option_list.append("--dry-run")
+    except AttributeError:
+        pass
+    # if hasattr(options, "dry_run") and options.dry_run:
+    #    option_list.append("--dry-run")
     if not options.with_no_log:
         option_list.append("--logging")
     if options.log_level == logging.DEBUG:

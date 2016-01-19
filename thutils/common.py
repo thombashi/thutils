@@ -90,7 +90,7 @@ class MinMaxObject(BaseObject):
             self.__max_value = max(self.__max_value, value)
 
 
-def isInteger(value):
+def is_integer(value):
     if isinstance(value, six.integer_types):
         return not isinstance(value, bool)
 
@@ -106,7 +106,7 @@ def isInteger(value):
     return True
 
 
-def isHex(value):
+def is_hex(value):
     try:
         int(value, 16)
     except (TypeError, ValueError):
@@ -132,7 +132,7 @@ def is_float(value):
     return True
 
 
-def isNaN(value):
+def is_nan(value):
     return value != value
 
 
@@ -148,7 +148,7 @@ def isListOrTuple(value):
     return any([isList(value), isTuple(value)])
 
 
-def isNotEmptyString(value):
+def is_not_empty_string(value):
     """
     空白文字(\0, \t, \n)を除いた文字数が0より大きければTrueを返す
     """
@@ -159,7 +159,7 @@ def isNotEmptyString(value):
         return False
 
 
-def isEmptyString(value):
+def is_empty_string(value):
     try:
         return len(value.strip()) == 0
     except AttributeError:
@@ -201,7 +201,7 @@ def safe_division(dividend, divisor):
 
 
 def get_list_item(input_list, index):
-    if not isInteger(index):
+    if not is_integer(index):
         return None
 
     list_size = len(input_list)
@@ -231,7 +231,7 @@ def get_integer_digit(value):
 
 def _get_decimal_places(value, integer_digits):
     float_digit_len = 0
-    if isInteger(value):
+    if is_integer(value):
         abs_value = abs(int(value))
     else:
         abs_value = abs(float(value))
@@ -275,7 +275,7 @@ def get_number_of_digit(value):
     return (integer_digits, decimal_places)
 
 
-def getTextLen(text):
+def get_text_len(text):
     try:
         return len(str(text))
     except UnicodeEncodeError:
@@ -299,7 +299,7 @@ def removeListFromList(input_list, remove_list):
 
 
 def convertValue(value):
-    if isInteger(value):
+    if is_integer(value):
         value = int(value)
     elif is_float(value):
         value = float(value)
@@ -500,7 +500,7 @@ def command_to_filename(command, suffix=""):
     filename = filename.strip(os.path.sep)
     filename = filename.replace(os.path.sep, "-")
     filename = gfile.sanitizeFileName(filename)
-    if isNotEmptyString(suffix):
+    if is_not_empty_string(suffix):
         filename += "_" + suffix
 
     return filename
@@ -543,7 +543,7 @@ def get_execution_command():
     def get_arg_text():
         arg_list = []
         for arg in sys.argv[1:]:
-            if isInteger(arg):
+            if is_integer(arg):
                 arg_list.append(arg)
                 continue
 
