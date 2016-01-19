@@ -122,7 +122,7 @@ class SqlQuery:
         if common.is_empty_string(table_name):
             raise ValueError("table name is empty")
 
-        if common.isEmptyListOrTuple(insert_tuple):
+        if common.is_empty_list_or_tuple(insert_tuple):
             logger.error("empty insert list/tuple")
             return ""
 
@@ -443,7 +443,7 @@ class SqliteWrapper(object):
                 nothing
         """
 
-        gfile.validatePath(database_path)
+        gfile.validate_path(database_path)
         self.close()
 
         if mode == "r":
@@ -512,7 +512,7 @@ class SqliteWrapper(object):
                 table_name, self.database_path))
             return False
 
-        if common.isEmptyList(insert_record_list):
+        if common.is_empty_list_or_tuple(insert_record_list):
             logger.debug("empty record list")
             return True
 
@@ -807,7 +807,7 @@ class SqliteWrapper(object):
     def createIndexList(self, table_name, attribute_name_list):
         self.checkAccessPermission(["w", "a"])
 
-        if common.isEmptyListOrTuple(attribute_name_list):
+        if common.is_empty_list_or_tuple(attribute_name_list):
             return
 
         for attribute in attribute_name_list:
@@ -822,7 +822,7 @@ class SqliteWrapper(object):
         strip_index_attribute_list = list(
             set(attribute_name_list).intersection(set(index_attribute_list)))
 
-        if common.isEmptyListOrTuple(data_matrix):
+        if common.is_empty_list_or_tuple(data_matrix):
             msg = "null input data: '%s (%s)'" % (
                 table_name, ", ".join(attribute_name_list))
             logger.warn(msg)
@@ -1104,7 +1104,7 @@ def adjustDataMatrix(
                 else:
                     value = sampling_datetime.strftime(time_format)
             else:
-                value = common.convertValue(value)
+                value = common.convert_value(value)
 
             data_list.append(value)
 

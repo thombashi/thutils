@@ -147,7 +147,7 @@ class logger:
         else:
             # set up logging to file
 
-            gfile.FileManager.makeDirectory(output_dir_path)
+            gfile.FileManager.make_directory(output_dir_path)
             log_file_name = gfile.getFileNameFromPath(
                 program_filename) + cls.LOG_EXTENSION
             log_file_path = os.path.join(output_dir_path, log_file_name)

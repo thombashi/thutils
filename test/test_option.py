@@ -83,7 +83,7 @@ class Test_ArgumentParserObject_add_run_option:
 class Test_ArgumentParserObject_addSqlArgumentGroup:
 
     def test_smoke(self, maked_parser):
-        maked_parser.addSqlArgumentGroup()
+        maked_parser.add_sql_argument_group()
 
 
 class Test_ArgumentParserObject_addProfileArgumentGroup:

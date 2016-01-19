@@ -22,7 +22,6 @@ KEY_ALL = "key-all"
 # Attribute Name ---
 AN_GeneralKey = "key"
 AN_GeneralValue = "value"
-AN_GeneralGroupID = "group_id"
 AN_SamplingStartTime = "Sampling Start Time"
 AN_SamplingEndTime = "Sampling End Time"
 KEY_VALUE_HEADER = [AN_GeneralKey, AN_GeneralValue]
@@ -174,11 +173,11 @@ def isEmptyTuple(value):
     return value is None or (isTuple(value) and len(value) == 0)
 
 
-def isEmptyListOrTuple(value):
+def is_empty_list_or_tuple(value):
     return value is None or (isListOrTuple(value) and len(value) == 0)
 
 
-def isNotEmptyListOrTuple(value):
+def is_not_empty_list_or_tuple(value):
     return isListOrTuple(value) and len(value) > 0
 
 
@@ -298,7 +297,7 @@ def removeListFromList(input_list, remove_list):
         removeItemFromList(input_list, remove_item)
 
 
-def convertValue(value):
+def convert_value(value):
     if is_integer(value):
         value = int(value)
     elif is_float(value):

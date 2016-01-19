@@ -69,7 +69,7 @@ class SystemWrapper(object):
         return_code = proc.returncode
 
         if return_code != 0:
-            if common.isNotEmptyListOrTuple(ignore_error_list):
+            if common.is_not_empty_list_or_tuple(ignore_error_list):
                 if return_code not in ignore_error_list:
                     logger.error("failed '%s' = %d" % (command, return_code))
             else:

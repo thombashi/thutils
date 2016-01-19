@@ -71,13 +71,13 @@ class FileManager:
         if cls.__dry_run:
             return
 
-        cls.makeDirectory(os.path.dirname(path))
+        cls.make_directory(os.path.dirname(path))
 
         with open(path, "a") as _fp:
             pass
 
     @classmethod
-    def makeDirectory(cls, path, force=False):
+    def make_directory(cls, path, force=False):
         try:
             check_file_existence(path)
         except FileNotFoundError:
@@ -307,7 +307,7 @@ class FileManager:
         return dict_result_pathlist
 
 
-def validatePath(path):
+def validate_path(path):
     if thutils.common.is_empty_string(path):
         raise InvalidFilePathError("null path")
 
@@ -331,7 +331,7 @@ def check_file_existence(path):
         - RuntimeError
     """
 
-    validatePath(path)
+    validate_path(path)
 
     if not os.path.lexists(path):
         raise FileNotFoundError(path)
@@ -366,7 +366,7 @@ def findFile(search_root_dir_path, re_pattern_text):
     result = findFileAll(
         search_root_dir_path, os.path.isfile, re_pattern_text, find_count=1)
 
-    if thutils.common.isEmptyListOrTuple(result):
+    if thutils.common.is_empty_list_or_tuple(result):
         return None
 
     return result[0]
@@ -402,7 +402,7 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     result = findFileAll(
         search_root_dir_path, os.path.isdir, re_pattern, find_count=1)
 
-    if thutils.common.isEmptyListOrTuple(result):
+    if thutils.common.is_empty_list_or_tuple(result):
         return None
 
     return result[0]

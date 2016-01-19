@@ -220,7 +220,7 @@ class PropertyExtractor:
 
     @staticmethod
     def extractDataPropertyList(data_list):
-        if common.isEmptyListOrTuple(data_list):
+        if common.is_empty_list_or_tuple(data_list):
             return []
 
         return [DataPeroperty(data) for data in data_list]
@@ -243,7 +243,7 @@ class PropertyExtractor:
         for col_idx, col_prop_list in enumerate(zip(*data_prop_matrix)):
             column_prop = ColumnDataPeroperty()
 
-            if common.isNotEmptyListOrTuple(header_prop_list):
+            if common.is_not_empty_list_or_tuple(header_prop_list):
                 header_prop = header_prop_list[col_idx]
                 column_prop.update_header(header_prop)
 

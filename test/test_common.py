@@ -31,7 +31,7 @@ def return0_func():
     return 0
 
 
-class Test_isInteger:
+class Test_is_integer:
 
     @pytest.mark.parametrize(["value"], [
         [0], [99999999999], [-99999999999],
@@ -56,7 +56,7 @@ class Test_isInteger:
         assert not is_integer(value)
 
 
-class Test_isHex:
+class Test_is_hex:
 
     @pytest.mark.parametrize(["value"], [
         ["0x00"], ["0xffffffff"], ["a"], ["f"],
@@ -98,7 +98,7 @@ class Test_is_float:
         assert not is_float(value)
 
 
-class Test_isNaN:
+class Test_is_nan:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [nan, True],
@@ -134,7 +134,7 @@ class Test_isNotEmptyString:
         assert is_not_empty_string(value) == expected
 
 
-class Test_isEmptyString:
+class Test_is_empty_string:
 
     @pytest.mark.parametrize(["value", "expected"], [
         ["nan", False],
@@ -261,7 +261,7 @@ class Test_isEmptyTuple:
         assert isEmptyTuple(value) == expected
 
 
-class Test_isEmptyListOrTuple:
+class Test_is_empty_list_or_tuple:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [(), True],
@@ -274,7 +274,7 @@ class Test_isEmptyListOrTuple:
         [("a",) * 200000, False],
     ])
     def test_normal(self, value, expected):
-        assert isEmptyListOrTuple(value) == expected
+        assert is_empty_list_or_tuple(value) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [nan, False],
@@ -283,7 +283,7 @@ class Test_isEmptyListOrTuple:
         [True, False],
     ])
     def test_abnormal(self, value, expected):
-        assert isEmptyListOrTuple(value) == expected
+        assert is_empty_list_or_tuple(value) == expected
 
 
 class Test_isNotEmptyListOrTuple:
@@ -299,7 +299,7 @@ class Test_isNotEmptyListOrTuple:
         [("a",) * 200000, True],
     ])
     def test_normal(self, value, expected):
-        assert isNotEmptyListOrTuple(value) == expected
+        assert is_not_empty_list_or_tuple(value) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [nan, False],
@@ -308,10 +308,10 @@ class Test_isNotEmptyListOrTuple:
         [True, False],
     ])
     def test_abnormal(self, value, expected):
-        assert isNotEmptyListOrTuple(value) == expected
+        assert is_not_empty_list_or_tuple(value) == expected
 
 
-class Test_isInstallCommand:
+class Test_is_install_command:
 
     @pytest.mark.parametrize(["value", "expected"], [
         ["ls", True],
@@ -566,7 +566,7 @@ class Test_get_number_of_digit:
         assert is_nan(float_digit)
 
 
-class Test_getTextLen:
+class Test_get_text_len:
 
     def test_normal_1(self):
         assert get_text_len("") == 0
@@ -592,26 +592,26 @@ class Test_getTextLen:
 class Test_convertValue:
 
     def test_normal_1(self):
-        assert convertValue("0") == 0
-        assert convertValue("9999999999") == 9999999999
-        assert convertValue("-9999999999") == -9999999999
-        assert convertValue(0) == 0
-        assert convertValue(9999999999) == 9999999999
-        assert convertValue(-9999999999) == -9999999999
+        assert convert_value("0") == 0
+        assert convert_value("9999999999") == 9999999999
+        assert convert_value("-9999999999") == -9999999999
+        assert convert_value(0) == 0
+        assert convert_value(9999999999) == 9999999999
+        assert convert_value(-9999999999) == -9999999999
 
     def test_normal_2(self):
-        assert convertValue("0.0") == 0
-        assert convertValue(0.0) == 0
+        assert convert_value("0.0") == 0
+        assert convert_value(0.0) == 0
 
     def test_normal_3(self):
-        assert convertValue("aaaaa") == "aaaaa"
+        assert convert_value("aaaaa") == "aaaaa"
 
     def test_abnormal_1(self):
-        assert convertValue(None) is None
+        assert convert_value(None) is None
 
     def test_abnormal_2(self):
-        assert is_nan(convertValue(nan))
-        assert convertValue(inf) == inf
+        assert is_nan(convert_value(nan))
+        assert convert_value(inf) == inf
 
 
 class Test_removeItemFromList:
@@ -866,7 +866,7 @@ class Test_getFileNameFromCommand:
             command_to_filename(value)
 
 
-class Test_compareVersion:
+class Test_compare_version:
 
     @pytest.mark.parametrize(['lhs', 'rhs', "expected"], [
         ["1.0.0", "1.0.0", 0],
@@ -899,7 +899,7 @@ class Test_compareVersion:
             compare_version(lhs, rhs)
 
 
-class Test_sleepWrapper:
+class Test_sleep_wrapper:
 
     @pytest.mark.parametrize(["value", "dry_run", "expected"], [
         [0.1, False, 0.1],

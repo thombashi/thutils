@@ -78,7 +78,7 @@ class CommandCache:
         cache_dir_path = os.path.join(
             thutils.LIB_TMP_DIR, "__thutils_command_cache__")
 
-        thutils.gfile.FileManager.makeDirectory(cache_dir_path, force=True)
+        thutils.gfile.FileManager.make_directory(cache_dir_path, force=True)
 
         return cache_dir_path
 

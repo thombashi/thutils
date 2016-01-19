@@ -68,7 +68,7 @@ class ArgumentParserObject(object):
             "--run", dest="dry_run", action="store_false", default=True,
             help="execute")
 
-    def addSqlArgumentGroup(self):
+    def add_sql_argument_group(self):
         group = self.add_argument_group(self.GroupName.SQL)
         group.add_argument(
             "--sql-logging", action="store_true", default=False,
@@ -90,7 +90,7 @@ class ArgumentParserObject(object):
 
         import re
 
-        if common.isEmptyListOrTuple(valid_time_format_list):
+        if common.is_empty_list_or_tuple(valid_time_format_list):
             raise ValueError("required at least a valid time format")
 
         # convert datetime format to human readable text
