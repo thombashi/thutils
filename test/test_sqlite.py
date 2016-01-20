@@ -223,29 +223,34 @@ class Test_make_select:
 
 class Test_make_insert:
 
-    @pytest.mark.parametrize(["table", "insert_tuple", "expected"], [
-        ["A", ["B"], "insert into A values (?)"],
-        ["A", ["B"] * 2, "insert into A values (?,?)"],
+    @pytest.mark.parametrize(["table", "insert_tuple", "is_isert_many", "expected"], [
+        ["A", ["B"], False, "insert into A values (B)"],
+        ["A", ["B", "C"], False, "insert into A values (B,C)"],
+        ["A", ["B"], True, "insert into A values (?)"],
+        ["A", ["B", "C"], True, "insert into A values (?,?)"],
     ])
-    def test_normal(self, table, insert_tuple, expected):
-        assert SqlQuery.make_insert(table, insert_tuple) == expected
+    def test_normal(self, table, insert_tuple, is_isert_many, expected):
+        assert SqlQuery.make_insert(
+            table, insert_tuple, is_isert_many) == expected
 
-    @pytest.mark.parametrize(["table", "insert_tuple", "expected"], [
-        ["A", [], ""],
-        ["A", None, ""],
+    """
+    @pytest.mark.parametrize(["table", "insert_tuple", "is_isert_many", "expected"], [
     ])
-    def test_abnormal(self, table, insert_tuple, expected):
+    def test_abnormal(self, table, insert_tuple, is_isert_many, expected):
         assert SqlQuery.make_insert(table, insert_tuple) == expected
+    """
 
-    @pytest.mark.parametrize(["table", "insert_tuple", "expected"], [
-        ["", [], ValueError],
-        ["", None, ValueError],
-        ["", ["B"], ValueError],
-        [None, None, TypeError],
-        [None, ["B"], TypeError],
-        [None, [], TypeError],
+    @pytest.mark.parametrize(["table", "insert_tuple", "is_isert_many", "expected"], [
+        ["", [], False, ValueError],
+        ["", None, True, ValueError],
+        ["", ["B"], False, ValueError],
+        ["A", [], True, ValueError],
+        ["A", None, False, ValueError],
+        [None, None, True, TypeError],
+        [None, ["B"], False, TypeError],
+        [None, [], True, TypeError],
     ])
-    def test_exception(self, table, insert_tuple, expected):
+    def test_exception(self, table, insert_tuple, is_isert_many, expected):
         with pytest.raises(expected):
             SqlQuery.make_insert(table, insert_tuple)
 
@@ -366,10 +371,27 @@ class Test_SqliteWrapper_conmem:
             con.connect(value, mode)
 
     def test_execute_select(self, con):
-        con.execute_select(select="*", table=TEST_TABLE_NAME)
+        result = con.execute_select(select="*", table=TEST_TABLE_NAME)
+        assert result is not None
+
+    def test_execute_insert(self, con):
+        assert con.execute_insert(
+            TEST_TABLE_NAME, insert_record=[5, 6])
+
+    def test_execute_insert_many(self, con):
+        insert_record_list = [
+            [7, 8],
+            [9, 10],
+        ]
+        assert con.execute_insert_many(
+            TEST_TABLE_NAME, insert_record_list)
 
     def test_rollback(self, con):
         assert con.rollback()
+
+    def test_get_table_name_list(self, con):
+        assert con.get_table_name_list() == [
+            SqliteWrapper.TN_TABLE_CONFIG, TEST_TABLE_NAME]
 
     def test_commit(self, con):
         assert con.commit()
@@ -393,6 +415,21 @@ class Test_SqliteWrapper_conmem:
     def test_verify_attribute_existence_normal(self, con, table, attr, expected):
         with pytest.raises(expected):
             con.verify_attribute_existence(table, attr)
+
+    def test_create_drop_table(self, con):
+        attr_description_list = [
+            "'%s' %s" % ("attr_name", "TEXT")
+        ]
+
+        table_name = "new_table"
+
+        assert not con.has_table(table_name)
+
+        con.create_table(table_name, attr_description_list)
+        assert con.has_table(table_name)
+
+        con.drop_table(table_name)
+        assert not con.has_table(table_name)
 
 
 class Test_SqliteWrapper_empty:

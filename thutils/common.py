@@ -14,25 +14,12 @@ import six
 from thutils.logger import logger
 
 
-# Key ---
-KEY_AVERAGE = "key-avg"
-KEY_TOTAL = "key-total"
-KEY_ALL = "key-all"
-
 # Attribute Name ---
 AN_GeneralKey = "key"
 AN_GeneralValue = "value"
 AN_SamplingStartTime = "Sampling Start Time"
 AN_SamplingEndTime = "Sampling End Time"
 KEY_VALUE_HEADER = [AN_GeneralKey, AN_GeneralValue]
-
-
-class Field:
-    GENERAL_KEY = "key"
-    GENERAL_VALUE = "value"
-    DATETIME = "datetime"
-    SAMPLING_START_TIME = "Sampling Start Time"
-    SAMPLING_END_TIME = "Sampling END Time"
 
 
 # Regular Expression ---
@@ -98,9 +85,12 @@ def is_integer(value):
     except:
         return False
 
-    text = str(value).strip()
-    if re.search("[.]|e-", text) is not None:
+    if isinstance(value, float):
         return False
+
+    #text = str(value).strip()
+    # if re.search("[.]|e-", text) is not None:
+    #    return False
 
     return True
 
@@ -229,6 +219,9 @@ def get_integer_digit(value):
 
 
 def _get_decimal_places(value, integer_digits):
+    import math
+    from collections import namedtuple
+
     float_digit_len = 0
     if is_integer(value):
         abs_value = abs(int(value))
@@ -243,18 +236,19 @@ def _get_decimal_places(value, integer_digits):
             float_text = text_value.split("e-")[1]
             float_digit_len = int(float_text) - 1
 
-    abs_digit = 0
-    pair_list = [
-        [0.01, 5],
-        [0.1, 4],
-        [1.0, 3],
-        [10.0, 2],
-        [100.0, 3],
+    Threshold = namedtuple("Threshold", "pow digit_len")
+    upper_threshold = Threshold(pow=-2, digit_len=6)
+    min_digit_len = 1
+
+    treshold_list = [
+        Threshold(upper_threshold.pow + i, upper_threshold.digit_len - i)
+        for i, _ in enumerate(range(upper_threshold.digit_len, min_digit_len - 1, -1))
     ]
-    for pair in pair_list:
-        threshold_value, digit = pair
-        if abs_value < threshold_value:
-            abs_digit = digit
+
+    abs_digit = min_digit_len
+    for treshold in treshold_list:
+        if abs_value < math.pow(10, treshold.pow):
+            abs_digit = treshold.digit_len
             break
 
     return min(abs_digit, float_digit_len)
@@ -316,6 +310,9 @@ def diffItemList(item_list, remove_list):
 
 
 def _unit_to_byte(unit, kilo_size):
+    if kilo_size not in [1000, 1024]:
+        raise ValueError("invalid kilo size: " + str(kilo_size))
+
     re_exp_pair_list = [
         [re.compile("^b$", re.IGNORECASE), 0],
         [re.compile("^k$", re.IGNORECASE), 1],

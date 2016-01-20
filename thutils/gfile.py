@@ -336,7 +336,6 @@ def check_file_existence(path):
     if not os.path.lexists(path):
         raise FileNotFoundError(path)
 
-    # TODO: 別関数にする。
     if os.path.isfile(path):
         logger.debug("file found: " + path)
         return FileType.FILE

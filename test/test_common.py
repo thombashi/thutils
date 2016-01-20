@@ -15,6 +15,7 @@ from thutils.common import *
 from thutils.gfile import *
 from thutils.sqlite import *
 
+
 nan = float("nan")
 inf = float("inf")
 
@@ -459,91 +460,31 @@ class Test_get_integer_digit:
             get_integer_digit(value)
 
 
-"""
-class Test_getFloatDigit:
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [0, 0], [-0, 0],
-        [1000, 0], [-1000, 0],
-        [1000.0, 0], [-1000.0, 0],
-
-        [0.0, 1], [-0.0, 1],
-        [0.10, 1], [-0.10, 1],
-        [0.9, 1], [-0.9, 1],
-        [10.1, 1], [-10.1, 1],
-        [100.1, 1], [-100.1, 1],
-
-        [0.01, 2], [-0.01, 2],
-        [0.99, 2], [-0.99, 2],
-        [99.999, 2], [-99.999, 2],
-
-        [0.001, 3], [-0.001, 3],
-        [9.999, 3], [-9.999, 3],
-        [9.9999, 3], [-9.9999, 3],
-
-        [0.0123, 4], [-0.0123, 4],
-        [0.01234, 4], [-0.01234, 4],
-
-        [1.0, 1],
-    ])
-    def test_normal(self, value, expected):
-        assert getFloatDigit(value, get_integer_digit(value)) == expected
-
-    @pytest.mark.parametrize(["value", 'significant_digit', "expected"], [
-        [None, 1, TypeError],
-        [nan, 1, ValueError],
-        [inf, 1, ValueError],
-
-        [1.0, None, TypeError],
-        [None, None, TypeError],
-        [nan, None, TypeError],
-        [inf, None, TypeError],
-    ])
-    def test_abnormal(self, value, significant_digit, expected):
-        with pytest.raises(expected):
-            getFloatDigit(value, significant_digit)
-"""
-
-
 class Test_get_number_of_digit:
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [0, (1, 0)],
-        [-0, (1, 0)],
-        ["0", (1, 0)],
-        ["-0", (1, 0)],
-        [10, (2, 0)],
-        [-10, (2, 0)],
-        ["10", (2, 0)],
-        ["-10", (2, 0)],
-        [10.1, (2, 1)],
-        [-10.1, (2, 1)],
-        ["10.1", (2, 1)],
-        ["-10.1", (2, 1)],
-        [0.1, (1, 1)],
-        [-0.1, (1, 1)],
-        ["0.1", (1, 1)],
-        ["-0.1", (1, 1)],
-        [0.01, (1, 2)],
-        [-0.01, (1, 2)],
-        ["0.01", (1, 2)],
-        ["-0.01", (1, 2)],
-        [0.001, (1, 3)],
-        [-0.001, (1, 3)],
-        ["0.001", (1, 3)],
-        ["-0.001", (1, 3)],
-        [0.0001, (1, 4)],
-        [-0.0001, (1, 4)],
-        ["0.0001", (1, 4)],
-        ["-0.0001", (1, 4)],
-        [0.00001, (1, 4)],
-        [-0.00001, (1, 4)],
-        ["0.00001", (1, 4)],
-        ["-0.00001", (1, 4)],
-        [2e-05, (1, 4)],
-        [-2e-05, (1, 4)],
-        ["2e-05", (1, 4)],
-        ["-2e-05", (1, 4)],
+        [0, (1, 0)], [-0, (1, 0)],
+        ["0", (1, 0)], ["-0", (1, 0)],
+        [10, (2, 0)], [-10, (2, 0)],
+        ["10", (2, 0)], ["-10", (2, 0)],
+        [10.1, (2, 1)], [-10.1, (2, 1)],
+        ["10.1", (2, 1)], ["-10.1", (2, 1)],
+        [10.01, (2, 2)], [-10.01, (2, 2)],
+        [10.001, (2, 2)], [-10.001, (2, 2)],
+        [100.1, (3, 1)], [-100.1, (3, 1)],
+        [100.01, (3, 1)], [-100.01, (3, 1)],
+        [0.1, (1, 1)], [-0.1, (1, 1)],
+        ["0.1", (1, 1)], ["-0.1", (1, 1)],
+        [0.01, (1, 2)], [-0.01, (1, 2)],
+        ["0.01", (1, 2)], ["-0.01", (1, 2)],
+        [0.001, (1, 3)], [-0.001, (1, 3)],
+        ["0.001", (1, 3)], ["-0.001", (1, 3)],
+        [0.0001, (1, 4)], [-0.0001, (1, 4)],
+        ["0.0001", (1, 4)], ["-0.0001", (1, 4)],
+        [0.00001, (1, 4)], [-0.00001, (1, 4)],
+        ["0.00001", (1, 4)], ["-0.00001", (1, 4)],
+        [2e-05, (1, 4)], [-2e-05, (1, 4)],
+        ["2e-05", (1, 4)], ["-2e-05", (1, 4)],
     ])
     def test_normal(self, value, expected):
         assert get_number_of_digit(value) == expected
@@ -949,7 +890,6 @@ class Test_dump_dict:
     def test_normal(self, value, expected):
         assert dump_dict(value, indent=4) == expected
 
-    #"""
     @pytest.mark.parametrize(["value", "expected"], [
         [1, TypeError],
         [None, TypeError],
@@ -957,4 +897,3 @@ class Test_dump_dict:
     def test_exception(self, value, expected):
         with pytest.raises(expected):
             assert dump_dict(value)
-    #"""
