@@ -117,17 +117,21 @@ class SqlQuery:
         return " ".join(query_list)
 
     @classmethod
-    def make_insert(cls, table_name, insert_tuple):
+    def make_insert(cls, table_name, insert_tuple, is_insert_many=False):
         table_name = SqlQuery.to_table_str(table_name)
         if common.is_empty_string(table_name):
             raise ValueError("table name is empty")
 
         if common.is_empty_list_or_tuple(insert_tuple):
-            logger.error("empty insert list/tuple")
-            return ""
+            raise ValueError("empty insert list/tuple")
+
+        if is_insert_many:
+            value_list = ['?' for _i in insert_tuple]
+        else:
+            value_list = [str(value) for value in insert_tuple]
 
         return "insert into %s values (%s)" % (
-            table_name, ",".join(['?' for _i in insert_tuple]))
+            table_name, ",".join(value_list))
 
     @classmethod
     def make_where(cls, key, value, operation="="):
@@ -207,7 +211,7 @@ def copyTable(con_src, con_dst, table_name):
         logger.error("null destination database")
         return False
 
-    if not con_src.hasTable(table_name):
+    if not con_src.has_table(table_name):
         logger.warn(
             "not found '%s' table in %s" % (table_name, con_src.database_path))
         return False
@@ -239,7 +243,7 @@ def appendTable(con_src, con_dst, table_name):
     for value_list in result.fetchall():
         value_matrix.append(value_list)
 
-    if not con_dst.hasTable(table_name):
+    if not con_dst.has_table(table_name):
         con_dst.create_table_with_data(
             table_name, con_src.getAttributeNameList(table_name),
             value_matrix)
@@ -491,7 +495,8 @@ class SqliteWrapper(object):
     def execute_insert(self, table_name, insert_record):
         self.checkAccessPermission(["w", "a"])
 
-        query = SqlQuery.make_insert(table_name, insert_record)
+        query = SqlQuery.make_insert(
+            table_name, insert_record)
         self.__logging("execute query: %s %s" % (query, insert_record))
 
         if self.dry_run:
@@ -513,7 +518,8 @@ class SqliteWrapper(object):
             logger.debug("empty record list")
             return True
 
-        query = SqlQuery.make_insert(table_name, insert_record_list[0])
+        query = SqlQuery.make_insert(
+            table_name, insert_record_list[0], is_insert_many=True)
         self.__logging("insert many record: query=%s, size=%d, db=%s" % (
             query, len(insert_record_list), self.database_path))
 
@@ -580,7 +586,7 @@ class SqliteWrapper(object):
             table=table_name,
             where=SqlQuery.make_where(common.AN_GeneralKey, self.AN_DB_VERSION))
 
-    def getTableNameList(self):
+    def get_table_name_list(self):
         try:
             self.check_connection()
         except NullDatabaseConnectionError:
@@ -596,7 +602,7 @@ class SqliteWrapper(object):
         return getListFromQueryResult(result.fetchall())
 
     def getAttributeNameList(self, table_name):
-        if not self.hasTable(table_name):
+        if not self.has_table(table_name):
             logger.warn("'%s' table not found in %s" % (
                 table_name, self.database_path))
             return []
@@ -606,7 +612,7 @@ class SqliteWrapper(object):
         return getListFromQueryResult(result.description)
 
     def getFieldNameTypeList(self, table_name):
-        if not self.hasTable(table_name):
+        if not self.has_table(table_name):
             logger.warn("'%s' table not found in %s" % (
                 table_name, self.database_path))
             return []
@@ -691,22 +697,22 @@ class SqliteWrapper(object):
 
         return True
 
-    def hasTable(self, table_name):
+    def has_table(self, table_name):
         if self.dry_run:
             return True
 
         if common.is_empty_string(table_name):
             return False
 
-        return table_name in self.getTableNameList()
+        return table_name in self.get_table_name_list()
 
-    def hasAttribute(self, table_name, attribute_name):
+    def has_attribute(self, table_name, attribute_name):
         return attribute_name in self.getAttributeNameList(table_name)
 
     def hasAttributeList(self, table_name, attribute_name_list):
         not_exist_field_list = []
         for attribute_name in attribute_name_list:
-            if not self.hasAttribute(table_name, attribute_name):
+            if not self.has_attribute(table_name, attribute_name):
                 not_exist_field_list.append(attribute_name)
 
         if len(not_exist_field_list) > 0:
@@ -726,7 +732,7 @@ class SqliteWrapper(object):
         if common.is_empty_string(table_name):
             raise TypeError("null string")
 
-        found_table = self.hasTable(table_name)
+        found_table = self.has_table(table_name)
 
         if found_table:
             msg_format = "'%s' table found in %s"
@@ -750,7 +756,7 @@ class SqliteWrapper(object):
 
         self.verify_table_existence(table_name)
 
-        found_attr = self.hasAttribute(table_name, attribute_name)
+        found_attr = self.has_attribute(table_name, attribute_name)
 
         if found_attr:
             msg_format = "'%s' attribute found in '%s' table"
@@ -763,21 +769,21 @@ class SqliteWrapper(object):
         else:
             raise AttributeNotFoundError(message)
 
-    def dropTable(self, table_name, is_drop_existing_table=True):
+    def drop_table(self, table_name, is_drop_existing_table=True):
         self.checkAccessPermission(["w", "a"])
 
-        if self.hasTable(table_name) and is_drop_existing_table:
+        if self.has_table(table_name) and is_drop_existing_table:
             logger.debug("drop table: " + table_name)
 
             query = "DROP TABLE IF EXISTS '%s'" % (table_name)
             self.__execute(query, logging.getLogger().findCaller())
             self.commit()
 
-    def createTable(self, table_name, attribute_description_list):
+    def create_table(self, table_name, attribute_description_list):
         self.checkAccessPermission(["w", "a"])
 
         table_name = table_name.strip()
-        if self.hasTable(table_name):
+        if self.has_table(table_name):
             logger.debug("table already exists: " + table_name)
             return True
 
@@ -843,7 +849,7 @@ class SqliteWrapper(object):
             ])
 
         self.__create_table_config(table_config_matrix)
-        self.createTable(table_name, attr_description_list)
+        self.create_table(table_name, attr_description_list)
 
         if not self.execute_insert_many(table_name, data_matrix):
             raise DatabaseError("failed to insert record to " + table_name)
@@ -860,7 +866,7 @@ class SqliteWrapper(object):
         self.checkAccessPermission(["w", "a"])
 
         table_name = self.TN_DB_INFO
-        if self.hasTable(table_name):
+        if self.has_table(table_name):
             logger.debug("'%s' table already exists" % (table_name))
             return True
 
@@ -1032,8 +1038,8 @@ class SqliteWrapper(object):
             attr_description_list.append("'%s' %s" % (attr_name, "TEXT"))
 
         table_name = self.TN_TABLE_CONFIG
-        if not self.hasTable(table_name):
-            self.createTable(table_name, attr_description_list)
+        if not self.has_table(table_name):
+            self.create_table(table_name, attr_description_list)
 
         self.execute_insert_many(table_name, table_config_matrix)
 

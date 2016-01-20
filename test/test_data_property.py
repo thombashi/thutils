@@ -11,6 +11,7 @@ import sys
 import itertools
 
 import pytest
+import six
 
 import thutils
 from thutils.data_property import *
@@ -188,14 +189,26 @@ class Test_PropertyExtractor_get_base_float_len:
             integer_digits, decimal_places))
 
     @pytest.mark.parametrize(["integer_digits", "decimal_places", "expected"], [
-        [None, None, ValueError],
-        [None, 0, ValueError],
-        [0, None, ValueError],
         [-1, -1, ValueError],
         [-1, 0, ValueError],
         [0, -1, ValueError],
     ])
     def test_exception(self, integer_digits, decimal_places, expected):
+        with pytest.raises(expected):
+            PropertyExtractor.get_base_float_len(
+                integer_digits, decimal_places)
+
+    @pytest.mark.parametrize(["integer_digits", "decimal_places"], [
+        [None, None],
+        [None, 0],
+        [0, None],
+    ])
+    def test_exception_pyversion(self, integer_digits, decimal_places):
+        if six.PY2:
+            expected = ValueError
+        else:
+            expected = TypeError
+
         with pytest.raises(expected):
             PropertyExtractor.get_base_float_len(
                 integer_digits, decimal_places)

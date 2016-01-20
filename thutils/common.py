@@ -14,25 +14,12 @@ import six
 from thutils.logger import logger
 
 
-# Key ---
-KEY_AVERAGE = "key-avg"
-KEY_TOTAL = "key-total"
-KEY_ALL = "key-all"
-
 # Attribute Name ---
 AN_GeneralKey = "key"
 AN_GeneralValue = "value"
 AN_SamplingStartTime = "Sampling Start Time"
 AN_SamplingEndTime = "Sampling End Time"
 KEY_VALUE_HEADER = [AN_GeneralKey, AN_GeneralValue]
-
-
-class Field:
-    GENERAL_KEY = "key"
-    GENERAL_VALUE = "value"
-    DATETIME = "datetime"
-    SAMPLING_START_TIME = "Sampling Start Time"
-    SAMPLING_END_TIME = "Sampling END Time"
 
 
 # Regular Expression ---
@@ -323,6 +310,9 @@ def diffItemList(item_list, remove_list):
 
 
 def _unit_to_byte(unit, kilo_size):
+    if kilo_size not in [1000, 1024]:
+        raise ValueError("invalid kilo size: " + str(kilo_size))
+
     re_exp_pair_list = [
         [re.compile("^b$", re.IGNORECASE), 0],
         [re.compile("^k$", re.IGNORECASE), 1],
