@@ -98,9 +98,12 @@ def is_integer(value):
     except:
         return False
 
-    text = str(value).strip()
-    if re.search("[.]|e-", text) is not None:
+    if isinstance(value, float):
         return False
+
+    #text = str(value).strip()
+    # if re.search("[.]|e-", text) is not None:
+    #    return False
 
     return True
 
@@ -229,6 +232,9 @@ def get_integer_digit(value):
 
 
 def _get_decimal_places(value, integer_digits):
+    import math
+    from collections import namedtuple
+
     float_digit_len = 0
     if is_integer(value):
         abs_value = abs(int(value))
@@ -243,18 +249,19 @@ def _get_decimal_places(value, integer_digits):
             float_text = text_value.split("e-")[1]
             float_digit_len = int(float_text) - 1
 
-    abs_digit = 0
-    pair_list = [
-        [0.01, 5],
-        [0.1, 4],
-        [1.0, 3],
-        [10.0, 2],
-        [100.0, 3],
+    Threshold = namedtuple("Threshold", "pow digit_len")
+    upper_threshold = Threshold(pow=-2, digit_len=6)
+    min_digit_len = 1
+
+    treshold_list = [
+        Threshold(upper_threshold.pow + i, upper_threshold.digit_len - i)
+        for i, _ in enumerate(range(upper_threshold.digit_len, min_digit_len - 1, -1))
     ]
-    for pair in pair_list:
-        threshold_value, digit = pair
-        if abs_value < threshold_value:
-            abs_digit = digit
+
+    abs_digit = min_digit_len
+    for treshold in treshold_list:
+        if abs_value < math.pow(10, treshold.pow):
+            abs_digit = treshold.digit_len
             break
 
     return min(abs_digit, float_digit_len)

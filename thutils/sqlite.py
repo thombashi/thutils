@@ -507,10 +507,7 @@ class SqliteWrapper(object):
         logger.debug("insert %d records to '%s'" % (
             len(insert_record_list), table_name))
 
-        if not self.hasTable(table_name):
-            logger.warn("'%s' table not found in %s" % (
-                table_name, self.database_path))
-            return False
+        self.verify_table_existence(table_name)
 
         if common.is_empty_list_or_tuple(insert_record_list):
             logger.debug("empty record list")
@@ -852,9 +849,7 @@ class SqliteWrapper(object):
             raise DatabaseError("failed to insert record to " + table_name)
 
         self.createIndexList(table_name, strip_index_attribute_list)
-
-        if self.auto_commit:
-            self.commit()
+        self.__auto_commit()
 
         return True
 
@@ -882,6 +877,10 @@ class SqliteWrapper(object):
 
         return self.create_table_with_data(
             table_name, common.KEY_VALUE_HEADER, value_matrix)
+
+    def __auto_commit(self):
+        if self.auto_commit:
+            self.commit()
 
     @staticmethod
     def __verify_sqlite_db_file(database_path):
@@ -945,7 +944,6 @@ class SqliteWrapper(object):
         """
 
         dict_column_valuetype = {}
-        # for col in range(len(value_matrix[0])):
         for col, _ in enumerate(value_matrix[0]):
             dict_column_valuetype[col] = "INTEGER"
 
@@ -1047,8 +1045,7 @@ def connect_sqlite_db_mem():
     return con_mem
 
 
-def connect_sqlite_database(
-        db_path, mode, db_name="", db_version="", options=None):
+def connect_sqlite_database(db_path, mode, options=None):
     """
     SQLiteデータベースファイルへのコネクションを返す。
     """
@@ -1066,48 +1063,4 @@ def connect_sqlite_database(
     con.is_logging_query = sql_logging
     con.connect(db_path, mode)
 
-    if mode in ["r", "a"]:
-        if common.is_not_empty_string(db_name):
-            con.check_database_name(db_name)
-
-        if common.is_not_empty_string(db_version):
-            con.check_database_version(db_version)
-    elif mode == "w":
-        if all([
-            common.is_not_empty_string(db_name),
-            common.is_not_empty_string(db_version),
-        ]):
-            con.create_db_info_table(db_name, db_version)
-    else:
-        raise ValueError("unknown mode=" + mode)
-
     return con
-
-
-def adjustDataMatrix(
-        attr_list, data_matrix,
-        datetime_attr_list=(
-            common.Field.SAMPLING_START_TIME,
-            common.Field.SAMPLING_END_TIME,
-            common.Field.DATETIME),
-        time_format=gtime.Format.ISO.DATETIME):
-
-    adjust_data_matrix = []
-    for value_list in data_matrix:
-        data_list = []
-
-        for atrr, value in zip(attr_list, value_list):
-            if atrr in datetime_attr_list:
-                sampling_datetime = gtime.toDateTime(value, DB_DATETIME_FORMAT)
-                if sampling_datetime is None:
-                    value = None
-                else:
-                    value = sampling_datetime.strftime(time_format)
-            else:
-                value = common.convert_value(value)
-
-            data_list.append(value)
-
-        adjust_data_matrix.append(data_list)
-
-    return adjust_data_matrix

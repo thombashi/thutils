@@ -14,7 +14,7 @@ class Typecode:
     STRING = 1 << 2
 
     @classmethod
-    def getTypecodeFromBitmap(cls, typecode_bitmap):
+    def get_typecode_from_bitmap(cls, typecode_bitmap):
         typecode_list = [cls.STRING, cls.FLOAT, cls.INT]
 
         for typecode in typecode_list:
@@ -85,15 +85,16 @@ class DataPeroperty(common.BaseObject):
 
         self.__data = data
         self.__typecode = self.__get_typecode(data)
-        self.__align = PropertyExtractor.getAlignFromTypeCode(self.__typecode)
+        self.__align = PropertyExtractor.get_align_from_typecode(
+            self.__typecode)
 
         integer_digits, decimal_places = common.get_number_of_digit(data)
         self.__integer_digits = integer_digits
         self.__decimal_places = decimal_places
-        self.__additional_format_len = PropertyExtractor.getAdditionalFormatLen(
+        self.__additional_format_len = PropertyExtractor.get_additional_format_len(
             data)
 
-        self.__type_format = PropertyExtractor.getTypeFormat(
+        self.__type_format = self.__get_type_format(
             data, decimal_places)
         self.__str_len = self.__get_str_len()
 
@@ -110,17 +111,27 @@ class DataPeroperty(common.BaseObject):
 
         return Typecode.STRING
 
+    @staticmethod
+    def __get_type_format(value, decimal_places):
+        if common.is_integer(value):
+            return "d"
+        if common.is_float(value):
+            if common.is_nan(value):
+                return "f"
+            return ".%df" % (decimal_places)
+        return "s"
+
     def __get_str_len(self):
         if self.typecode == Typecode.INT:
             return (
                 self.integer_digits +
-                PropertyExtractor.getAdditionalFormatLen(self.data))
+                PropertyExtractor.get_additional_format_len(self.data))
 
         if self.typecode == Typecode.FLOAT:
             return (
-                PropertyExtractor.getBaseFloatLen(
+                PropertyExtractor.get_base_float_len(
                     self.integer_digits, self.decimal_places) +
-                PropertyExtractor.getAdditionalFormatLen(self.data))
+                PropertyExtractor.get_additional_format_len(self.data))
 
         return common.get_text_len(self.data)
 
@@ -129,11 +140,11 @@ class ColumnDataPeroperty(common.BaseObject):
 
     @property
     def typecode(self):
-        return Typecode.getTypecodeFromBitmap(self.typecode_bitmap)
+        return Typecode.get_typecode_from_bitmap(self.typecode_bitmap)
 
     @property
     def align(self):
-        return PropertyExtractor.getAlignFromTypeCode(self.typecode)
+        return PropertyExtractor.get_align_from_typecode(self.typecode)
 
     @property
     def padding_len(self):
@@ -184,21 +195,14 @@ class PropertyExtractor:
     }
 
     @classmethod
-    def getAlignFromTypeCode(cls, typecode):
+    def get_align_from_typecode(cls, typecode):
         return cls.__dict_ValueType_Align.get(typecode, Align.LEFT)
 
     @staticmethod
-    def getTypeFormat(value, decimal_places):
-        if common.is_integer(value):
-            return "d"
-        if common.is_float(value):
-            if common.is_nan(value):
-                return "f"
-            return ".%df" % (decimal_places)
-        return "s"
+    def get_base_float_len(integer_digits, decimal_places):
+        if any([integer_digits < 0, decimal_places < 0]):
+            raise ValueError()
 
-    @staticmethod
-    def getBaseFloatLen(integer_digits, decimal_places):
         float_len = integer_digits + decimal_places
         if decimal_places > 0:
             # for dot
@@ -206,7 +210,7 @@ class PropertyExtractor:
         return float_len
 
     @staticmethod
-    def getAdditionalFormatLen(data):
+    def get_additional_format_len(data):
         if not common.is_float(data):
             return 0
 
@@ -218,28 +222,19 @@ class PropertyExtractor:
 
         return format_len
 
-    @staticmethod
-    def extractDataPropertyList(data_list):
-        if common.is_empty_list_or_tuple(data_list):
-            return []
-
-        return [DataPeroperty(data) for data in data_list]
-
     @classmethod
-    def extractDataPropertyMatrix(cls, data_matrix):
+    def extract_data_property_matrix(cls, data_matrix):
         return [
-            cls.extractDataPropertyList(data_list)
+            cls.__extract_data_property_list(data_list)
             for data_list in data_matrix
         ]
 
     @classmethod
-    def extractColumnPropertyList(cls, header_list, data_matrix):
-        data_prop_matrix = cls.extractDataPropertyMatrix(data_matrix)
-        header_prop_list = cls.extractDataPropertyList(header_list)
+    def extract_column_property_list(cls, header_list, data_matrix):
+        data_prop_matrix = cls.extract_data_property_matrix(data_matrix)
+        header_prop_list = cls.__extract_data_property_list(header_list)
         column_prop_list = []
 
-        # for header_prop, col_prop_list in zip(header_prop_list,
-        # zip(*data_prop_matrix)):
         for col_idx, col_prop_list in enumerate(zip(*data_prop_matrix)):
             column_prop = ColumnDataPeroperty()
 
@@ -255,7 +250,7 @@ class PropertyExtractor:
                 decimal_places = column_prop.decimal_places
 
                 float_len = (
-                    cls.getBaseFloatLen(
+                    cls.get_base_float_len(
                         column_prop.minmax_integer_digits.max_value,
                         decimal_places) +
                     column_prop.minmax_additional_format_len.max_value
@@ -268,6 +263,13 @@ class PropertyExtractor:
             column_prop_list.append(column_prop)
 
         return column_prop_list
+
+    @staticmethod
+    def __extract_data_property_list(data_list):
+        if common.is_empty_list_or_tuple(data_list):
+            return []
+
+        return [DataPeroperty(data) for data in data_list]
 
     @staticmethod
     def __get_column_type_format(typecode, decimal_places):
