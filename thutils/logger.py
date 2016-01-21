@@ -15,7 +15,7 @@ class LogLevelText:
     FATAL = "FATAL"
 
 
-class BaseWriter(object):
+class _BaseWriter(object):
     __MESSAGE_FORMAT = "[%s] %s\n"
 
     @property
@@ -50,7 +50,7 @@ class BaseWriter(object):
         raise NotImplementedError()
 
 
-class _LoggingWriter(BaseWriter):
+class _LoggingWriter(_BaseWriter):
 
     def __init__(self):
         super(_LoggingWriter, self).__init__()
@@ -75,7 +75,7 @@ class _LoggingWriter(BaseWriter):
         self.appendLog(self.getLogMessage(LogLevelText.FATAL, message))
 
 
-class _StdWriter(BaseWriter):
+class _StdWriter(_BaseWriter):
 
     def __init__(self):
         super(_StdWriter, self).__init__()
@@ -213,6 +213,8 @@ class logger:
             cls.error(msg, caller)
         elif log_level == logging.FATAL:
             cls.fatal(msg, caller)
+        else:
+            raise ValueError("invalid log level: " + str(log_level))
 
     @classmethod
     def info(cls, message, caller=None):
@@ -272,8 +274,8 @@ class logger:
             logging.error(cls.__TRACEBACK_FORMAT %
                           (str(traceback.print_exc())))
 
-    @classmethod
-    def __get_message(cls, caller_info_list, msg):
+    @staticmethod
+    def __get_message(caller_info_list, msg):
         file_path, line_no, func_name = caller_info_list[:3]
         return "from %s(%d) %s: %s" % (
             os.path.basename(file_path), line_no, str(func_name), str(msg))

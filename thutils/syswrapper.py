@@ -11,7 +11,7 @@ import subprocess
 from thutils.logger import logger
 
 
-class SystemWrapper(object):
+class SubprocessWrapper(object):
 
     @property
     def dry_run(self):
@@ -69,23 +69,16 @@ class SystemWrapper(object):
         return_code = proc.returncode
 
         if return_code != 0:
-            if common.is_not_empty_list_or_tuple(ignore_error_list):
-                if return_code not in ignore_error_list:
-                    logger.error("failed '%s' = %d" % (command, return_code))
+            if (common.is_not_empty_list_or_tuple(ignore_error_list)
+                    and return_code not in ignore_error_list):
+                logger.error("failed '%s' = %d" % (command, return_code))
             else:
                 logger.debug(
                     "return code of '%s' = %d" % (command, return_code))
 
         return return_code
 
-    def call(self, command_list):
-        self.__show_command(" ".join(command_list))
-        if self.dry_run:
-            return 0
-
-        return subprocess.check_call(command_list)
-
-    def popenCommand(self, command, std_in=None, environ=None):
+    def popen_command(self, command, std_in=None, environ=None):
         self.__show_command(command)
         if self.dry_run:
             return None

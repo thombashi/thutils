@@ -194,15 +194,8 @@ def getListFromQueryResult(result):
 
     return [record[0] for record in result]
 
-    """
-    result_list = []
-    for column_idx in result:
-        result_list.append(column_idx[0])
-    return result_list
-    """
 
-
-def copyTable(con_src, con_dst, table_name):
+def copy_table(con_src, con_dst, table_name):
     if con_src is None:
         logger.error("null source database")
         return False
@@ -231,7 +224,7 @@ def copyTable(con_src, con_dst, table_name):
         value_matrix)
 
 
-def appendTable(con_src, con_dst, table_name):
+def append_table(con_src, con_dst, table_name):
     logger.debug("append '%s' table: %s -> %s" % (
         table_name, con_src.database_path, con_dst.database_path))
 
@@ -239,9 +232,7 @@ def appendTable(con_src, con_dst, table_name):
     if result is None:
         return False
 
-    value_matrix = []
-    for value_list in result.fetchall():
-        value_matrix.append(value_list)
+    value_matrix = [value_list for value_list in result.fetchall()]
 
     if not con_dst.has_table(table_name):
         con_dst.create_table_with_data(
@@ -558,7 +549,7 @@ class SqliteWrapper(object):
         if result is None:
             return None
 
-        return common.getListItem(result.fetchone(), 0)
+        return common.get_list_item(result.fetchone(), 0)
 
     def getValueList(self, select, table, where=None, extra=None):
         query = SqlQuery.make_select(select, table, where, extra)
@@ -587,12 +578,7 @@ class SqliteWrapper(object):
             where=SqlQuery.make_where(common.AN_GeneralKey, self.AN_DB_VERSION))
 
     def get_table_name_list(self):
-        try:
-            self.check_connection()
-        except NullDatabaseConnectionError:
-            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-            logger.exception(e)
-            return []
+        self.check_connection()
 
         query = "SELECT name FROM sqlite_master WHERE TYPE='table'"
         result = self.__execute(query, logging.getLogger().findCaller())

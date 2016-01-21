@@ -18,7 +18,7 @@ from thutils.binary_writer import *
 
 @pytest.fixture
 def sys_wrapper():
-    return thutils.syswrapper.SystemWrapper()
+    return thutils.syswrapper.SubprocessWrapper()
 
 
 @pytest.fixture
