@@ -5,6 +5,7 @@
     https://pypi.python.org/pypi/pytest
 '''
 
+import itertools
 import os
 
 import pytest
@@ -17,6 +18,8 @@ import thutils.gfile as gfile
 nan = float("nan")
 inf = float("inf")
 TEST_TABLE_NAME = "test_table"
+TEST_DB_NAME = "test_db"
+TEST_DB_VERSION = "1.0.0"
 
 
 class Test_sanitize:
@@ -315,37 +318,96 @@ class Test_make_where_not_in:
             SqlQuery.make_where_not_in(key, value)
 
 
-class Test_SqliteWrapper_conmem:
+@pytest.fixture
+def con(tmpdir):
+    #con_mem = connect_sqlite_db_mem()
+    p = tmpdir.join("tmp.db")
+    con = connect_sqlite_database(str(p), "w")
 
-    @pytest.fixture
-    def con(self):
-        con_mem = connect_sqlite_db_mem()
-        con_mem.create_table_with_data(
-            table_name=TEST_TABLE_NAME,
-            attribute_name_list=["a", "b"],
-            data_matrix=[
-                [1, 2],
-                [3, 4],
-            ])
+    con.create_table_with_data(
+        table_name=TEST_TABLE_NAME,
+        attribute_name_list=["a", "b"],
+        data_matrix=[
+            [1, 2],
+            [3, 4],
+        ])
 
-        return con_mem
+    con.create_db_info_table(TEST_DB_NAME, TEST_DB_VERSION)
 
-    def test_is_connected(self, con):
+    return con
+
+
+@pytest.fixture
+def con_null():
+    return SqliteWrapper()
+
+
+class Test_SqliteWrapper_is_connected:
+
+    def test_normal(self, con):
         assert con.is_connected()
 
-    def test_check_connection(self, con):
+    def test_null(self, con_null):
+        assert not con_null.is_connected()
+
+
+class Test_SqliteWrapper_check_connection:
+
+    def test_normal(self, con):
         con.check_connection()
 
-    def test_check_database_name(self, con):
-        with pytest.raises(TableNotFoundError):
-            con.check_database_name("hoge")
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.check_connection()
 
-    def test_check_database_version(self, con):
-        with pytest.raises(TableNotFoundError):
-            con.check_database_version("hoge")
 
-    def test_get_total_changes(self, con):
+class Test_SqliteWrapper_check_database_name:
+
+    def test_normal(self, con):
+        con.check_database_name(TEST_DB_NAME)
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        ["hoge", MissmatchError],
+        [None, MissmatchError],
+    ])
+    def test_exception(self, con, value, expected):
+        with pytest.raises(expected):
+            con.check_database_name(value)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.check_database_name("hoge")
+
+
+class Test_SqliteWrapper_check_database_version:
+
+    def test_normal(self, con):
+        con.check_database_version(TEST_DB_VERSION)
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        ["hoge", ValueError],
+        [None, AttributeError],
+    ])
+    def test_exception(self, con, value, expected):
+        with pytest.raises(expected):
+            con.check_database_version(value)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.check_database_version("hoge")
+
+
+class Test_SqliteWrapper_get_total_changes:
+
+    def test_smoke(self, con):
         con.get_total_changes()
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.get_total_changes()
+
+
+class Test_SqliteWrapper_connect:
 
     @pytest.mark.parametrize(["value", "mode", "expected"], [
         [None, "r", gfile.InvalidFilePathError],
@@ -366,19 +428,38 @@ class Test_SqliteWrapper_conmem:
         ["empty_file.txt", "", ValueError],
         ["empty_file.txt", "invalid_mode", ValueError],
     ])
-    def test_connect(self, con, value, mode, expected):
+    def test_exception(self, value, mode, expected):
+        con = SqliteWrapper()
         with pytest.raises(expected):
             con.connect(value, mode)
 
-    def test_execute_select(self, con):
+
+class Test_SqliteWrapper_execute_select:
+
+    def test_smoke(self, con):
         result = con.execute_select(select="*", table=TEST_TABLE_NAME)
         assert result is not None
 
-    def test_execute_insert(self, con):
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.execute_select(select="*", table=TEST_TABLE_NAME)
+
+
+class Test_SqliteWrapper_execute_insert:
+
+    def test_smoke(self, con):
         assert con.execute_insert(
             TEST_TABLE_NAME, insert_record=[5, 6])
 
-    def test_execute_insert_many(self, con):
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.execute_insert(
+                TEST_TABLE_NAME, insert_record=[5, 6])
+
+
+class Test_SqliteWrapper_execute_insert_many:
+
+    def test_normal(self, con):
         insert_record_list = [
             [7, 8],
             [9, 10],
@@ -386,25 +467,59 @@ class Test_SqliteWrapper_conmem:
         assert con.execute_insert_many(
             TEST_TABLE_NAME, insert_record_list)
 
-    def test_rollback(self, con):
+
+class Test_SqliteWrapper_rollback:
+
+    def test_normal(self, con):
         assert con.rollback()
 
-    def test_get_table_name_list(self, con):
-        assert con.get_table_name_list() == [
-            SqliteWrapper.TN_TABLE_CONFIG, TEST_TABLE_NAME]
+    def test_null(self, con_null):
+        assert con_null.rollback()
 
-    def test_commit(self, con):
+
+class Test_SqliteWrapper_get_table_name_list:
+
+    def test_normal(self, con):
+        expected = set([
+            SqliteWrapper.TN_TABLE_CONFIG, SqliteWrapper.TN_DB_INFO, TEST_TABLE_NAME
+        ])
+
+        assert set(con.get_table_name_list()) == expected
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.get_table_name_list()
+
+
+class Test_SqliteWrapper_commit:
+
+    def test_normal(self, con):
         assert con.commit()
+
+    def test_null(self, con_null):
+        assert con_null.commit()
+
+
+class Test_SqliteWrapper_close:
 
     def test_close(self, con):
         assert con.close()
 
-    def test_verify_table_existence_normal(self, con):
+    def test_null(self, con_null):
+        assert con_null.close()
+
+
+class Test_SqliteWrapper_verify_table_existence:
+
+    def test_normal(self, con):
         con.verify_table_existence(TEST_TABLE_NAME)
 
-    def test_verify_table_existence_exception(self, con):
+    def test_exception(self, con):
         with pytest.raises(TableNotFoundError):
             con.verify_table_existence("not_exist_table")
+
+
+class Test_SqliteWrapper_verify_attribute_existence:
 
     @pytest.mark.parametrize(["table", "attr", "expected"], [
         [TEST_TABLE_NAME, "not_exist_attr", AttributeNotFoundError],
@@ -412,11 +527,14 @@ class Test_SqliteWrapper_conmem:
         [None, "a", TypeError],
         ["", "a", TypeError],
     ])
-    def test_verify_attribute_existence_normal(self, con, table, attr, expected):
+    def test_normal(self, con, table, attr, expected):
         with pytest.raises(expected):
             con.verify_attribute_existence(table, attr)
 
-    def test_create_drop_table(self, con):
+
+class Test_SqliteWrapper_drop_table:
+
+    def test_normal(self, con):
         attr_description_list = [
             "'%s' %s" % ("attr_name", "TEXT")
         ]
@@ -432,63 +550,19 @@ class Test_SqliteWrapper_conmem:
         assert not con.has_table(table_name)
 
 
-class Test_SqliteWrapper_empty:
+class Test_connect_sqlite_db_mem:
 
-    @pytest.fixture
-    def con(self):
-        return SqliteWrapper()
+    def test_normal(self):
+        assert connect_sqlite_db_mem() is not None
 
-    def test_is_connected(self, con):
-        assert not con.is_connected()
 
-    def test_check_connection(self, con):
-        with pytest.raises(NullDatabaseConnectionError):
-            con.check_connection()
+class Test_connect_sqlite_database:
 
-    def test_check_database_name(self, con):
-        with pytest.raises(NullDatabaseConnectionError):
-            con.check_database_name("hoge")
-
-    def test_check_database_version(self, con):
-        with pytest.raises(NullDatabaseConnectionError):
-            con.check_database_version("hoge")
-
-    def test_get_total_changes(self, con):
-        with pytest.raises(NullDatabaseConnectionError):
-            con.get_total_changes()
-
-    @pytest.mark.parametrize(["value", "mode", "expected"], [
-        [None, "r", gfile.InvalidFilePathError],
-        [nan, "r", gfile.InvalidFilePathError],
-        ["", "r", gfile.InvalidFilePathError],
-        ["/not/existing/file/__path__", "r", gfile.FileNotFoundError],
-
-        [None, "w", gfile.InvalidFilePathError],
-        [inf, "w", gfile.InvalidFilePathError],
-        ["", "w", gfile.InvalidFilePathError],
-
-        [None, "a", gfile.InvalidFilePathError],
-        [1, "a", gfile.InvalidFilePathError],
-        ["", "a", gfile.InvalidFilePathError],
-
-        ["empty_file.txt", None, TypeError],
-        ["empty_file.txt", inf, TypeError],
-        ["empty_file.txt", "", ValueError],
-        ["empty_file.txt", "invalid_mode", ValueError],
+    @pytest.mark.parametrize(["db_path", "mode"], [
+        ["tmp.db", "w"],
+        ["tmp.db", "a"],
     ])
-    def test_connect(self, con, value, mode, expected):
-        with pytest.raises(expected):
-            con.connect(value, mode)
-
-    def test_execute_select(self, con):
-        with pytest.raises(NullDatabaseConnectionError):
-            con.execute_select(select="*", table=TEST_TABLE_NAME)
-
-    def test_rollback(self, con):
-        assert con.rollback()
-
-    def test_commit(self, con):
-        assert con.commit()
-
-    def test_close(self, con):
-        assert con.close()
+    def test_normal(self, tmpdir, db_path, mode):
+        p = str(tmpdir.join(db_path))
+        assert connect_sqlite_database(p, mode) is not None
+        assert connect_sqlite_database(p, "r") is not None
