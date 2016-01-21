@@ -10,6 +10,7 @@ import os
 from subprocess import PIPE
 
 import pytest
+import six
 
 import thutils
 from thutils.syswrapper import SubprocessWrapper
@@ -69,7 +70,7 @@ class Test_SubprocessWrapper_popen_command:
     ])
     def test_normal_stdin(self, subproc_run, command, input, environ, expected):
         proc = subproc_run.popen_command(command, PIPE, environ)
-        ret_stdout, ret_stderr = proc.communicate(input=input)
+        ret_stdout, ret_stderr = proc.communicate(input=six.b(input))
         assert thutils.common.is_not_empty_string(ret_stdout)
         assert thutils.common.is_empty_string(ret_stderr)
         assert proc.returncode == expected

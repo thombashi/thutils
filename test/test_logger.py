@@ -7,14 +7,12 @@
 '''
 
 import logging
+import sys
 
 import pytest
 
 import thutils
 from thutils.logger import logger
-
-
-#TEST_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class Test_logger_initialize:
@@ -82,7 +80,10 @@ class Test_logger_write:
         [None, logging.INFO, None],
     ])
     def test_smoke(self, message, log_level, caller):
-        logger.write(message, log_level, caller)
+        try:
+            raise ValueError()
+        except:
+            logger.write(message, log_level, caller)
 
     @pytest.mark.parametrize(["message", "log_level", "expected"], [
         ["aaa", None, ValueError],
@@ -131,11 +132,15 @@ class Test_logger_error:
 
 class Test_logger_exception:
 
-    @pytest.mark.parametrize(["exception", "message"], [
-        [ValueError(), "aaa"],
+    @pytest.mark.parametrize(["message"], [
+        ["aaa"],
     ])
-    def test_smoke(self, exception, message):
-        logger.exception(exception, message)
+    def test_smoke(self, message):
+        try:
+            raise ValueError("for logger test")
+        except:
+            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
+            logger.exception(e, message)
 
 
 class Test_logger_fatal:
@@ -144,4 +149,10 @@ class Test_logger_fatal:
         ["aaa", None],
     ])
     def test_smoke(self, message, caller):
-        logger.fatal(message, caller)
+        try:
+            raise ValueError("for logger test")
+        except:
+            # Python3では例外を送出していないときにtraceback.print_exc()を呼ぶと
+            # AttributeError: 'NoneType' object has no attribute '__context__'
+            # が発生する
+            logger.fatal(message, caller)
