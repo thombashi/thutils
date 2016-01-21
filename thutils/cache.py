@@ -30,7 +30,7 @@ class CommandCache:
 
     @classmethod
     def initialize(cls):
-        cls.__sys_wrapper = thutils.syswrapper.SystemWrapper()
+        cls.__sys_wrapper = thutils.syswrapper.SubprocessWrapper()
 
     @classmethod
     def clear(cls):
