@@ -116,7 +116,7 @@ class Test_is_nan:
         assert is_nan(value) == expected
 
 
-class Test_isNotEmptyString:
+class Test_is_not_empty_string:
 
     @pytest.mark.parametrize(["value", "expected"], [
         ["nan", True],
@@ -154,6 +154,7 @@ class Test_is_empty_string:
         assert is_empty_string(value) == expected
 
 
+"""
 class Test_isList:
 
     @pytest.mark.parametrize(["value"], [
@@ -163,7 +164,7 @@ class Test_isList:
         [["a"] * 200000],
     ])
     def test_normal(self, value):
-        assert isList(value)
+        assert __is_list(value)
 
     @pytest.mark.parametrize(["value"], [
         [None], [()],
@@ -171,8 +172,7 @@ class Test_isList:
         [True],
     ])
     def test_abnormal(self, value):
-        assert not isList(value)
-
+        assert not __is_list(value)
 
 class Test_isTuple:
 
@@ -183,7 +183,7 @@ class Test_isTuple:
         [("a",) * 200000],
     ])
     def test_normal(self, value):
-        assert isTuple(value)
+        assert _is_tuple(value)
 
     @pytest.mark.parametrize(["value"], [
         [None], [[]],
@@ -191,10 +191,11 @@ class Test_isTuple:
         [True],
     ])
     def test_abnormal(self, value):
-        assert not isTuple(value)
+        assert not _is_tuple(value)
+"""
 
 
-class Test_isListOrTuple:
+class Test_is_list_or_tuple:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [[], True],
@@ -211,10 +212,10 @@ class Test_isListOrTuple:
         [True, False],
     ])
     def test_normal(self, value, expected):
-        assert isListOrTuple(value) == expected
+        assert is_list_or_tuple(value) == expected
 
 
-class Test_isEmptyList:
+class Test_is_empty_list_or_tuple:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [[], True],
@@ -224,7 +225,7 @@ class Test_isEmptyList:
         [["a"] * 200000, False],
     ])
     def test_normal(self, value, expected):
-        assert isEmptyList(value) == expected
+        assert is_empty_list_or_tuple(value) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [(), False],
@@ -235,31 +236,7 @@ class Test_isEmptyList:
         [True, False],
     ])
     def test_abnormal(self, value, expected):
-        assert isEmptyList(value) == expected
-
-
-class Test_isEmptyTuple:
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [(), True],
-        [None, True],
-
-        [(1,), False],
-        [("a",) * 200000, False],
-    ])
-    def test_normal(self, value, expected):
-        assert isEmptyTuple(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [[], False],
-        [[1, 2], False],
-        [nan, False],
-        [0, False],
-        ["aaa", False],
-        [True, False],
-    ])
-    def test_abnormal(self, value, expected):
-        assert isEmptyTuple(value) == expected
+        assert is_empty_list_or_tuple(value) == expected
 
 
 class Test_is_empty_list_or_tuple:
@@ -287,7 +264,7 @@ class Test_is_empty_list_or_tuple:
         assert is_empty_list_or_tuple(value) == expected
 
 
-class Test_isNotEmptyListOrTuple:
+class Test_is_not_empty_list_or_tuple:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [(), False],
@@ -530,7 +507,7 @@ class Test_get_text_len:
         assert get_text_len(inf) == 3
 
 
-class Test_convertValue:
+class Test_convert_value:
 
     def test_normal_1(self):
         assert convert_value("0") == 0
@@ -638,18 +615,21 @@ class Test_humanreadable_to_byte:
     def test_normal(self, value, kilo_size, expected):
         assert humanreadable_to_byte(value, kilo_size) == expected
 
-    @pytest.mark.parametrize(["value", "exception"], [
-        [None, TypeError],
-        [True, TypeError],
-        [nan, TypeError],
-        ["a", ValueError],
-        ["ｂ", ValueError],
-        ["1k0 ", ValueError],
-        ["10kb", ValueError],
+    @pytest.mark.parametrize(["value", "kilo_size", "exception"], [
+        [None, 1000, TypeError],
+        [True, 1000, TypeError],
+        [nan, 1000, TypeError],
+        ["a", 1000, ValueError],
+        ["ｂ", 1000, ValueError],
+        ["1k0 ", 1000, ValueError],
+        ["10kb", 1000, ValueError],
+        ["-2m", 1000, ValueError],
+        ["2m", None, ValueError],
+        ["2m", 1001, ValueError],
     ])
-    def test_exception(self, value, exception):
+    def test_exception(self, value, kilo_size, exception):
         with pytest.raises(exception):
-            humanreadable_to_byte(value)
+            humanreadable_to_byte(value, kilo_size)
 
 
 class Test_bytes_to_humanreadable:
@@ -745,16 +725,30 @@ class Test_splitLineListByRe:
         ["value", "separator", "is_include_matched_line", "expected"],
         [
             [
-                ["abcdefg", "ABCDEFG", "1234"],
+                [
+                    "abcdefg",
+                    "ABCDEFG",
+                    "1234",
+                ],
                 re.compile("DEFG$"),
                 False,
-                [["abcdefg"], ["1234"]],
+                [
+                    ["abcdefg"],
+                    ["1234"],
+                ],
             ],
             [
-                ["abcdefg", "ABCDEFG", "1234"],
+                [
+                    "abcdefg",
+                    "ABCDEFG",
+                    "1234"
+                ],
                 re.compile("DEFG$"),
                 True,
-                [["abcdefg"], ["ABCDEFG", "1234"]],
+                [
+                    ["abcdefg"],
+                    ["ABCDEFG", "1234"],
+                ],
             ],
         ])
     def test_normal(self, value, separator, is_include_matched_line, expected):
@@ -788,15 +782,17 @@ class Test_checkInstallCommand:
             verify_install_command(value)
 
 
-class Test_getFileNameFromCommand:
+class Test_command_to_filename:
 
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["/bin/ls", "bin-ls"],
-        ["cat /proc/cpuinfo", "cat_-proc-cpuinfo"],
-        ["", ""],
+    @pytest.mark.parametrize(["value", "suffix", "expected"], [
+        ["/bin/ls", "", "bin-ls"],
+        ["/bin/ls", None, "bin-ls"],
+        ["/bin/ls -la", "test", "bin-ls_la_test"],
+        ["cat /proc/cpuinfo", "", "cat_-proc-cpuinfo"],
+        ["", "", ""],
     ])
-    def test_normal(self, value, expected):
-        assert command_to_filename(value) == expected
+    def test_normal(self, value, suffix, expected):
+        assert command_to_filename(value, suffix) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [1, AttributeError],
@@ -838,6 +834,12 @@ class Test_compare_version:
     def test_exception(self, lhs, rhs, expected):
         with pytest.raises(expected):
             compare_version(lhs, rhs)
+
+
+class Test_get_execution_command:
+
+    def test_normal(self):
+        assert is_not_empty_string(get_execution_command())
 
 
 class Test_sleep_wrapper:
