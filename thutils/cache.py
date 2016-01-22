@@ -84,8 +84,6 @@ class CommandCache:
 
     @classmethod
     def __is_cache_expire(cls, cache_file_path):
-        import thutils.common as common
-
         last_modified = datetime.datetime.fromtimestamp(
             os.stat(cache_file_path).st_mtime)
         dt = datetime.datetime.now() - last_modified

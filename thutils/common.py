@@ -125,16 +125,11 @@ def is_nan(value):
     return value != value
 
 
-def isList(value):
-    return isinstance(value, list)
-
-
-def isTuple(value):
-    return isinstance(value, tuple)
-
-
-def isListOrTuple(value):
-    return any([isList(value), isTuple(value)])
+def is_empty_string(value):
+    try:
+        return len(value.strip()) == 0
+    except AttributeError:
+        return True
 
 
 def is_not_empty_string(value):
@@ -148,27 +143,28 @@ def is_not_empty_string(value):
         return False
 
 
-def is_empty_string(value):
-    try:
-        return len(value.strip()) == 0
-    except AttributeError:
-        return True
+def _is_list(value):
+    return isinstance(value, list)
 
 
-def isEmptyList(value):
-    return value is None or (isList(value) and len(value) == 0)
+def _is_tuple(value):
+    return isinstance(value, tuple)
 
 
-def isEmptyTuple(value):
-    return value is None or (isTuple(value) and len(value) == 0)
+def is_list_or_tuple(value):
+    return any([_is_list(value), _is_tuple(value)])
 
 
 def is_empty_list_or_tuple(value):
-    return value is None or (isListOrTuple(value) and len(value) == 0)
+    return value is None or (_is_list(value) and len(value) == 0)
+
+
+def is_empty_list_or_tuple(value):
+    return value is None or (is_list_or_tuple(value) and len(value) == 0)
 
 
 def is_not_empty_list_or_tuple(value):
-    return isListOrTuple(value) and len(value) > 0
+    return is_list_or_tuple(value) and len(value) > 0
 
 
 def safe_division(dividend, divisor):
@@ -409,9 +405,6 @@ def strtobool_wrapper(value):
     raise ValueError("can not convert '%s' to bool" % (value))
 
 
-# no unit test ------
-
-
 def splitLineList(line_list, separator=""):
     line_idx = 0
     for line in line_list:
@@ -587,7 +580,7 @@ def dump_dict(dict_input, indent=4):
     dict_work = dict(dict_input)
     """
     for key, value in six.iteritems(dict_input):
-        if any([f(value) for f in (is_float, isDict, isListOrTuple)]):
+        if any([f(value) for f in (is_float, isDict, is_list_or_tuple)]):
             dict_work[key] = value
             continue
 

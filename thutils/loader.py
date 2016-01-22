@@ -8,6 +8,7 @@
 
 from __future__ import with_statement
 import os
+import sys
 
 import thutils.common as common
 import thutils.gfile as gfile
@@ -16,8 +17,8 @@ from thutils.logger import logger
 
 class JsonLoader:
 
-    @classmethod
-    def load(cls, json_file_path, schema=None):
+    @staticmethod
+    def load(json_file_path, schema=None):
         """
         input:
             json_file_path: path of the json file to be read
@@ -59,8 +60,8 @@ class JsonLoader:
 
         return dict_json
 
-    @classmethod
-    def loads(cls, json_text, schema=None):
+    @staticmethod
+    def loads(json_text, schema=None):
         """
         input:
                 json_text: json text to be read
