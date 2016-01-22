@@ -54,7 +54,12 @@ class FileTypeChecker:
 
     @classmethod
     def is_text_file(cls, file_path):
-        return cls.__re_text.search(cls.get_file_type(file_path)) is not None
+        try:
+            file_type_text = cls.get_file_type(file_path).decode("utf-8")
+        except UnicodeDecodeError:
+            return False
+
+        return cls.__re_text.search(file_type_text) is not None
 
 
 class FileManager:
