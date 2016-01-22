@@ -49,6 +49,7 @@ class Test_validatePath:
         ["", InvalidFilePathError],
         ["/", InvalidFilePathError],
         ["//", InvalidFilePathError],
+        ["///", InvalidFilePathError],
         ["..", InvalidFilePathError],
         ["../..", InvalidFilePathError],
         ["../../..", InvalidFilePathError],
@@ -89,36 +90,6 @@ class Test_check_file_existence:
     def test_exception(self, value, expected):
         with pytest.raises(expected):
             assert check_file_existence(value)
-
-
-class Test_getFileNameFromPath:
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [EMPTY_FILE_PATH, EMPTY_FILE_NAME],
-        [EMPTY_DIR_PATH, EMPTY_DIR_NAME],
-        ["/not/existing/file/__path__", "__path__"],
-        ["/not/existing/file/__path__/", "__path__"],
-        ["/not/existing/file/__path__/ ", "__path__"],
-        ["/__path__", "__path__"],
-        ["__path__", "__path__"],
-    ])
-    def test_normal(self, value, expected):
-        assert getFileNameFromPath(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["", ""],
-    ])
-    def test_abnormal(self, value, expected):
-        assert getFileNameFromPath(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, AttributeError],
-        [1, AttributeError],
-        [True, AttributeError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            assert getFileNameFromPath(value)
 
 
 class Test_sanitizeFileName:

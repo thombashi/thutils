@@ -10,8 +10,8 @@ import re
 import sys
 
 import six
+import path
 
-#import thutils.common as common
 import thutils.common
 from thutils.logger import logger
 
@@ -65,16 +65,15 @@ class FileManager:
         cls.__dry_run = dry_run
 
     @classmethod
-    def touch(cls, path):
-        logger.debug("touch file: " + path)
+    def touch(cls, touch_path):
+        logger.debug("touch file: " + touch_path)
 
         if cls.__dry_run:
             return
 
-        cls.make_directory(os.path.dirname(path))
-
-        with open(path, "a") as _fp:
-            pass
+        file = Path(touch_path).dirname()
+        cls.make_directory(file)
+        file.touch()
 
     @classmethod
     def make_directory(cls, path, force=False):
@@ -307,11 +306,11 @@ class FileManager:
         return dict_result_pathlist
 
 
-def validate_path(path):
-    if thutils.common.is_empty_string(path):
+def validate_path(input_path):
+    if thutils.common.is_empty_string(input_path):
         raise InvalidFilePathError("null path")
 
-    work_path = os.path.normpath(path)
+    work_path = path.Path(input_path).normpath()
 
     if all([w == ".." for w in work_path.split(os.path.sep)]):
         raise InvalidFilePathError(work_path)
@@ -349,16 +348,6 @@ def check_file_existence(path):
         return FileType.LINK
 
     raise RuntimeError()
-
-
-def getFileNameFromPath(path):
-    """
-    フルパスから拡張子を除くファイル名を返す。
-    """
-
-    path = path.strip().strip(os.path.sep)
-
-    return os.path.splitext(os.path.basename(path))[0]
 
 
 def findFile(search_root_dir_path, re_pattern_text):
