@@ -220,7 +220,7 @@ def copy_table(con_src, con_dst, table_name):
 
     return con_dst.create_table_with_data(
         table_name,
-        con_src.getAttributeNameList(table_name),
+        con_src.get_attribute_name_list(table_name),
         value_matrix)
 
 
@@ -236,7 +236,7 @@ def append_table(con_src, con_dst, table_name):
 
     if not con_dst.has_table(table_name):
         con_dst.create_table_with_data(
-            table_name, con_src.getAttributeNameList(table_name),
+            table_name, con_src.get_attribute_name_list(table_name),
             value_matrix)
     else:
         con_dst.execute_insert_many(table_name, value_matrix)
@@ -364,7 +364,7 @@ class SqliteWrapper(object):
         self.check_connection()
         self.verify_table_existence(table_name)
 
-        database_name = self.getDatabaseName()
+        database_name = self.get_database_name()
         if common.is_empty_string(database_name):
             message = "'%s' attribute not found in '%s' table" % (
                 self.AN_DB_NAME, table_name)
@@ -392,7 +392,7 @@ class SqliteWrapper(object):
 
         self.check_connection()
 
-        database_version = self.getDatabaseVersion()
+        database_version = self.get_database_version()
         if common.is_empty_string(database_version):
             message = "%s attribute not found in %s table" % (
                 self.AN_DB_VERSION, self.TN_DB_INFO)
@@ -559,7 +559,7 @@ class SqliteWrapper(object):
 
         return getListFromQueryResult(result.fetchall())
 
-    def getDatabaseName(self):
+    def get_database_name(self):
         table_name = self.TN_DB_INFO
         self.verify_table_existence(table_name)
 
@@ -568,7 +568,7 @@ class SqliteWrapper(object):
             table=table_name,
             where=SqlQuery.make_where(common.AN_GeneralKey, self.AN_DB_NAME))
 
-    def getDatabaseVersion(self):
+    def get_database_version(self):
         table_name = self.TN_DB_INFO
         self.verify_table_existence(table_name)
 
@@ -587,23 +587,21 @@ class SqliteWrapper(object):
 
         return getListFromQueryResult(result.fetchall())
 
-    def getAttributeNameList(self, table_name):
+    def get_attribute_name_list(self, table_name):
         if not self.has_table(table_name):
-            logger.warn("'%s' table not found in %s" % (
+            raise TableNotFoundError("'%s' table not found in %s" % (
                 table_name, self.database_path))
-            return []
 
         query = "SELECT * FROM '%s'" % (table_name)
         result = self.__execute(query, logging.getLogger().findCaller())
         return getListFromQueryResult(result.description)
 
-    def getFieldNameTypeList(self, table_name):
+    def get_attribute_type_list(self, table_name):
         if not self.has_table(table_name):
-            logger.warn("'%s' table not found in %s" % (
+            raise TableNotFoundError("'%s' table not found in %s" % (
                 table_name, self.database_path))
-            return []
 
-        attribute_name_list = self.getAttributeNameList(table_name)
+        attribute_name_list = self.get_attribute_name_list(table_name)
         query = "SELECT DISTINCT %s FROM '%s'" % (
                 ",".join([
                     "TYPEOF(%s)" % (SqlQuery.to_attr_str(attribute))
@@ -611,32 +609,7 @@ class SqliteWrapper(object):
                 table_name)
         result = self.__execute(query, logging.getLogger().findCaller())
 
-        return getListFromQueryResult(result.fetchall())
-
-    def rollback(self):
-        try:
-            self.check_connection()
-        except NullDatabaseConnectionError:
-            return True
-
-        logger.info("rollback %s" % (self.database_path))
-        self.connection.rollback()
-
-        return True
-
-    def commit(self):
-        if self.dry_run:
-            return True
-
-        try:
-            self.check_connection()
-        except NullDatabaseConnectionError:
-            return True
-
-        logger.debug("commit to %s" % (self.database_path))
-        self.connection.commit()
-
-        return True
+        return result.fetchone()
 
     def get_profile(self, get_profile_count=50):
         con_tmp = connect_sqlite_db_mem()
@@ -654,34 +627,19 @@ class SqliteWrapper(object):
             data_matrix=value_matrix)
         con_tmp.commit()
 
-        result = con_tmp.execute_select(
-            select="%s,SUM(%s),SUM(%s)" % (
-                "query", "execution_time", "count"),
-            table=self.TN_SQL_PROFILE,
-            extra="GROUP BY %s ORDER BY %s DESC LIMIT %d" % (
-                "query", "execution_time", get_profile_count))
+        try:
+            result = con_tmp.execute_select(
+                select="%s,SUM(%s),SUM(%s)" % (
+                    "query", "execution_time", "count"),
+                table=self.TN_SQL_PROFILE,
+                extra="GROUP BY %s ORDER BY %s DESC LIMIT %d" % (
+                    "query", "execution_time", get_profile_count))
+        except sqlite3.OperationalError:
+            return [], []
         if result is None:
             return [], []
 
         return attribute_name_list, result.fetchall()
-
-    def close(self):
-        if self.dry_run:
-            return True
-
-        try:
-            self.check_connection()
-        except NullDatabaseConnectionError:
-            return True
-
-        self.commit()
-        logger.debug("close database: path=%s, changes=%d" % (
-            self.database_path, self.get_total_changes()))
-
-        self.connection.close()
-        self.__init__()
-
-        return True
 
     def has_table(self, table_name):
         if self.dry_run:
@@ -693,13 +651,17 @@ class SqliteWrapper(object):
         return table_name in self.get_table_name_list()
 
     def has_attribute(self, table_name, attribute_name):
-        return attribute_name in self.getAttributeNameList(table_name)
+        return attribute_name in self.get_attribute_name_list(table_name)
 
-    def hasAttributeList(self, table_name, attribute_name_list):
-        not_exist_field_list = []
-        for attribute_name in attribute_name_list:
-            if not self.has_attribute(table_name, attribute_name):
-                not_exist_field_list.append(attribute_name)
+    def has_attribute_list(self, table_name, attribute_name_list):
+        if common.is_empty_list_or_tuple(attribute_name_list):
+            return False
+
+        not_exist_field_list = [
+            attribute_name
+            for attribute_name in attribute_name_list
+            if not self.has_attribute(table_name, attribute_name)
+        ]
 
         if len(not_exist_field_list) > 0:
             logger.warn(
@@ -869,6 +831,49 @@ class SqliteWrapper(object):
 
         return self.create_table_with_data(
             table_name, common.KEY_VALUE_HEADER, value_matrix)
+
+    def rollback(self):
+        try:
+            self.check_connection()
+        except NullDatabaseConnectionError:
+            return True
+
+        logger.info("rollback %s" % (self.database_path))
+        self.connection.rollback()
+
+        return True
+
+    def commit(self):
+        if self.dry_run:
+            return True
+
+        try:
+            self.check_connection()
+        except NullDatabaseConnectionError:
+            return True
+
+        logger.debug("commit to %s" % (self.database_path))
+        self.connection.commit()
+
+        return True
+
+    def close(self):
+        if self.dry_run:
+            return True
+
+        try:
+            self.check_connection()
+        except NullDatabaseConnectionError:
+            return True
+
+        self.commit()
+        logger.debug("close database: path=%s, changes=%d" % (
+            self.database_path, self.get_total_changes()))
+
+        self.connection.close()
+        self.__init__()
+
+        return True
 
     def __auto_commit(self):
         if self.auto_commit:
@@ -1047,9 +1052,20 @@ def connect_sqlite_database(db_path, mode, options=None):
     sql_logging = False
 
     if options is not None:
-        dry_run = options.__dict__.get("dry_run", False)
-        profile = options.__dict__.get("profile", False)
-        sql_logging = options.__dict__.get("sql_logging", False)
+        try:
+            dry_run = options.dry_run
+        except AttributeError:
+            dry_run = False
+
+        try:
+            profile = options.profile
+        except AttributeError:
+            profile = False
+
+        try:
+            sql_logging = options.sql_logging
+        except AttributeError:
+            sql_logging = False
 
     con = SqliteWrapper(dry_run, profile)
     con.is_logging_query = sql_logging

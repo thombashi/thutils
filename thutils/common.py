@@ -405,23 +405,9 @@ def strtobool_wrapper(value):
     raise ValueError("can not convert '%s' to bool" % (value))
 
 
-def splitLineList(line_list, separator=""):
-    line_idx = 0
-    for line in line_list:
-        if line.strip() == separator:
-            line_idx += 1
-            continue
-
-        break
-
-    return splitLineListByRe(
-        line_list[line_idx:],
-        re.compile("^%s$" % (separator)),
-        is_include_matched_line=False)
-
-
-def splitLineListByRe(
-        line_list, re_separator, is_include_matched_line=False, is_strip=True):
+def split_line_list(
+        line_list, re_line_separator=re.compile("^$"),
+        is_include_matched_line=False, is_strip=True):
     block_list = []
     block = []
 
@@ -429,8 +415,10 @@ def splitLineListByRe(
         if is_strip:
             line = line.strip()
 
-        if re_separator.search(line):
-            block_list.append(block)
+        if re_line_separator.search(line):
+            if len(block) > 0:
+                block_list.append(block)
+
             block = []
             if is_include_matched_line:
                 block.append(line)
@@ -440,9 +428,6 @@ def splitLineListByRe(
 
     if len(block) > 0:
         block_list.append(block)
-
-    logger.debug(
-        "splitLineListByRe: block-count=%s" % (len(block_list)))
 
     return block_list
 

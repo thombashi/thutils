@@ -76,25 +76,25 @@ class FileManager:
         if cls.__dry_run:
             return
 
-        file = Path(touch_path).dirname()
-        cls.make_directory(file)
-        file.touch()
+        path_obj = path.Path(touch_path)
+        cls.make_directory(path_obj.dirname())
+
+        return path_obj.touch()
 
     @classmethod
-    def make_directory(cls, path, force=False):
+    def make_directory(cls, dir_path, force=False):
         try:
-            check_file_existence(path)
+            check_file_existence(dir_path)
         except FileNotFoundError:
             pass
-        else:
-            logger.debug("already exists: " + path)
-            return False
 
-        logger.debug("make directory: " + path)
+        logger.debug("make directory: " + dir_path)
+        path_obj = path.Path(dir_path)
+
         if any([not cls.__dry_run, force]):
-            os.makedirs(path)
+            return path_obj.makedirs_p()
 
-        return True
+        return path_obj
 
     @classmethod
     def copy_file(cls, src_path, dst_path):
@@ -152,7 +152,6 @@ class FileManager:
         except FileNotFoundError:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.debug(e)
-            logger.debug(e)
             return False
 
         logger.debug("chmod %s %s" % (path, permission_text))
@@ -160,7 +159,7 @@ class FileManager:
         os.chmod(path, parseLsPermissionText(permission_text))
 
     @classmethod
-    def renameFile(cls, src_path, dst_path):
+    def rename(cls, src_path, dst_path):
         try:
             check_file_existence(src_path)
         except (InvalidFilePathError, FileNotFoundError):
