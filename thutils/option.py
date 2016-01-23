@@ -2,6 +2,8 @@
 @author: Tsuyoshi Hombashi
 '''
 
+import logging
+
 import six
 
 import thutils.common as common
@@ -27,6 +29,7 @@ class ArgumentParserObject(object):
         MISC = "Miscellaneous"
         SQL = "SQL"
         TIME_RANGE = "Time Range"
+        PROFILE = "Profile"
 
     def __init__(self):
         self.parser = None
@@ -51,8 +54,9 @@ class ArgumentParserObject(object):
         if common.is_empty_string(group_name):
             raise ValueError("null argument group name")
 
-        group = self.parser.add_argument_group(group_name)
-        self.dict_group[group_name] = group
+        if group_name not in self.dict_group:
+            group = self.parser.add_argument_group(group_name)
+            self.dict_group[group_name] = group
 
         return group
 
@@ -77,10 +81,19 @@ class ArgumentParserObject(object):
         return group
 
     def add_profile_argument_group(self):
-        group = self.add_argument_group("Profile")
+        group = self.add_argument_group(self.GroupName.PROFILE)
         group.add_argument(
             "--profile", action="store_true", default=False,
             help="for execution time profile (python 2.6 or greater required)")
+
+        return group
+
+    def add_time_argument_group(self):
+        group = self.add_argument_group(self.GroupName.PROFILE)
+        group.add_argument(
+            "--time-measure", action="store_const",
+            const=logging.INFO, default=logging.DEBUG,
+            help="measuring execution time.")
 
         return group
 
@@ -155,13 +168,7 @@ class ArgumentParserObject(object):
             pass
 
     def _add_general_argument_group(self):
-        import logging
-
         group = self.add_argument_group(self.GroupName.MISC)
-        group.add_argument(
-            "--time-measure", action="store_const",
-            const=logging.INFO, default=logging.DEBUG,
-            help="measuring execution time.")
         group.add_argument(
             "--logging", dest="with_no_log", action="store_false", default=True,
             help="suppress output of execution log files.")
@@ -172,8 +179,6 @@ class ArgumentParserObject(object):
         return group
 
     def _add_log_level_argument_group(self):
-        import logging
-
         dest = "log_level"
 
         group = self.parser.add_mutually_exclusive_group()
@@ -190,8 +195,6 @@ class ArgumentParserObject(object):
 
 
 def getGeneralOptionList(options):
-    import logging
-
     option_list = []
 
     try:
