@@ -17,7 +17,7 @@ from thutils.binary_writer import *
 
 
 @pytest.fixture
-def sys_wrapper():
+def subproc_wrapper():
     return thutils.subprocwrapper.SubprocessWrapper()
 
 

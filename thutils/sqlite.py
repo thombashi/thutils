@@ -93,16 +93,7 @@ class SqlQuery:
         SQLite query作成補助関数
         SQLiteWrapper classのメソッドからのみ呼ばれる
 
-        Return value: SQLite query string
-        """
-
-        """
-        if common.is_empty_string(select):
-            raise ValueError("empty select query")
-
-        if common.is_empty_string(table):
-            logger.error("empty table name")
-            return ""
+        :Return value: SQLite query string
         """
 
         query_list = [
@@ -353,7 +344,7 @@ class SqliteWrapper(object):
 
     def check_database_name(self, expected_name):
         """
-        raise:
+        :raise:
             TableNotFoundError: table not found in the database
             AttributeError: attribute not found in the database
             MissmatchError: database name missmatch found
@@ -384,10 +375,10 @@ class SqliteWrapper(object):
 
     def check_database_version(self, compare_version):
         """
-        raise:
-                TableNotFoundError: table not found in the database
-                AttributeError: attribute not found in the database
-                MissmatchError: database version missmatch found
+        :raise:
+            TableNotFoundError: table not found in the database
+            AttributeError: attribute not found in the database
+            MissmatchError: database version missmatch found
         """
 
         self.check_connection()
@@ -674,9 +665,9 @@ class SqliteWrapper(object):
 
     def verify_table_existence(self, table_name):
         """
-        raise:
-                TypeError
-                TableNotFoundError
+        :raise:
+            TypeError
+            TableNotFoundError
         """
 
         if common.is_empty_string(table_name):
@@ -698,10 +689,10 @@ class SqliteWrapper(object):
 
     def verify_attribute_existence(self, table_name, attribute_name):
         """
-        raise:
-                TypeError
-                TableNotFoundError
-                AttributeNotFoundError
+        :raise:
+            TypeError
+            TableNotFoundError
+            AttributeNotFoundError
         """
 
         self.verify_table_existence(table_name)
