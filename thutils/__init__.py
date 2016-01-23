@@ -32,8 +32,10 @@ def initialize_library(
             output_dir_path = options.output_dir
 
     dry_run = False
-    if hasattr(options, "dry_run"):
+    try:
         dry_run = options.dry_run
+    except AttributeError:
+        pass
 
     return_value = logger.logger.initialize(
         program_filename,
