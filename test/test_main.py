@@ -20,7 +20,7 @@ import thutils.sqlite as sql
 
 @pytest.fixture
 def sys_wrapper():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 TEST_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 

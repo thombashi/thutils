@@ -13,17 +13,17 @@ import pytest
 import six
 
 import thutils
-from thutils.syswrapper import SubprocessWrapper
+from thutils.subprocwrapper import SubprocessWrapper
 
 
 @pytest.fixture
 def subproc_run():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 
 @pytest.fixture
 def subproc_dryrun():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 
 class Test_SubprocessWrapper_init:

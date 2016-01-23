@@ -8,7 +8,7 @@ import thutils.loader
 import thutils.logger
 import thutils.main
 import thutils.option
-import thutils.syswrapper
+import thutils.subprocwrapper
 
 
 LIB_TMP_DIR = "/tmp/__golib__"
