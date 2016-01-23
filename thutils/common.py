@@ -474,12 +474,7 @@ def command_to_filename(command, suffix=""):
     filename = command.replace(" ", "_")
     filename = filename.replace("-", "")
     filename = filename.strip(sep_char).lstrip(sep_char)
-    #filename = filename.strip(os.path.sep)
-    #filename = filename.replace(sep_char, "-")
-    print re.escape("[/\]")
-    #filename = re.sub("[/\\]", "-", filename)
     filename = re.sub("[%s]" % re.escape("/\\"), "-", filename)
-    #filename = re.sub(re.escape("[/\]"), "-", filename)
     filename = gfile.sanitize_file_name(filename)
     if is_not_empty_string(suffix):
         filename += "_" + suffix

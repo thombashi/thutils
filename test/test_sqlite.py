@@ -463,16 +463,6 @@ class Test_SqliteWrapper_execute_select:
         result = con.execute_select(select="*", table=TEST_TABLE_NAME)
         assert result is not None
 
-    """
-    def test_normal(self, con):
-        result = con.execute_select(
-            select="attr_a",
-            table=TEST_TABLE_NAME,
-            where=SqlQuery.make_where("attr_a", 9999999))
-        print result.fetchall()
-        assert result is None
-    #"""
-
     @pytest.mark.parametrize(["attr", "table_name", "expected"], [
         ["not_exist_attr", TEST_TABLE_NAME, sqlite3.OperationalError],
         ["", TEST_TABLE_NAME, sqlite3.OperationalError],

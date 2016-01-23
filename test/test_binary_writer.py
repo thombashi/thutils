@@ -97,13 +97,9 @@ class Test_WindowsBinaryWriter:
     def test_normal(
             self, monkeypatch, tmpdir, write_size, expected):
 
-        def mockreturn():
-            return "Windows"
-
         os.O_BINARY = 32768
         os.O_SEQUENTIAL = 32
 
-        monkeypatch.setattr(platform, 'system', mockreturn)
         bin_writer = BinaryWriter()
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
