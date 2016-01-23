@@ -42,8 +42,13 @@ class JsonLoader:
 
         gfile.check_file_existence(json_file_path)
 
-        if not gfile.FileTypeChecker.is_text_file(json_file_path):
-            raise ValueError("not a JSON file")
+        try:
+            if not gfile.FileTypeChecker.is_text_file(json_file_path):
+                raise ValueError("not a JSON file")
+        except ImportError:
+            # magicが必要とするライブラリが見つからない (e.g. Windowsでは追加DLLが必要)
+            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
+            logger.debug(e)
 
         with open(json_file_path, "r") as fp:
             try:

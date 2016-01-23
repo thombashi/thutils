@@ -24,7 +24,7 @@ TEST_DB_NAME = "test_db"
 TEST_DB_VERSION = "1.0.0"
 
 
-class Test_sanitize:
+class Test_SqlQuery_sanitize:
     SANITIZE_CHAR_LIST = [
         "%", "/", "(", ")", "[", "]", "<", ">", ".", ";",
         "'", "!", "\\", "#", " ", "-", "+", "=", "\n"

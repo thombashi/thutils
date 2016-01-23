@@ -291,14 +291,16 @@ class Test_is_not_empty_list_or_tuple:
 
 class Test_is_install_command:
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["value", "expected"], [
-        ["ls", True],
+        ["hostname", True],
         ["テスト", False],
         ["__not_existing_command__", False],
     ])
     def test_linux_normal(self, value, expected):
         assert is_install_command(value) == expected
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["value", "expected"], [
         ["", IndexError],
     ])
@@ -306,6 +308,7 @@ class Test_is_install_command:
         with pytest.raises(expected):
             is_install_command(value)
 
+    """
     @pytest.mark.parametrize(["value", "expected"], [
         ["dir", False],
     ])
@@ -316,6 +319,7 @@ class Test_is_install_command:
         monkeypatch.setattr(platform, 'system', mockreturn)
 
         assert is_install_command(value) == expected
+    """
 
 
 class Test_safe_division:
@@ -793,7 +797,7 @@ class Test_splitLineListByRe:
                 value, separator, is_include_matched_line, is_strip)
 
 
-class Test_checkInstallCommand:
+class Test_verify_install_command:
 
     @pytest.mark.parametrize(["value"], [
         [[]],
@@ -801,6 +805,7 @@ class Test_checkInstallCommand:
     def test_normal(self, value):
         verify_install_command(value)
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["value", "expected"], [
         [None, TypeError],
         ["__not_existing_command__", NotInstallError],
@@ -876,8 +881,6 @@ class Test_sleep_wrapper:
         [0.1, False, 0.1],
         [-1, False, 0],
         [0.1, True, 0],
-        [inf, True, 0],
-        [nan, True, 0],
     ])
     def test_normal(self, value, dry_run, expected):
         sleep_wrapper(value, dry_run) == expected
@@ -892,7 +895,9 @@ class Test_sleep_wrapper:
         [None, False, TypeError],
         ["a", True, ValueError],
         ["a", False, ValueError],
-        [inf, False, IOError],
+        [inf, True, OverflowError],
+        [inf, False, OverflowError],
+        [nan, True, IOError],
         [nan, False, IOError],
     ])
     def test_exception(self, value, dry_run, expected):

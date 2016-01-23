@@ -21,34 +21,42 @@ class Test_logger_initialize:
         [
             "program_filename", "dry_run",
             "print_stack_trace", "with_no_log",
-            "output_dir_path", "stdout_log_level", "expected"
+            "output_dir_path", "stdout_log_level",
+            "expected_dir", "expected_file",
         ],
         [
             [
                 "program", False,
-                False, False, ".", logging.INFO, "./program.log"
+                False, False, ".", logging.INFO,
+                ".", "program.log"
             ],
             [
                 "program", False,
-                True, False, "/tmp", logging.DEBUG, "/tmp/program.log"
+                True, False, "tmp", logging.DEBUG,
+                "tmp", "program.log"
             ],
             [
                 "program", False,
-                True, True, "out", logging.NOTSET, ""
+                True, True, "out", logging.NOTSET,
+                "", ""
             ],
         ]
     )
     def test_normal(
             self, program_filename, dry_run, print_stack_trace,
-            with_no_log, output_dir_path, stdout_log_level, expected):
-        assert logger.initialize(
+            with_no_log, output_dir_path, stdout_log_level,
+            expected_dir, expected_file):
+        import os.path
+
+        log_path = logger.initialize(
             program_filename,
             dry_run,
             print_stack_trace,
             with_no_log,
             stdout_log_level,
             output_dir_path=output_dir_path,
-        ) == expected
+        )
+        assert log_path == os.path.join(expected_dir, expected_file)
 
 
 class Test_logger_get_log_clear_log:

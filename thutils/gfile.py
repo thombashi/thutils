@@ -16,6 +16,9 @@ import thutils.common
 from thutils.logger import logger
 
 
+__INVALID_PATH_CHARS = '\:*?"<>|'
+
+
 class FileType:
     FILE = 1
     DIRECTORY = 2
@@ -314,13 +317,11 @@ def validate_path(input_path):
     if thutils.common.is_empty_string(input_path):
         raise InvalidFilePathError("null path")
 
-    work_path = path.Path(input_path).normpath()
-
-    if all([w == ".." for w in work_path.split(os.path.sep)]):
-        raise InvalidFilePathError(work_path)
-
-    if work_path in ("/", "//"):
-        raise InvalidFilePathError("root path")
+    match = re.search(
+        "[%s]" % (re.escape(__INVALID_PATH_CHARS)), os.path.basename(input_path))
+    if match is not None:
+        raise InvalidFilePathError(
+            "invalid char found in file name: '%s'" % (re.escape(match.group())))
 
 
 def check_file_existence(path):
@@ -400,15 +401,15 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     return result[0]
 
 
-def sanitizeFileName(path, replacement_text=""):
+def sanitize_file_name(path, replacement_text=""):
     path = path.strip()
-    re_replace = re.compile("[%s]" % re.escape('\:/*?"<>|'))
+    re_replace = re.compile("[%s]" % re.escape(__INVALID_PATH_CHARS))
 
     return re_replace.sub(replacement_text, path)
 
 
 def adjustFileName(file_name, replacement_text=""):
-    fname = sanitizeFileName(file_name, replacement_text)
+    fname = sanitize_file_name(file_name, replacement_text)
     if fname is None:
         return None
 

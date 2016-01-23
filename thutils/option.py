@@ -76,7 +76,7 @@ class ArgumentParserObject(object):
 
         return group
 
-    def addProfileArgumentGroup(self):
+    def add_profile_argument_group(self):
         group = self.add_argument_group("Profile")
         group.add_argument(
             "--profile", action="store_true", default=False,

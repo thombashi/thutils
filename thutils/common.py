@@ -437,17 +437,17 @@ def is_install_command(command):
     import platform
 
     if platform.system() != "Linux":
-        return False
+        return True
 
     search_command = "type " + command.split()[0]
     proc = subprocess.Popen(
         search_command, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    isCommandFound = proc.wait() == 0
-    if not isCommandFound:
+    is_command_found = proc.wait() == 0
+    if not is_command_found:
         logger.debug("'%s' command not found" % (command))
 
-    return isCommandFound
+    return is_command_found
 
 
 def verify_install_command(command_list):
@@ -468,12 +468,19 @@ def verify_install_command(command_list):
 def command_to_filename(command, suffix=""):
     import thutils.gfile as gfile
 
+    sep_char = "/\\"
+
     command = command.strip()
     filename = command.replace(" ", "_")
     filename = filename.replace("-", "")
-    filename = filename.strip(os.path.sep)
-    filename = filename.replace(os.path.sep, "-")
-    filename = gfile.sanitizeFileName(filename)
+    filename = filename.strip(sep_char).lstrip(sep_char)
+    #filename = filename.strip(os.path.sep)
+    #filename = filename.replace(sep_char, "-")
+    print re.escape("[/\]")
+    #filename = re.sub("[/\\]", "-", filename)
+    filename = re.sub("[%s]" % re.escape("/\\"), "-", filename)
+    #filename = re.sub(re.escape("[/\]"), "-", filename)
+    filename = gfile.sanitize_file_name(filename)
     if is_not_empty_string(suffix):
         filename += "_" + suffix
 
@@ -532,6 +539,18 @@ def get_execution_command():
 
 def sleep_wrapper(sleep_second, dry_run=False):
     import time
+
+    if sleep_second == float("inf"):
+        # Process to maintain consistency between OS
+        #   linux: raise IOError
+        #   windows: raise OverflowError
+        raise OverflowError("sleep length is too large")
+
+    if is_nan(sleep_second):
+        # Process to maintain consistency between OS
+        #   linux: raise IOError
+        #   windows: not raise exception
+        raise IOError("Invalid argument")
 
     sleep_second = float(sleep_second)
     if sleep_second <= 0:

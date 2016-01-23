@@ -28,7 +28,7 @@ MEMORY_DB_NAME = ":memory:"
 
 
 class SqlQuery:
-    __RE_SANITIZE = re.compile("[%s]" % (re.escape("%/()[]<>.:;'!\# -+=\n")))
+    __RE_SANITIZE = re.compile("[%s]" % (re.escape("%/()[]<>.:;'!\# -+=\n\r")))
     __RE_TABLE_STR = re.compile("[%s]" % (re.escape("%()-+/.")))
     __RE_TO_ATTR_STR = re.compile("[%s0-9\s#]" % (re.escape("[%()-+/.]")))
 
@@ -415,30 +415,32 @@ class SqliteWrapper(object):
 
     def connect(self, database_path, mode="w"):
         """
-        mode:
-                "r": read only
-                "w": DBファイルを新規作成する。既存ファイルは削除する。
-                "a": 既存DBファイルに追記する。
+        :mode:
+            "r": read only
+            "w": DBファイルを新規作成する。既存ファイルは削除する。
+            "a": 既存DBファイルに追記する。
 
-        raise:
-                TypeError:
-                        - database_path が文字列でない
-                        - mode が文字列でない
-                FileNotFoundError:
-                        - database_path がない
-                InvalidFilePathError:
-                        - database_path が有効なパスでない
-                ValueError:
-                        - database_path がディレクトリ
-                        - mode が未サポートの値
-                DatabaseError:
-                        - SQLiteデータベースバイナリファイルでない
+        :raise:
+            TypeError:
+                - database_path が文字列でない
+                - mode が文字列でない
+            FileNotFoundError:
+                - database_path がない
+            InvalidFilePathError:
+                - database_path が有効なパスでない
+            ValueError:
+                - database_path がディレクトリ
+                - mode が未サポートの値
+            DatabaseError:
+                - SQLiteデータベースバイナリファイルでない
 
-        Return value:
-                nothing
+        :Return value:
+            nothing
         """
 
-        gfile.validate_path(database_path)
+        if database_path != MEMORY_DB_NAME:
+            gfile.validate_path(database_path)
+
         self.close()
 
         if mode == "r":

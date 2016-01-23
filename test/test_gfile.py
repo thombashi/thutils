@@ -116,15 +116,21 @@ class Test_validatePath:
         [None, InvalidFilePathError],
         [1.1, InvalidFilePathError],
         [True, InvalidFilePathError],
+        ["/test/aa:aa", InvalidFilePathError],
+        ["/test/aa*aa", InvalidFilePathError],
+        ["/test/aa?aa", InvalidFilePathError],
+        ["/test/aa\"aa", InvalidFilePathError],
+        ["/test/aa<aa", InvalidFilePathError],
+        ["/test/aa>aa", InvalidFilePathError],
+        ["/test/aa|aa", InvalidFilePathError],
 
-        ["", InvalidFilePathError],
-        ["/", InvalidFilePathError],
-        ["//", InvalidFilePathError],
-        ["///", InvalidFilePathError],
-        ["..", InvalidFilePathError],
-        ["../..", InvalidFilePathError],
-        ["../../..", InvalidFilePathError],
-        ["../../.././.././", InvalidFilePathError],
+        ["c:\\aa:aa", InvalidFilePathError],
+        ["c:\\aa*aa", InvalidFilePathError],
+        ["c:\\aa?aa", InvalidFilePathError],
+        ["c:\\aa\"aa", InvalidFilePathError],
+        ["c:\\aa<aa", InvalidFilePathError],
+        ["c:\\aa>aa", InvalidFilePathError],
+        ["c:\\aa|aa", InvalidFilePathError],
     ])
     def test_exception(self, value, expected):
         with pytest.raises(expected):
@@ -163,9 +169,10 @@ class Test_check_file_existence:
             assert check_file_existence(value)
 
 
-class Test_sanitizeFileName:
+class Test_sanitize_file_name:
     SANITIZE_CHAR_LIST = [
-        "\\", ":", "/", "*", "?", '"', "<", ">", "|",
+        "\\", ":", "*", "?", '"', "<", ">", "|",
+        # "/",
     ]
     NOT_SANITIZE_CHAR_LIST = [
         "!", "#", "$", "%", '&', "'", "_",
@@ -187,7 +194,7 @@ class Test_sanitizeFileName:
         ]
     )
     def test_normal(self, value, replace_text, expected):
-        assert sanitizeFileName(value, replace_text) == expected
+        assert sanitize_file_name(value, replace_text) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [None, AttributeError],
@@ -196,13 +203,14 @@ class Test_sanitizeFileName:
     ])
     def test_exception(self, value, expected):
         with pytest.raises(expected):
-            sanitizeFileName(value)
+            sanitize_file_name(value)
 
 
 class Test_adjustFileName:
     SANITIZE_CHAR_LIST = [
-        "\\", ":", "/", "*", "?", '"', "<", ">", "|",
+        "\\", ":", "*", "?", '"', "<", ">", "|",
         ",", ".", "%", "(", ")",
+        #"/",
     ]
     NOT_SANITIZE_CHAR_LIST = [
         "!", "#", "$", '&', "'", "_",
