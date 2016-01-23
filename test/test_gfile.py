@@ -9,6 +9,7 @@ import os
 import itertools
 
 import pytest
+from path import Path
 
 import thutils.common as common
 from thutils.gfile import *
@@ -21,6 +22,76 @@ TEMP_FILE_NAME = "tmp_file"
 EMPTY_FILE_PATH = os.path.join(TEST_DIR_PATH, EMPTY_FILE_NAME + ".txt")
 EMPTY_DIR_NAME = "empty_dir"
 EMPTY_DIR_PATH = os.path.join(TEST_DIR_PATH, EMPTY_DIR_NAME)
+
+
+class Test_FileManager_touch:
+
+    @pytest.mark.parametrize(["value"], [
+        ["aaa"],
+        ["aaa/bbb"],
+    ])
+    def test_normal_file(self, tmpdir, value):
+        FileManager.initialize(dry_run=False)
+        target_dir = tmpdir.join("touch")
+        target_path = os.path.join(str(target_dir), value)
+        FileManager.touch(target_path)
+
+    @pytest.mark.parametrize(["value"], [
+        ["touch_time"],
+    ])
+    def test_normal_time(self, tmpdir, value):
+        import time
+
+        target_dir = tmpdir.join("touch")
+        tmp_path = os.path.join(str(target_dir), value)
+
+        FileManager.initialize(dry_run=False)
+
+        touch_file = FileManager.touch(tmp_path)
+        expected = Path(tmp_path)
+        assert touch_file == expected
+        before_atime = touch_file.atime
+        time.sleep(0.5)
+        touch_file = FileManager.touch(tmp_path)
+        assert touch_file == expected
+        assert touch_file.atime > before_atime
+
+
+class Test_FileManager_make_directory:
+
+    @pytest.mark.parametrize(["value"], [
+        ["test_normal_1"],
+    ])
+    def test_normal_1(self, tmpdir, value):
+        FileManager.initialize(dry_run=False)
+
+        target_dir = tmpdir.join("make_directory")
+        target_path = os.path.join(str(target_dir), value)
+
+        assert not os.path.exists(target_path)
+        assert FileManager.make_directory(target_path) == Path(target_path)
+        assert os.path.isdir(target_path)
+
+    @pytest.mark.parametrize(["value"], [
+        ["test_normal_2"],
+    ])
+    def test_normal_2(self, tmpdir, value):
+        FileManager.initialize(dry_run=False)
+
+        target_dir = tmpdir.join("make_directory")
+        target_path = os.path.join(str(target_dir), value)
+
+        assert not os.path.exists(target_path)
+        assert FileManager.make_directory(target_path) == Path(target_path)
+        assert FileManager.make_directory(target_path) == Path(target_path)
+        assert os.path.isdir(target_path)
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        [None, InvalidFilePathError],
+    ])
+    def test_exception(self, tmpdir, value, expected):
+        with pytest.raises(expected):
+            FileManager.make_directory(value)
 
 
 class Test_validatePath:

@@ -685,44 +685,13 @@ class Test_strtobool_wrapper:
             strtobool_wrapper(value)
 
 
-class Test_splitLineList:
-
-    @pytest.mark.parametrize(["value", "separator", "expected"], [
-        [
-            ["a", "", "b", "c"],
-            "",
-            [["a"], ["b", "c"]]
-        ],
-        [
-            ("a", "", "b", "c"),
-            "",
-            [["a"], ["b", "c"]]
-        ],
-        [
-            ["a", "", "b", "c"],
-            "b",
-            [["a", ""], ["c"]]
-        ],
-        ["", "", []
-         ],
-    ])
-    def test_normal(self, value, separator, expected):
-        assert splitLineList(value, separator) == expected
-
-    @pytest.mark.parametrize(["value", "separator", "expected"], [
-        [None, "", TypeError],
-        #["", "", TypeError],
-        #[1, "", TypeError],
-    ])
-    def test_exception(self, value, separator, expected):
-        with pytest.raises(expected):
-            splitLineList(value, separator)
-
-
 class Test_splitLineListByRe:
 
     @pytest.mark.parametrize(
-        ["value", "separator", "is_include_matched_line", "expected"],
+        [
+            "value", "separator", "is_include_matched_line",
+            "is_strip", "expected",
+        ],
         [
             [
                 [
@@ -732,6 +701,38 @@ class Test_splitLineListByRe:
                 ],
                 re.compile("DEFG$"),
                 False,
+                True,
+                [
+                    ["abcdefg"],
+                    ["1234"],
+                ],
+            ],
+            [
+                [
+                    "abcdefg",
+                    "ABCDEFG",
+                    "ABCDEFG",
+                    "1234",
+                ],
+                re.compile("DEFG$"),
+                False,
+                True,
+                [
+                    ["abcdefg"],
+                    ["1234"],
+                ],
+            ],
+            [
+                [
+                    "ABCDEFG",
+                    "abcdefg",
+                    "ABCDEFG",
+                    "1234",
+                    "ABCDEFG",
+                ],
+                re.compile("DEFG$"),
+                False,
+                True,
                 [
                     ["abcdefg"],
                     ["1234"],
@@ -745,24 +746,51 @@ class Test_splitLineListByRe:
                 ],
                 re.compile("DEFG$"),
                 True,
+                True,
                 [
                     ["abcdefg"],
                     ["ABCDEFG", "1234"],
                 ],
             ],
+            [
+                ["a", "  ", "b", "c"],
+                re.compile("^$"),
+                False,
+                True,
+                [
+                    ["a"],
+                    ["b", "c"]
+                ],
+            ],
+            [
+                ["a", "  ", "b", "c"],
+                re.compile("^$"),
+                False,
+                False,
+                [
+                    ["a", "  ", "b", "c"],
+                ],
+            ],
         ])
-    def test_normal(self, value, separator, is_include_matched_line, expected):
-        assert splitLineListByRe(
-            value, separator, is_include_matched_line) == expected
+    def test_normal(self, value, separator, is_include_matched_line, is_strip, expected):
+        assert split_line_list(
+            value, separator, is_include_matched_line, is_strip) == expected
 
-    @pytest.mark.parametrize(["value", "separator", "expected"], [
-        [None, "", TypeError],
-        #["", "", TypeError],
-        #[1, "", TypeError],
-    ])
-    def test_exception(self, value, separator, expected):
+    @pytest.mark.parametrize(
+        [
+            "value", "separator", "is_include_matched_line",
+            "is_strip", "expected",
+        ],
+        [
+            [None, "", False, True, TypeError],
+            [["a", "b", "c"], None, False, True, AttributeError],
+            [[1, 2, 3], re.compile(""), False, True, AttributeError],
+            [[1, 2, 3], re.compile(""), False, False, TypeError],
+        ])
+    def test_exception(self, value, separator, is_include_matched_line, is_strip, expected):
         with pytest.raises(expected):
-            splitLineListByRe(value, separator)
+            split_line_list(
+                value, separator, is_include_matched_line, is_strip)
 
 
 class Test_checkInstallCommand:
