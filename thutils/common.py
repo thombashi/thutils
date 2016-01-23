@@ -15,11 +15,9 @@ from thutils.logger import logger
 
 
 # Attribute Name ---
-AN_GeneralKey = "key"
-AN_GeneralValue = "value"
-AN_SamplingStartTime = "Sampling Start Time"
-AN_SamplingEndTime = "Sampling End Time"
-KEY_VALUE_HEADER = [AN_GeneralKey, AN_GeneralValue]
+AN_GENERAL_KEY = "key"
+AN_GENEARAL_VALUE = "value"
+KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
 
 
 # Regular Expression ---

@@ -566,18 +566,18 @@ class SqliteWrapper(object):
         self.verify_table_existence(table_name)
 
         return self.getValue(
-            select=common.AN_GeneralValue,
+            select=common.AN_GENEARAL_VALUE,
             table=table_name,
-            where=SqlQuery.make_where(common.AN_GeneralKey, self.AN_DB_NAME))
+            where=SqlQuery.make_where(common.AN_GENERAL_KEY, self.AN_DB_NAME))
 
     def get_database_version(self):
         table_name = self.TN_DB_INFO
         self.verify_table_existence(table_name)
 
         return self.getValue(
-            select=common.AN_GeneralValue,
+            select=common.AN_GENEARAL_VALUE,
             table=table_name,
-            where=SqlQuery.make_where(common.AN_GeneralKey, self.AN_DB_VERSION))
+            where=SqlQuery.make_where(common.AN_GENERAL_KEY, self.AN_DB_VERSION))
 
     def get_table_name_list(self):
         self.check_connection()
