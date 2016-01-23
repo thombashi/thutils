@@ -13,6 +13,7 @@ Personal python utility library
 # Dependencies
 Python 2.5+ or 3.3+
 
+- [path.py](https://pypi.python.org/pypi/path.py/)
 - [python-magic](https://pypi.python.org/pypi/python-magic/)
 - [six](https://pypi.python.org/pypi/six/)
 - [voluptuous](https://pypi.python.org/pypi/voluptuous/)
