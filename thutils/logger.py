@@ -125,6 +125,7 @@ class logger:
             with_no_log, stdout_log_level, file_log_level=logging.DEBUG,
             output_dir_path="."):
 
+        import path
         import thutils.common as common
         import thutils.gfile as gfile
 
@@ -148,8 +149,8 @@ class logger:
             # set up logging to file
 
             gfile.FileManager.make_directory(output_dir_path)
-            log_file_name = gfile.getFileNameFromPath(
-                program_filename) + cls.LOG_EXTENSION
+            log_file_name = path.Path(
+                program_filename).namebase + cls.LOG_EXTENSION
             log_file_path = os.path.join(output_dir_path, log_file_name)
 
             args = {

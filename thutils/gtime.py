@@ -294,7 +294,7 @@ def is_datetime(value):
     return value is not None and isinstance(value, datetime.datetime)
 
 
-def isValidTimeFormat(datetime_string, time_format):
+def is_valid_time_format(datetime_string, time_format):
     try:
         datetime.datetime.strptime(datetime_string, time_format)
     except (TypeError, ValueError):
@@ -348,7 +348,7 @@ def toDateTimeEx(datetime_string, time_format_list):
 
 def findValidTimeFormat(datetime_string, time_format_list):
     for time_format in time_format_list:
-        if isValidTimeFormat(datetime_string, time_format):
+        if is_valid_time_format(datetime_string, time_format):
             return time_format
 
     return None
@@ -364,20 +364,6 @@ def getTimeUnitSecondsCoefficient(unit):
         "d": 60 ** 2 * 24,
         "w": 60 ** 2 * 24 * 7,
     }
-
-    """
-    if unit == "s":
-        return 1
-    if unit == "m":
-        return 60
-    if unit == "h":
-        return 60 ** 2
-    if unit == "d":
-        return 60 ** 2 * 24
-    if unit == "w":
-        return 60 ** 2 * 24 * 7
-    raise ValueError("unknown unit: " + unit)
-    """
 
     coef_second = unit_table.get(unit)
 

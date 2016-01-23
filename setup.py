@@ -20,7 +20,7 @@ if major == 2 and minor <= 5:
 
 setuptools.setup(
     name="thutils",
-    version="0.1.12",
+    version="0.1.13",
     author="Tsuyoshi Hombashi",
     author_email="gogogo.vm@gmail.com",
     url="https://github.com/thombashi/thutils",
@@ -37,6 +37,10 @@ setuptools.setup(
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
@@ -44,9 +48,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
-        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     ],
 )

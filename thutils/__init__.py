@@ -8,7 +8,7 @@ import thutils.loader
 import thutils.logger
 import thutils.main
 import thutils.option
-import thutils.syswrapper
+import thutils.subprocwrapper
 
 
 LIB_TMP_DIR = "/tmp/__golib__"
@@ -32,8 +32,10 @@ def initialize_library(
             output_dir_path = options.output_dir
 
     dry_run = False
-    if hasattr(options, "dry_run"):
+    try:
         dry_run = options.dry_run
+    except AttributeError:
+        pass
 
     return_value = logger.logger.initialize(
         program_filename,

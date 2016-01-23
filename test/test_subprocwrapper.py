@@ -6,24 +6,36 @@
 :required: py.test
 '''
 
+import errno
 import os
+import platform
 from subprocess import PIPE
 
 import pytest
 import six
 
 import thutils
-from thutils.syswrapper import SubprocessWrapper
+from thutils.subprocwrapper import SubprocessWrapper
+
+os_type = platform.system()
+if os_type == "Linux":
+    list_command = "ls"
+    list_command_errno = errno.ENOENT
+elif os_type == "Windows":
+    list_command = "dir"
+    list_command_errno = 1
+else:
+    raise NotImplementedError(os_type)
 
 
 @pytest.fixture
 def subproc_run():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 
 @pytest.fixture
 def subproc_dryrun():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 
 class Test_SubprocessWrapper_init:
@@ -39,14 +51,15 @@ class Test_SubprocessWrapper_init:
 class Test_SubprocessWrapper_run:
 
     @pytest.mark.parametrize(["command", "ignore_error_list", "expected"], [
-        ["ls", [], 0],
-        ["ls", None, 0],
-        ["ls", [2], 0],
-        ["ls not_exist_dir", [], 2],
-        ["ls not_exist_dir", [2], 2],
-        ["not_exist_command", [], -1],
-        ["", [], -1],
-        [None, [], -1],
+        [list_command, [], 0],
+        [list_command, None, 0],
+        [list_command, [list_command_errno], 0],
+        [list_command + " not_exist_dir", [], list_command_errno],
+        [list_command + " not_exist_dir",
+            [list_command_errno], list_command_errno],
+        ["not_exist_command", [], list_command_errno],
+        ["", [], errno.ENOENT],
+        [None, [], errno.ENOENT],
     ])
     def test_normal(self, subproc_run, command, ignore_error_list, expected):
         assert subproc_run.run(command, ignore_error_list) == expected
@@ -65,6 +78,7 @@ class Test_SubprocessWrapper_popen_command:
         assert thutils.common.is_empty_string(ret_stderr)
         assert proc.returncode == expected
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["command", "input", "environ", "expected"], [
         ["grep a", "aaa", None, 0],
     ])

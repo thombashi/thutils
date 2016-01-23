@@ -4,8 +4,8 @@
 @author: Tsuyoshi Hombashi
 '''
 
-import os
 import datetime
+import os
 
 import thutils
 from thutils.logger import logger
@@ -30,7 +30,7 @@ class CommandCache:
 
     @classmethod
     def initialize(cls):
-        cls.__sys_wrapper = thutils.syswrapper.SubprocessWrapper()
+        cls.__sys_wrapper = thutils.subprocwrapper.SubprocessWrapper()
 
     @classmethod
     def clear(cls):
@@ -84,8 +84,6 @@ class CommandCache:
 
     @classmethod
     def __is_cache_expire(cls, cache_file_path):
-        import thutils.common as common
-
         last_modified = datetime.datetime.fromtimestamp(
             os.stat(cache_file_path).st_mtime)
         dt = datetime.datetime.now() - last_modified

@@ -80,16 +80,22 @@ class Test_ArgumentParserObject_add_run_option:
         maked_parser.add_run_option()
 
 
-class Test_ArgumentParserObject_addSqlArgumentGroup:
+class Test_ArgumentParserObject_add_sql_argument_group:
 
     def test_smoke(self, maked_parser):
-        maked_parser.add_sql_argument_group()
+        assert maked_parser.add_sql_argument_group() is not None
 
 
-class Test_ArgumentParserObject_addProfileArgumentGroup:
+class Test_ArgumentParserObject_add_profile_argument_group:
 
     def test_smoke(self, maked_parser):
-        maked_parser.addProfileArgumentGroup()
+        assert maked_parser.add_profile_argument_group() is not None
+
+
+class Test_ArgumentParserObject_add_time_argument_group:
+
+    def test_smoke(self, maked_parser):
+        assert maked_parser.add_time_argument_group() is not None
 
 
 class Test_ArgumentParserObject_add_time_range_argument_group:

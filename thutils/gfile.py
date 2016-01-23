@@ -10,10 +10,13 @@ import re
 import sys
 
 import six
+import path
 
-#import thutils.common as common
 import thutils.common
 from thutils.logger import logger
+
+
+__INVALID_PATH_CHARS = '\:*?"<>|'
 
 
 class FileType:
@@ -54,7 +57,12 @@ class FileTypeChecker:
 
     @classmethod
     def is_text_file(cls, file_path):
-        return cls.__re_text.search(cls.get_file_type(file_path)) is not None
+        try:
+            file_type_text = cls.get_file_type(file_path).decode("utf-8")
+        except UnicodeDecodeError:
+            return False
+
+        return cls.__re_text.search(file_type_text) is not None
 
 
 class FileManager:
@@ -65,32 +73,31 @@ class FileManager:
         cls.__dry_run = dry_run
 
     @classmethod
-    def touch(cls, path):
-        logger.debug("touch file: " + path)
+    def touch(cls, touch_path):
+        logger.debug("touch file: " + touch_path)
 
         if cls.__dry_run:
             return
 
-        cls.make_directory(os.path.dirname(path))
+        path_obj = path.Path(touch_path)
+        cls.make_directory(path_obj.dirname())
 
-        with open(path, "a") as _fp:
-            pass
+        return path_obj.touch()
 
     @classmethod
-    def make_directory(cls, path, force=False):
+    def make_directory(cls, dir_path, force=False):
         try:
-            check_file_existence(path)
+            check_file_existence(dir_path)
         except FileNotFoundError:
             pass
-        else:
-            logger.debug("already exists: " + path)
-            return False
 
-        logger.debug("make directory: " + path)
+        logger.debug("make directory: " + dir_path)
+        path_obj = path.Path(dir_path)
+
         if any([not cls.__dry_run, force]):
-            os.makedirs(path)
+            return path_obj.makedirs_p()
 
-        return True
+        return path_obj
 
     @classmethod
     def copy_file(cls, src_path, dst_path):
@@ -148,7 +155,6 @@ class FileManager:
         except FileNotFoundError:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
             logger.debug(e)
-            logger.debug(e)
             return False
 
         logger.debug("chmod %s %s" % (path, permission_text))
@@ -156,7 +162,7 @@ class FileManager:
         os.chmod(path, parseLsPermissionText(permission_text))
 
     @classmethod
-    def renameFile(cls, src_path, dst_path):
+    def rename(cls, src_path, dst_path):
         try:
             check_file_existence(src_path)
         except (InvalidFilePathError, FileNotFoundError):
@@ -307,17 +313,15 @@ class FileManager:
         return dict_result_pathlist
 
 
-def validate_path(path):
-    if thutils.common.is_empty_string(path):
+def validate_path(input_path):
+    if thutils.common.is_empty_string(input_path):
         raise InvalidFilePathError("null path")
 
-    work_path = os.path.normpath(path)
-
-    if all([w == ".." for w in work_path.split(os.path.sep)]):
-        raise InvalidFilePathError(work_path)
-
-    if work_path in ("/", "//"):
-        raise InvalidFilePathError("root path")
+    match = re.search(
+        "[%s]" % (re.escape(__INVALID_PATH_CHARS)), os.path.basename(input_path))
+    if match is not None:
+        raise InvalidFilePathError(
+            "invalid char found in file name: '%s'" % (re.escape(match.group())))
 
 
 def check_file_existence(path):
@@ -349,16 +353,6 @@ def check_file_existence(path):
         return FileType.LINK
 
     raise RuntimeError()
-
-
-def getFileNameFromPath(path):
-    """
-    フルパスから拡張子を除くファイル名を返す。
-    """
-
-    path = path.strip().strip(os.path.sep)
-
-    return os.path.splitext(os.path.basename(path))[0]
 
 
 def findFile(search_root_dir_path, re_pattern_text):
@@ -407,15 +401,15 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     return result[0]
 
 
-def sanitizeFileName(path, replacement_text=""):
+def sanitize_file_name(path, replacement_text=""):
     path = path.strip()
-    re_replace = re.compile("[%s]" % re.escape('\:/*?"<>|'))
+    re_replace = re.compile("[%s]" % re.escape(__INVALID_PATH_CHARS))
 
     return re_replace.sub(replacement_text, path)
 
 
 def adjustFileName(file_name, replacement_text=""):
-    fname = sanitizeFileName(file_name, replacement_text)
+    fname = sanitize_file_name(file_name, replacement_text)
     if fname is None:
         return None
 

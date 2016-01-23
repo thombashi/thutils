@@ -7,10 +7,12 @@
 
 import itertools
 import os
+import sqlite3
 
 import pytest
 from six.moves import range
 
+from thutils.common import *
 from thutils.sqlite import *
 import thutils.gfile as gfile
 
@@ -22,7 +24,7 @@ TEST_DB_NAME = "test_db"
 TEST_DB_VERSION = "1.0.0"
 
 
-class Test_sanitize:
+class Test_SqlQuery_sanitize:
     SANITIZE_CHAR_LIST = [
         "%", "/", "(", ")", "[", "]", "<", ">", ".", ";",
         "'", "!", "\\", "#", " ", "-", "+", "=", "\n"
@@ -86,8 +88,8 @@ class Test_to_attr_str:
     @pytest.mark.parametrize(["value", "operation", "expected"], [
         ["test", None, "test"],
         ["test", "AVG", "AVG(test)"],
-        ["a", 2, "a"],
-        ["a", True, "a"],
+        ["attr_a", 2, "attr_a"],
+        ["attr_a", True, "attr_a"],
     ] + [
         ["te%sst" % (re.escape(c)), None, "[te%sst]" % (re.escape(c))]
         for c in [
@@ -283,7 +285,7 @@ class Test_make_where:
 class Test_make_where_in:
 
     @pytest.mark.parametrize(["key", "value", "expected"], [
-        ["key", ["a", "b"], "key IN ('a', 'b')"],
+        ["key", ["attr_a", "attr_b"], "key IN ('attr_a', 'attr_b')"],
     ])
     def test_normal(self, key, value, expected):
         assert SqlQuery.make_where_in(key, value) == expected
@@ -291,7 +293,7 @@ class Test_make_where_in:
     @pytest.mark.parametrize(["key", "value", "expected"], [
         ["key", None, TypeError],
         ["key", 1, TypeError],
-        [None, ["a", "b"], TypeError],
+        [None, ["attr_a", "attr_b"], TypeError],
         [None, None, TypeError],
     ])
     def test_exception(self, key, value, expected):
@@ -302,7 +304,7 @@ class Test_make_where_in:
 class Test_make_where_not_in:
 
     @pytest.mark.parametrize(["key", "value", "expected"], [
-        ["key", ["a", "b"], "key NOT IN ('a', 'b')"],
+        ["key", ["attr_a", "attr_b"], "key NOT IN ('attr_a', 'attr_b')"],
     ])
     def test_normal(self, key, value, expected):
         assert SqlQuery.make_where_not_in(key, value) == expected
@@ -310,7 +312,7 @@ class Test_make_where_not_in:
     @pytest.mark.parametrize(["key", "value", "expected"], [
         ["key", None, TypeError],
         ["key", 1, TypeError],
-        [None, ["a", "b"], TypeError],
+        [None, ["attr_a", "attr_b"], TypeError],
         [None, None, TypeError],
     ])
     def test_exception(self, key, value, expected):
@@ -320,13 +322,33 @@ class Test_make_where_not_in:
 
 @pytest.fixture
 def con(tmpdir):
-    #con_mem = connect_sqlite_db_mem()
     p = tmpdir.join("tmp.db")
     con = connect_sqlite_database(str(p), "w")
 
     con.create_table_with_data(
         table_name=TEST_TABLE_NAME,
-        attribute_name_list=["a", "b"],
+        attribute_name_list=["attr_a", "attr_b"],
+        data_matrix=[
+            [1, 2],
+            [3, 4],
+        ])
+
+    con.create_db_info_table(TEST_DB_NAME, TEST_DB_VERSION)
+
+    return con
+
+
+@pytest.fixture
+def con_profile(tmpdir):
+    class TestOptions(object):
+        profile = True
+
+    p = tmpdir.join("tmp_profile.db")
+    con = connect_sqlite_database(str(p), "w", TestOptions())
+
+    con.create_table_with_data(
+        table_name=TEST_TABLE_NAME,
+        attribute_name_list=["attr_a", "attr_b"],
         data_matrix=[
             [1, 2],
             [3, 4],
@@ -387,6 +409,7 @@ class Test_SqliteWrapper_check_database_version:
     @pytest.mark.parametrize(["value", "expected"], [
         ["hoge", ValueError],
         [None, AttributeError],
+        ["99.99.99", MissmatchError],
     ])
     def test_exception(self, con, value, expected):
         with pytest.raises(expected):
@@ -440,6 +463,18 @@ class Test_SqliteWrapper_execute_select:
         result = con.execute_select(select="*", table=TEST_TABLE_NAME)
         assert result is not None
 
+    @pytest.mark.parametrize(["attr", "table_name", "expected"], [
+        ["not_exist_attr", TEST_TABLE_NAME, sqlite3.OperationalError],
+        ["", TEST_TABLE_NAME, sqlite3.OperationalError],
+        [None, TEST_TABLE_NAME, TypeError],
+        ["attr_a", "not_exist_table", sqlite3.OperationalError],
+        ["attr_a", "", sqlite3.OperationalError],
+        ["attr_a", None, TypeError],
+    ])
+    def test_exception(self, con, attr, table_name, expected):
+        with pytest.raises(expected):
+            con.execute_select(select=attr, table=table_name)
+
     def test_null(self, con_null):
         with pytest.raises(NullDatabaseConnectionError):
             con_null.execute_select(select="*", table=TEST_TABLE_NAME)
@@ -459,22 +494,30 @@ class Test_SqliteWrapper_execute_insert:
 
 class Test_SqliteWrapper_execute_insert_many:
 
-    def test_normal(self, con):
-        insert_record_list = [
-            [7, 8],
-            [9, 10],
-        ]
+    @pytest.mark.parametrize(["table_name", "value", "expected"], [
+        [
+            TEST_TABLE_NAME,
+            [
+                [7, 8],
+                [9, 10],
+            ],
+            True,
+        ],
+        [
+            TEST_TABLE_NAME,
+            [
+            ],
+            True,
+        ],
+    ])
+    def test_normal(self, con, table_name, value, expected):
         assert con.execute_insert_many(
-            TEST_TABLE_NAME, insert_record_list)
-
-
-class Test_SqliteWrapper_rollback:
-
-    def test_normal(self, con):
-        assert con.rollback()
+            TEST_TABLE_NAME, value) == expected
 
     def test_null(self, con_null):
-        assert con_null.rollback()
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.execute_insert_many(
+                TEST_TABLE_NAME, [])
 
 
 class Test_SqliteWrapper_get_table_name_list:
@@ -491,22 +534,131 @@ class Test_SqliteWrapper_get_table_name_list:
             con_null.get_table_name_list()
 
 
-class Test_SqliteWrapper_commit:
+class Test_SqliteWrapper_get_attribute_name_list:
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        [
+            TEST_TABLE_NAME,
+            ["attr_a", "attr_b"],
+        ],
+    ])
+    def test_normal(self, con,  value, expected):
+        assert con.get_attribute_name_list(value) == expected
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        ["not_exist_table", TableNotFoundError],
+        [None, TableNotFoundError],
+    ])
+    def test_null(self, con, value, expected):
+        with pytest.raises(expected):
+            con.get_attribute_name_list(value)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.get_attribute_name_list("not_exist_table")
+
+
+class Test_SqliteWrapper_get_attribute_type_list:
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        [
+            TEST_TABLE_NAME,
+            ("integer", "integer"),
+        ],
+    ])
+    def test_normal(self, con,  value, expected):
+        assert con.get_attribute_type_list(value) == expected
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        ["not_exist_table", TableNotFoundError],
+        [None, TableNotFoundError],
+    ])
+    def test_null(self, con, value, expected):
+        with pytest.raises(expected):
+            con.get_attribute_type_list(value)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.get_attribute_type_list(TEST_TABLE_NAME)
+
+
+class Test_SqliteWrapper_has_table:
+
+    @pytest.mark.parametrize(["value", "expected"], [
+        [TEST_TABLE_NAME, True],
+        ["not_exist_table", False],
+        ["", False],
+        [None, False],
+    ])
+    def test_normal(self, con, value, expected):
+        assert con.has_table(value) == expected
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.has_table(TEST_TABLE_NAME)
+
+
+class Test_SqliteWrapper_has_attribute:
+
+    @pytest.mark.parametrize(["table", "attr", "expected"], [
+        [TEST_TABLE_NAME, "attr_a", True],
+        [TEST_TABLE_NAME, "not_exist_attr", False],
+        [TEST_TABLE_NAME, "", False],
+        [TEST_TABLE_NAME, None, False],
+    ])
+    def test_normal(self, con, table, attr, expected):
+        assert con.has_attribute(table, attr) == expected
+
+    @pytest.mark.parametrize(["value", "attr", "expected"], [
+        ["not_exist_table", "attr_a", TableNotFoundError],
+        [None, "attr_a", TableNotFoundError],
+    ])
+    def test_exception(self, con, value, attr, expected):
+        with pytest.raises(expected):
+            con.has_attribute(value, attr)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.has_attribute(TEST_TABLE_NAME, "attr")
+
+
+class Test_SqliteWrapper_has_attribute_list:
+
+    @pytest.mark.parametrize(["table", "attr", "expected"], [
+        [TEST_TABLE_NAME, ["attr_a"], True],
+        [TEST_TABLE_NAME, ["attr_a", "attr_b"], True],
+        [TEST_TABLE_NAME, ["attr_a", "attr_b", "not_exist_attr"], False],
+        [TEST_TABLE_NAME, ["not_exist_attr"], False],
+        [TEST_TABLE_NAME, [], False],
+        [TEST_TABLE_NAME, None, False],
+    ])
+    def test_normal(self, con, table, attr, expected):
+        assert con.has_attribute_list(table, attr) == expected
+
+    @pytest.mark.parametrize(["value", "attr", "expected"], [
+        ["not_exist_table", ["attr_a"], TableNotFoundError],
+        [None, ["attr_a"], TableNotFoundError],
+    ])
+    def test_exception(self, con, value, attr, expected):
+        with pytest.raises(expected):
+            con.has_attribute_list(value, attr)
+
+    def test_null(self, con_null):
+        with pytest.raises(NullDatabaseConnectionError):
+            con_null.has_attribute_list(TEST_TABLE_NAME, "attr")
+
+
+class Test_SqliteWrapper_get_profile:
 
     def test_normal(self, con):
-        assert con.commit()
+        attribute_name_list, profile_list = con.get_profile()
+        assert is_empty_list_or_tuple(attribute_name_list)
+        assert is_empty_list_or_tuple(profile_list)
 
-    def test_null(self, con_null):
-        assert con_null.commit()
-
-
-class Test_SqliteWrapper_close:
-
-    def test_close(self, con):
-        assert con.close()
-
-    def test_null(self, con_null):
-        assert con_null.close()
+    def test_normal_profile(self, con_profile):
+        attribute_name_list, profile_list = con_profile.get_profile()
+        assert is_not_empty_list_or_tuple(attribute_name_list)
+        assert is_not_empty_list_or_tuple(profile_list)
 
 
 class Test_SqliteWrapper_verify_table_existence:
@@ -523,9 +675,9 @@ class Test_SqliteWrapper_verify_attribute_existence:
 
     @pytest.mark.parametrize(["table", "attr", "expected"], [
         [TEST_TABLE_NAME, "not_exist_attr", AttributeNotFoundError],
-        ["not_exist_table", "a", TableNotFoundError],
-        [None, "a", TypeError],
-        ["", "a", TypeError],
+        ["not_exist_table", "attr_a", TableNotFoundError],
+        [None, "attr_a", TypeError],
+        ["", "attr_a", TypeError],
     ])
     def test_normal(self, con, table, attr, expected):
         with pytest.raises(expected):
@@ -548,6 +700,33 @@ class Test_SqliteWrapper_drop_table:
 
         con.drop_table(table_name)
         assert not con.has_table(table_name)
+
+
+class Test_SqliteWrapper_rollback:
+
+    def test_normal(self, con):
+        assert con.rollback()
+
+    def test_null(self, con_null):
+        assert con_null.rollback()
+
+
+class Test_SqliteWrapper_commit:
+
+    def test_normal(self, con):
+        assert con.commit()
+
+    def test_null(self, con_null):
+        assert con_null.commit()
+
+
+class Test_SqliteWrapper_close:
+
+    def test_close(self, con):
+        assert con.close()
+
+    def test_null(self, con_null):
+        assert con_null.close()
 
 
 class Test_connect_sqlite_db_mem:

@@ -15,11 +15,9 @@ from thutils.logger import logger
 
 
 # Attribute Name ---
-AN_GeneralKey = "key"
-AN_GeneralValue = "value"
-AN_SamplingStartTime = "Sampling Start Time"
-AN_SamplingEndTime = "Sampling End Time"
-KEY_VALUE_HEADER = [AN_GeneralKey, AN_GeneralValue]
+AN_GENERAL_KEY = "key"
+AN_GENEARAL_VALUE = "value"
+KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
 
 
 # Regular Expression ---
@@ -125,16 +123,11 @@ def is_nan(value):
     return value != value
 
 
-def isList(value):
-    return isinstance(value, list)
-
-
-def isTuple(value):
-    return isinstance(value, tuple)
-
-
-def isListOrTuple(value):
-    return any([isList(value), isTuple(value)])
+def is_empty_string(value):
+    try:
+        return len(value.strip()) == 0
+    except AttributeError:
+        return True
 
 
 def is_not_empty_string(value):
@@ -148,27 +141,28 @@ def is_not_empty_string(value):
         return False
 
 
-def is_empty_string(value):
-    try:
-        return len(value.strip()) == 0
-    except AttributeError:
-        return True
+def _is_list(value):
+    return isinstance(value, list)
 
 
-def isEmptyList(value):
-    return value is None or (isList(value) and len(value) == 0)
+def _is_tuple(value):
+    return isinstance(value, tuple)
 
 
-def isEmptyTuple(value):
-    return value is None or (isTuple(value) and len(value) == 0)
+def is_list_or_tuple(value):
+    return any([_is_list(value), _is_tuple(value)])
 
 
 def is_empty_list_or_tuple(value):
-    return value is None or (isListOrTuple(value) and len(value) == 0)
+    return value is None or (_is_list(value) and len(value) == 0)
+
+
+def is_empty_list_or_tuple(value):
+    return value is None or (is_list_or_tuple(value) and len(value) == 0)
 
 
 def is_not_empty_list_or_tuple(value):
-    return isListOrTuple(value) and len(value) > 0
+    return is_list_or_tuple(value) and len(value) > 0
 
 
 def safe_division(dividend, divisor):
@@ -409,26 +403,9 @@ def strtobool_wrapper(value):
     raise ValueError("can not convert '%s' to bool" % (value))
 
 
-# no unit test ------
-
-
-def splitLineList(line_list, separator=""):
-    line_idx = 0
-    for line in line_list:
-        if line.strip() == separator:
-            line_idx += 1
-            continue
-
-        break
-
-    return splitLineListByRe(
-        line_list[line_idx:],
-        re.compile("^%s$" % (separator)),
-        is_include_matched_line=False)
-
-
-def splitLineListByRe(
-        line_list, re_separator, is_include_matched_line=False, is_strip=True):
+def split_line_list(
+        line_list, re_line_separator=re.compile("^$"),
+        is_include_matched_line=False, is_strip=True):
     block_list = []
     block = []
 
@@ -436,8 +413,10 @@ def splitLineListByRe(
         if is_strip:
             line = line.strip()
 
-        if re_separator.search(line):
-            block_list.append(block)
+        if re_line_separator.search(line):
+            if len(block) > 0:
+                block_list.append(block)
+
             block = []
             if is_include_matched_line:
                 block.append(line)
@@ -448,9 +427,6 @@ def splitLineListByRe(
     if len(block) > 0:
         block_list.append(block)
 
-    logger.debug(
-        "splitLineListByRe: block-count=%s" % (len(block_list)))
-
     return block_list
 
 
@@ -459,17 +435,17 @@ def is_install_command(command):
     import platform
 
     if platform.system() != "Linux":
-        return False
+        return True
 
     search_command = "type " + command.split()[0]
     proc = subprocess.Popen(
         search_command, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    isCommandFound = proc.wait() == 0
-    if not isCommandFound:
+    is_command_found = proc.wait() == 0
+    if not is_command_found:
         logger.debug("'%s' command not found" % (command))
 
-    return isCommandFound
+    return is_command_found
 
 
 def verify_install_command(command_list):
@@ -490,12 +466,14 @@ def verify_install_command(command_list):
 def command_to_filename(command, suffix=""):
     import thutils.gfile as gfile
 
+    sep_char = "/\\"
+
     command = command.strip()
     filename = command.replace(" ", "_")
     filename = filename.replace("-", "")
-    filename = filename.strip(os.path.sep)
-    filename = filename.replace(os.path.sep, "-")
-    filename = gfile.sanitizeFileName(filename)
+    filename = filename.strip(sep_char).lstrip(sep_char)
+    filename = re.sub("[%s]" % re.escape("/\\"), "-", filename)
+    filename = gfile.sanitize_file_name(filename)
     if is_not_empty_string(suffix):
         filename += "_" + suffix
 
@@ -555,6 +533,18 @@ def get_execution_command():
 def sleep_wrapper(sleep_second, dry_run=False):
     import time
 
+    if sleep_second == float("inf"):
+        # Process to maintain consistency between OS
+        #   linux: raise IOError
+        #   windows: raise OverflowError
+        raise OverflowError("sleep length is too large")
+
+    if is_nan(sleep_second):
+        # Process to maintain consistency between OS
+        #   linux: raise IOError
+        #   windows: not raise exception
+        raise IOError("Invalid argument")
+
     sleep_second = float(sleep_second)
     if sleep_second <= 0:
         logger.debug("skip sleep")
@@ -587,7 +577,7 @@ def dump_dict(dict_input, indent=4):
     dict_work = dict(dict_input)
     """
     for key, value in six.iteritems(dict_input):
-        if any([f(value) for f in (is_float, isDict, isListOrTuple)]):
+        if any([f(value) for f in (is_float, isDict, is_list_or_tuple)]):
             dict_work[key] = value
             continue
 

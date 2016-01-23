@@ -4,8 +4,11 @@
 @author: Tsuyoshi Hombashi
 '''
 
-import os
+
+import errno
 import logging
+import os
+import platform
 import subprocess
 
 from thutils.logger import logger
@@ -46,7 +49,7 @@ class SubprocessWrapper(object):
 
         if common.is_empty_string(command):
             logger.error("null command")
-            return -1
+            return errno.ENOENT
 
         self.__show_command(command)
         if self.dry_run:
@@ -55,7 +58,7 @@ class SubprocessWrapper(object):
         if re.search("\(.*\)", command) is None:
             if not common.is_install_command(command.split()[0]):
                 logger.error("command not found: " + command)
-                return -1
+                return errno.ENOENT
 
         tmp_environ = dict(os.environ)
         tmp_environ["LC_ALL"] = "C"

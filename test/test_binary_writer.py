@@ -18,7 +18,7 @@ from thutils.binary_writer import *
 
 @pytest.fixture
 def sys_wrapper():
-    return thutils.syswrapper.SubprocessWrapper()
+    return thutils.subprocwrapper.SubprocessWrapper()
 
 
 @pytest.fixture
@@ -70,16 +70,13 @@ class Test_BinaryWriter:
 
 class Test_LinuxBinaryWriter:
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["write_size", "expected"], [
         [1024 ** 2, 1024 ** 2],
     ])
     def test_normal(
             self, monkeypatch, tmpdir, write_size, expected):
 
-        def mockreturn():
-            return "Linux"
-
-        monkeypatch.setattr(platform, 'system', mockreturn)
         bin_writer = BinaryWriter()
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
@@ -93,19 +90,16 @@ class Test_LinuxBinaryWriter:
 
 class Test_WindowsBinaryWriter:
 
+    @pytest.mark.skipif("platform.system() == 'Linux'")
     @pytest.mark.parametrize(["write_size", "expected"], [
         [1024 ** 2, 1024 ** 2],
     ])
     def test_normal(
             self, monkeypatch, tmpdir, write_size, expected):
 
-        def mockreturn():
-            return "Windows"
-
         os.O_BINARY = 32768
         os.O_SEQUENTIAL = 32
 
-        monkeypatch.setattr(platform, 'system', mockreturn)
         bin_writer = BinaryWriter()
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
