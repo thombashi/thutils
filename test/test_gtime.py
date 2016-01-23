@@ -212,7 +212,13 @@ class Test_DateTimeRange_abnormal:
             assert datetime_range.discard(discard_percent)
 
 
-class Test_isDatetime:
+class Test_TimeMeasure:
+
+    def test_smoke(self):
+        TimeMeasure("test")
+
+
+class Test_is_datetime:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [TEST_START_DATETIME, True],
@@ -228,7 +234,7 @@ class Test_isDatetime:
         assert is_datetime(value) == expected
 
 
-class Test_isValidTimeFormat:
+class Test_is_valid_time_format:
 
     @pytest.mark.parametrize(["value", "time_format", "expected"], [
         [START_DATETIME_TEXT, Format.ISO.DATETIME, True],
@@ -239,7 +245,7 @@ class Test_isValidTimeFormat:
         import locale
 
         locale.setlocale(locale.LC_TIME, "C")
-        assert isValidTimeFormat(value, time_format) == expected
+        assert is_valid_time_format(value, time_format) == expected
 
     @pytest.mark.parametrize(["value", "time_format", "expected"], [
         [None, Format.ISO.DATETIME, False],
@@ -253,7 +259,7 @@ class Test_isValidTimeFormat:
         [START_DATETIME_TEXT, 1, False],
     ])
     def test_abnormal(self, value, time_format, expected):
-        assert isValidTimeFormat(value, time_format) == expected
+        assert is_valid_time_format(value, time_format) == expected
 
 
 class Test_toDateTime:
