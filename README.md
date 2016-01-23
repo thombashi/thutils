@@ -4,7 +4,6 @@
 [![appveyor build status](https://ci.appveyor.com/api/projects/status/jqph7qummtwnjbos/branch/master?svg=true)](https://ci.appveyor.com/project/thombashi/thutils/branch/master)
 [![Code Climate](https://codeclimate.com/github/thombashi/thutils/badges/gpa.svg)](https://codeclimate.com/github/thombashi/thutils)
 [![Coverage Status](https://coveralls.io/repos/thombashi/thutils/badge.svg?branch=develop&service=github)](https://coveralls.io/github/thombashi/thutils?branch=develop)
-[![PyPI](https://img.shields.io/pypi/v/thutils.svg)](https://pypi.python.org/pypi/thutils)
 
 
 # About
