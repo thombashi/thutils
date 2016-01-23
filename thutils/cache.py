@@ -4,8 +4,8 @@
 @author: Tsuyoshi Hombashi
 '''
 
-import os
 import datetime
+import os
 
 import thutils
 from thutils.logger import logger
