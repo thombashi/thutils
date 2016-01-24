@@ -25,6 +25,10 @@ class FileType:
     LINK = 3
 
 
+class NullPathError(Exception):
+    pass
+
+
 class InvalidFilePathError(Exception):
     pass
 
@@ -35,10 +39,6 @@ class FileNotFoundError(Exception):
 
 class EmptyFileError(Exception):
     pass
-
-
-RECOVERABLE_ERROR_LIST = (
-    InvalidFilePathError, FileNotFoundError, EmptyFileError)
 
 
 class FileTypeChecker:
@@ -90,6 +90,9 @@ class FileManager:
             check_file_existence(dir_path)
         except FileNotFoundError:
             pass
+        else:
+            logger.debug("directory already exists: " + dir_path)
+            return path.Path(dir_path)
 
         logger.debug("make directory: " + dir_path)
         path_obj = path.Path(dir_path)
@@ -315,7 +318,7 @@ class FileManager:
 
 def validate_path(input_path):
     if thutils.common.is_empty_string(input_path):
-        raise InvalidFilePathError("null path")
+        raise NullPathError()
 
     match = re.search(
         "[%s]" % (re.escape(__INVALID_PATH_CHARS)), os.path.basename(input_path))

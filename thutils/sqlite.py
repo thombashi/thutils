@@ -907,7 +907,7 @@ class SqliteWrapper(object):
             "  header: %d %s\n" % (len(field_list), str(field_list)) +
             "  # of miss match line: %d ouf of %d\n" % (
                 len(miss_match_idx_list), len(value_matrix)) +
-            "  e.g. value at %d: %d %s\n" % (
+            "  e.g. value at line=%d, len=%d: %s\n" % (
                 miss_match_idx_list[0],
                 len(sample_miss_match_list), str(sample_miss_match_list))
         )

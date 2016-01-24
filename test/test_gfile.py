@@ -87,7 +87,7 @@ class Test_FileManager_make_directory:
         assert os.path.isdir(target_path)
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, InvalidFilePathError],
+        [None, NullPathError],
     ])
     def test_exception(self, tmpdir, value, expected):
         with pytest.raises(expected):
@@ -113,9 +113,9 @@ class Test_validatePath:
         validate_path(value)
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, InvalidFilePathError],
-        [1.1, InvalidFilePathError],
-        [True, InvalidFilePathError],
+        [None, NullPathError],
+        [1.1, NullPathError],
+        [True, NullPathError],
         ["/test/aa:aa", InvalidFilePathError],
         ["/test/aa*aa", InvalidFilePathError],
         ["/test/aa?aa", InvalidFilePathError],
@@ -158,10 +158,10 @@ class Test_check_file_existence:
         assert check_file_existence(str(tmpdir)) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, InvalidFilePathError],
-        [1.1, InvalidFilePathError],
-        [True, InvalidFilePathError],
-        ["", InvalidFilePathError],
+        [None, NullPathError],
+        [1.1, NullPathError],
+        [True, NullPathError],
+        ["", NullPathError],
         ["/not/existing/file/__path__", FileNotFoundError],
     ])
     def test_exception(self, value, expected):

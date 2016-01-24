@@ -433,18 +433,18 @@ class Test_SqliteWrapper_get_total_changes:
 class Test_SqliteWrapper_connect:
 
     @pytest.mark.parametrize(["value", "mode", "expected"], [
-        [None, "r", gfile.InvalidFilePathError],
-        [nan, "r", gfile.InvalidFilePathError],
-        ["", "r", gfile.InvalidFilePathError],
+        [None, "r", gfile.NullPathError],
+        [nan, "r", gfile.NullPathError],
+        ["", "r", gfile.NullPathError],
         ["/not/existing/file/__path__", "r", gfile.FileNotFoundError],
 
-        [None, "w", gfile.InvalidFilePathError],
-        [inf, "w", gfile.InvalidFilePathError],
-        ["", "w", gfile.InvalidFilePathError],
+        [None, "w", gfile.NullPathError],
+        [inf, "w", gfile.NullPathError],
+        ["", "w", gfile.NullPathError],
 
-        [None, "a", gfile.InvalidFilePathError],
-        [1, "a", gfile.InvalidFilePathError],
-        ["", "a", gfile.InvalidFilePathError],
+        [None, "a", gfile.NullPathError],
+        [1, "a", gfile.NullPathError],
+        ["", "a", gfile.NullPathError],
 
         ["empty_file.txt", None, TypeError],
         ["empty_file.txt", inf, TypeError],
