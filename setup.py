@@ -19,7 +19,7 @@ if major == 2 and minor <= 5:
 
 setuptools.setup(
     name="thutils",
-    version="0.1.13",
+    version="0.1.14",
     author="Tsuyoshi Hombashi",
     author_email="gogogo.vm@gmail.com",
     url="https://github.com/thombashi/thutils",
