@@ -202,24 +202,15 @@ class Test_make_select:
     def test_normal(self, select, table, where, extra, expected):
         assert SqlQuery.make_select(select, table, where, extra) == expected
 
-    """
     @pytest.mark.parametrize(
         ["select", "table", "where", "extra", "expected"], [
-            ["A", None, None, None, ""],
-        ])
-    def test_abnormal(self, select, table, where, extra, expected):
-        assert SqlQuery.make_select(select, table, where, extra) == expected
-    """
-
-    @pytest.mark.parametrize(
-        ["select", "table", "where", "extra", "expected"], [
-            ["A", None, None, None, TypeError],
-            [None, None, None, None, TypeError],
+            ["A", None, None, None, ValueError],
+            [None, None, None, None, ValueError],
             [None, "B", None, None, TypeError],
-            [nan, None, None, None, TypeError],
-            [nan, nan, None, None, TypeError],
-            [nan, nan, nan, None, TypeError],
-            [nan, nan, nan, nan, TypeError],
+            [nan, None, None, None, ValueError],
+            [nan, nan, None, None, ValueError],
+            [nan, nan, nan, None, ValueError],
+            [nan, nan, nan, nan, ValueError],
         ])
     def test_exception(self, select, table, where, extra, expected):
         with pytest.raises(expected):
@@ -238,22 +229,15 @@ class Test_make_insert:
         assert SqlQuery.make_insert(
             table, insert_tuple, is_isert_many) == expected
 
-    """
-    @pytest.mark.parametrize(["table", "insert_tuple", "is_isert_many", "expected"], [
-    ])
-    def test_abnormal(self, table, insert_tuple, is_isert_many, expected):
-        assert SqlQuery.make_insert(table, insert_tuple) == expected
-    """
-
     @pytest.mark.parametrize(["table", "insert_tuple", "is_isert_many", "expected"], [
         ["", [], False, ValueError],
         ["", None, True, ValueError],
         ["", ["B"], False, ValueError],
         ["A", [], True, ValueError],
         ["A", None, False, ValueError],
-        [None, None, True, TypeError],
-        [None, ["B"], False, TypeError],
-        [None, [], True, TypeError],
+        [None, None, True, ValueError],
+        [None, ["B"], False, ValueError],
+        [None, [], True, ValueError],
     ])
     def test_exception(self, table, insert_tuple, is_isert_many, expected):
         with pytest.raises(expected):
@@ -468,8 +452,8 @@ class Test_SqliteWrapper_execute_select:
         ["", TEST_TABLE_NAME, sqlite3.OperationalError],
         [None, TEST_TABLE_NAME, TypeError],
         ["attr_a", "not_exist_table", sqlite3.OperationalError],
-        ["attr_a", "", sqlite3.OperationalError],
-        ["attr_a", None, TypeError],
+        ["attr_a", "", ValueError],
+        ["attr_a", None, ValueError],
     ])
     def test_exception(self, con, attr, table_name, expected):
         with pytest.raises(expected):
@@ -676,8 +660,8 @@ class Test_SqliteWrapper_verify_attribute_existence:
     @pytest.mark.parametrize(["table", "attr", "expected"], [
         [TEST_TABLE_NAME, "not_exist_attr", AttributeNotFoundError],
         ["not_exist_table", "attr_a", TableNotFoundError],
-        [None, "attr_a", TypeError],
-        ["", "attr_a", TypeError],
+        [None, "attr_a", ValueError],
+        ["", "attr_a", ValueError],
     ])
     def test_normal(self, con, table, attr, expected):
         with pytest.raises(expected):
