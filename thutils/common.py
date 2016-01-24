@@ -15,14 +15,18 @@ from thutils.logger import logger
 
 
 # Attribute Name ---
+
 AN_GENERAL_KEY = "key"
 AN_GENEARAL_VALUE = "value"
 KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
 
 
 # Regular Expression ---
+
 RE_SPACE = re.compile("[\s]+")
 
+
+# class ---
 
 class NotInstallError(Exception):
     pass
@@ -73,6 +77,8 @@ class MinMaxObject(BaseObject):
         else:
             self.__max_value = max(self.__max_value, value)
 
+
+# function ---
 
 def is_integer(value):
     if isinstance(value, six.integer_types):
@@ -565,9 +571,6 @@ def get_var_name(var, symboltable):
     for name, v in six.iteritems(symboltable):
         if id(v) == id(var):
             return name
-
-
-# dict ---
 
 
 def dump_dict(dict_input, indent=4):

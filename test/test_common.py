@@ -20,18 +20,6 @@ nan = float("nan")
 inf = float("inf")
 
 
-def testStr():
-    assert str(0) == "0"
-    assert str(0.0) == "0.0"
-    assert str(0.00) == "0.0"
-    assert str(0.1) == "0.1"
-    assert str(0.10) == "0.1"
-
-
-def return0_func():
-    return 0
-
-
 class Test_is_integer:
 
     @pytest.mark.parametrize(["value"], [
@@ -689,7 +677,7 @@ class Test_strtobool_wrapper:
             strtobool_wrapper(value)
 
 
-class Test_splitLineListByRe:
+class Test_split_line_list:
 
     @pytest.mark.parametrize(
         [
@@ -753,7 +741,10 @@ class Test_splitLineListByRe:
                 True,
                 [
                     ["abcdefg"],
-                    ["ABCDEFG", "1234"],
+                    [
+                        "ABCDEFG",
+                        "1234",
+                    ],
                 ],
             ],
             [
