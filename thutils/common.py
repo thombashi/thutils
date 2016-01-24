@@ -15,14 +15,18 @@ from thutils.logger import logger
 
 
 # Attribute Name ---
+
 AN_GENERAL_KEY = "key"
 AN_GENEARAL_VALUE = "value"
 KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
 
 
 # Regular Expression ---
+
 RE_SPACE = re.compile("[\s]+")
 
+
+# class ---
 
 class NotInstallError(Exception):
     pass
@@ -73,6 +77,8 @@ class MinMaxObject(BaseObject):
         else:
             self.__max_value = max(self.__max_value, value)
 
+
+# function ---
 
 def is_integer(value):
     if isinstance(value, six.integer_types):
@@ -167,8 +173,8 @@ def is_not_empty_list_or_tuple(value):
 
 def safe_division(dividend, divisor):
     """
-    return value:
-            nan: invalid arguments
+    :return value:
+        nan: invalid arguments
     """
 
     try:
@@ -215,6 +221,7 @@ def get_integer_digit(value):
 def _get_decimal_places(value, integer_digits):
     import math
     from collections import namedtuple
+    from six.moves import range
 
     float_digit_len = 0
     if is_integer(value):
@@ -484,10 +491,10 @@ def compare_version(lhs_version, rhs_version):
     """
     <Major>.<Minor>.<Revision> 形式のバージョン文字列を比較する。
 
-    Return value:
-            0<:	LHSがRHSより小さい
-            0:	LHS == RHS
-            0>:	LHSがRHSより大きい
+    :Return value:
+        0<:	LHSがRHSより小さい
+        0:	LHS == RHS
+        0>:	LHSがRHSより大きい
     """
 
     lhs_major, lhs_minor, lhs_revision = [
@@ -564,9 +571,6 @@ def get_var_name(var, symboltable):
     for name, v in six.iteritems(symboltable):
         if id(v) == id(var):
             return name
-
-
-# dict ---
 
 
 def dump_dict(dict_input, indent=4):

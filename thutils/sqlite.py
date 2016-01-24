@@ -93,21 +93,14 @@ class SqlQuery:
         SQLite query作成補助関数
         SQLiteWrapper classのメソッドからのみ呼ばれる
 
-        Return value: SQLite query string
+        :Return value: SQLite query string
         """
 
-        """
-        if common.is_empty_string(select):
-            raise ValueError("empty select query")
-
-        if common.is_empty_string(table):
-            logger.error("empty table name")
-            return ""
-        """
+        _validate_table_name(table)
 
         query_list = [
             "SELECT " + select,
-            "FROM " + SqlQuery.to_table_str(table),
+            "FROM " + cls.to_table_str(table),
         ]
         if common.is_not_empty_string(where):
             query_list.append("WHERE " + where)
@@ -118,9 +111,9 @@ class SqlQuery:
 
     @classmethod
     def make_insert(cls, table_name, insert_tuple, is_insert_many=False):
-        table_name = SqlQuery.to_table_str(table_name)
-        if common.is_empty_string(table_name):
-            raise ValueError("table name is empty")
+        _validate_table_name(table_name)
+
+        table_name = cls.to_table_str(table_name)
 
         if common.is_empty_list_or_tuple(insert_tuple):
             raise ValueError("empty insert list/tuple")
@@ -196,6 +189,8 @@ def getListFromQueryResult(result):
 
 
 def copy_table(con_src, con_dst, table_name):
+    _validate_table_name(table_name)
+
     if con_src is None:
         logger.error("null source database")
         return False
@@ -225,6 +220,8 @@ def copy_table(con_src, con_dst, table_name):
 
 
 def append_table(con_src, con_dst, table_name):
+    _validate_table_name(table_name)
+
     logger.debug("append '%s' table: %s -> %s" % (
         table_name, con_src.database_path, con_dst.database_path))
 
@@ -353,7 +350,7 @@ class SqliteWrapper(object):
 
     def check_database_name(self, expected_name):
         """
-        raise:
+        :raise:
             TableNotFoundError: table not found in the database
             AttributeError: attribute not found in the database
             MissmatchError: database name missmatch found
@@ -384,10 +381,10 @@ class SqliteWrapper(object):
 
     def check_database_version(self, compare_version):
         """
-        raise:
-                TableNotFoundError: table not found in the database
-                AttributeError: attribute not found in the database
-                MissmatchError: database version missmatch found
+        :raise:
+            TableNotFoundError: table not found in the database
+            AttributeError: attribute not found in the database
+            MissmatchError: database version missmatch found
         """
 
         self.check_connection()
@@ -674,13 +671,12 @@ class SqliteWrapper(object):
 
     def verify_table_existence(self, table_name):
         """
-        raise:
-                TypeError
-                TableNotFoundError
+        :raise:
+            TypeError
+            TableNotFoundError
         """
 
-        if common.is_empty_string(table_name):
-            raise TypeError("null string")
+        _validate_table_name(table_name)
 
         found_table = self.has_table(table_name)
 
@@ -698,10 +694,10 @@ class SqliteWrapper(object):
 
     def verify_attribute_existence(self, table_name, attribute_name):
         """
-        raise:
-                TypeError
-                TableNotFoundError
-                AttributeNotFoundError
+        :raise:
+            TypeError
+            TableNotFoundError
+            AttributeNotFoundError
         """
 
         self.verify_table_existence(table_name)
@@ -746,6 +742,8 @@ class SqliteWrapper(object):
         return True
 
     def createIndex(self, table_name, attribute_name):
+        self.verify_table_existence(table_name)
+
         self.checkAccessPermission(["w", "a"])
 
         index_name = "%s_%s_index" % (
@@ -769,6 +767,7 @@ class SqliteWrapper(object):
     def create_table_with_data(
             self, table_name, attribute_name_list, data_matrix,
             index_attribute_list=()):
+        _validate_table_name(table_name)
 
         self.checkAccessPermission(["w", "a"])
 
@@ -916,7 +915,7 @@ class SqliteWrapper(object):
             "  header: %d %s\n" % (len(field_list), str(field_list)) +
             "  # of miss match line: %d ouf of %d\n" % (
                 len(miss_match_idx_list), len(value_matrix)) +
-            "  e.g. value at %d: %d %s\n" % (
+            "  e.g. value at line=%d, len=%d: %s\n" % (
                 miss_match_idx_list[0],
                 len(sample_miss_match_list), str(sample_miss_match_list))
         )
@@ -1035,6 +1034,11 @@ class SqliteWrapper(object):
             self.create_table(table_name, attr_description_list)
 
         self.execute_insert_many(table_name, table_config_matrix)
+
+
+def _validate_table_name(name):
+    if common.is_empty_string(name):
+        raise ValueError("table name is empty")
 
 
 def connect_sqlite_db_mem():

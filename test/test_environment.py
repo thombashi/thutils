@@ -17,7 +17,7 @@ from thutils.environment import *
 
 
 @pytest.fixture
-def sys_wrapper():
+def subproc_wrapper():
     return thutils.subprocwrapper.SubprocessWrapper()
 
 TEST_DIR_PATH = os.path.dirname(os.path.realpath(__file__))

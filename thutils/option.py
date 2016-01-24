@@ -152,10 +152,14 @@ class ArgumentParserObject(object):
 
         import thutils.gtime as gtime
 
-        options.start_datetime = gtime.toDateTimeEx(
-            options.start_time, valid_time_format_list)
-        options.end_datetime = gtime.toDateTimeEx(
-            options.end_time, valid_time_format_list)
+        try:
+            options.start_datetime = gtime.toDateTimeEx(
+                options.start_time, valid_time_format_list)
+            options.end_datetime = gtime.toDateTimeEx(
+                options.end_time, valid_time_format_list)
+        except ValueError:
+            return
+
         options.datetime_range = gtime.DateTimeRange(
             options.start_datetime, options.end_datetime)
 
