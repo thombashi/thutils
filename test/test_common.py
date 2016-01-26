@@ -34,6 +34,7 @@ class Test_is_integer:
     @pytest.mark.parametrize(["value"], [
         [None], [nan], [inf],
         [0.5], ["0.5"],
+        [.999], [".999"],
         [""], ["test"], ["1a1"], ["11a"], ["a11"],
         #["１"],
         [True],
@@ -140,47 +141,6 @@ class Test_is_empty_string:
     ])
     def test_normal(self, value, expected):
         assert is_empty_string(value) == expected
-
-
-"""
-class Test_isList:
-
-    @pytest.mark.parametrize(["value"], [
-        [[]],
-        [[1]],
-        [["a", "b"]],
-        [["a"] * 200000],
-    ])
-    def test_normal(self, value):
-        assert __is_list(value)
-
-    @pytest.mark.parametrize(["value"], [
-        [None], [()],
-        [nan], [0], ["aaa"],
-        [True],
-    ])
-    def test_abnormal(self, value):
-        assert not __is_list(value)
-
-class Test_isTuple:
-
-    @pytest.mark.parametrize(["value"], [
-        [()],
-        [(1,)],
-        [("a", "b")],
-        [("a",) * 200000],
-    ])
-    def test_normal(self, value):
-        assert _is_tuple(value)
-
-    @pytest.mark.parametrize(["value"], [
-        [None], [[]],
-        [nan], [0], ["aaa"],
-        [True],
-    ])
-    def test_abnormal(self, value):
-        assert not _is_tuple(value)
-"""
 
 
 class Test_is_list_or_tuple:
@@ -296,19 +256,6 @@ class Test_is_install_command:
         with pytest.raises(expected):
             is_install_command(value)
 
-    """
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["dir", False],
-    ])
-    def test_windows(self, monkeypatch, value, expected):
-        def mockreturn():
-            return "Windows"
-
-        monkeypatch.setattr(platform, 'system', mockreturn)
-
-        assert is_install_command(value) == expected
-    """
-
 
 class Test_safe_division:
 
@@ -380,6 +327,8 @@ class Test_get_integer_digit:
 
     @pytest.mark.parametrize(["value", "expected"], [
         [0, 1], [-0, 1],
+        [.99, 1], [-.99, 1],
+        [".99", 1], ["-.99", 1],
         [1.01, 1], [-1.01, 1],
         [9.99, 1], [-9.99, 1],
         ["9.99", 1], ["-9.99", 1],
@@ -444,6 +393,8 @@ class Test_get_number_of_digit:
         [100.01, (3, 1)], [-100.01, (3, 1)],
         [0.1, (1, 1)], [-0.1, (1, 1)],
         ["0.1", (1, 1)], ["-0.1", (1, 1)],
+        [.99, (1, 2)], [-.99, (1, 2)],
+        [".99", (1, 2)], ["-.99", (1, 2)],
         [0.01, (1, 2)], [-0.01, (1, 2)],
         ["0.01", (1, 2)], ["-0.01", (1, 2)],
         [0.001, (1, 3)], [-0.001, (1, 3)],

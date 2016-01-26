@@ -150,7 +150,7 @@ class FileManager:
     @classmethod
     def chmod(cls, path, permission_text):
         """
-        permission_text: "ls -l" style permission: e.g. -rw-r--r--
+        :param str permission_text: "ls -l" style permission string. e.g. -rw-r--r--
         """
 
         try:
@@ -329,13 +329,11 @@ def validate_path(input_path):
 
 def check_file_existence(path):
     """
-    return value:
-        FileType
-
-    raise:
-        - InvalidFilePathError
-        - FileNotFoundError
-        - RuntimeError
+    :return: FileType
+    :rtype: int
+    :raises InvalidFilePathError:
+    :raises FileNotFoundError:
+    :raises RuntimeError:
     """
 
     validate_path(path)
@@ -411,21 +409,21 @@ def sanitize_file_name(path, replacement_text=""):
     return re_replace.sub(replacement_text, path)
 
 
-def adjustFileName(file_name, replacement_text=""):
+def replace_symbol(file_name, replacement_text=""):
     fname = sanitize_file_name(file_name, replacement_text)
     if fname is None:
         return None
 
-    fname = thutils.common.RE_SPACE.sub("_", fname)
-    return re.sub("[%s]" % (re.escape(",().%")), "", fname)
+    re_replace = re.compile("[%s]" % re.escape(" ,.%()/"))
+    return re_replace.sub(replacement_text, fname)
 
 
 def parsePermission3Char(permission):
     """
     'rwx' 形式のアクセス権限文字列 permission を8進数形式に変換する
 
-    Return value:
-            int
+    :return:
+    :rtype: int
     """
 
     if len(permission) != 3:

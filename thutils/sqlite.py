@@ -91,9 +91,9 @@ class SqlQuery:
     def make_select(cls, select, table, where=None, extra=None):
         """
         SQLite query作成補助関数
-        SQLiteWrapper classのメソッドからのみ呼ばれる
 
-        :Return value: SQLite query string
+        :return: SQLite query string
+        :rtype: str
         """
 
         _validate_table_name(table)
@@ -181,8 +181,7 @@ def getListFromQueryResult(result):
     :argument:
         Return value from a SQLite query response
 
-    :return value:
-        list
+    :rtype: list
     """
 
     return [record[0] for record in result]
@@ -335,8 +334,7 @@ class SqliteWrapper(object):
 
     def check_connection(self):
         """
-        raise NullDatabaseConnectionError
-        if not connected to a SQLite database file
+        :raises NullDatabaseConnectionError: if not connected to a SQLite database file
         """
 
         if self.dry_run:
@@ -350,10 +348,9 @@ class SqliteWrapper(object):
 
     def check_database_name(self, expected_name):
         """
-        :raise:
-            TableNotFoundError: table not found in the database
-            AttributeError: attribute not found in the database
-            MissmatchError: database name missmatch found
+        :raises TableNotFoundError: table not found in the database
+        :raises AttributeError: attribute not found in the database
+        :raises MissmatchError: database name missmatch found
         """
 
         table_name = self.TN_DB_INFO
@@ -381,10 +378,9 @@ class SqliteWrapper(object):
 
     def check_database_version(self, compare_version):
         """
-        :raise:
-            TableNotFoundError: table not found in the database
-            AttributeError: attribute not found in the database
-            MissmatchError: database version missmatch found
+        :raises TableNotFoundError: table not found in the database
+        :raises AttributeError: attribute not found in the database
+        :raises MissmatchError: database version miss match found
         """
 
         self.check_connection()
@@ -412,27 +408,20 @@ class SqliteWrapper(object):
 
     def connect(self, database_path, mode="w"):
         """
-        :mode:
+        :param str mode:
             "r": read only
             "w": DBファイルを新規作成する。既存ファイルは削除する。
             "a": 既存DBファイルに追記する。
 
-        :raise:
-            TypeError:
-                - database_path が文字列でない
-                - mode が文字列でない
-            FileNotFoundError:
-                - database_path がない
-            InvalidFilePathError:
-                - database_path が有効なパスでない
-            ValueError:
-                - database_path がディレクトリ
-                - mode が未サポートの値
-            DatabaseError:
-                - SQLiteデータベースバイナリファイルでない
-
-        :Return value:
-            nothing
+        :raises TypeError:
+            - database_path が文字列でない
+            - mode が文字列でない
+        :raises FileNotFoundError: database_path not found
+        :raises InvalidFilePathError: database_path is invalid
+        :raises ValueError:
+            - database_path がディレクトリ
+            - mode が未サポートの値
+        :raises DatabaseError: file is not a valid SQLite binary file
         """
 
         if database_path != MEMORY_DB_NAME:
@@ -671,9 +660,8 @@ class SqliteWrapper(object):
 
     def verify_table_existence(self, table_name):
         """
-        :raise:
-            TypeError
-            TableNotFoundError
+        :raises TypeError:
+        :raises TableNotFoundError:
         """
 
         _validate_table_name(table_name)
@@ -694,10 +682,9 @@ class SqliteWrapper(object):
 
     def verify_attribute_existence(self, table_name, attribute_name):
         """
-        :raise:
-            TypeError
-            TableNotFoundError
-            AttributeNotFoundError
+        :raises sTypeError:
+        :raises TableNotFoundError:
+        :raises AttributeNotFoundError:
         """
 
         self.verify_table_existence(table_name)
@@ -937,8 +924,8 @@ class SqliteWrapper(object):
         """
         get value type of column
 
-        return:
-                { column_number : value_type }
+        :return: { column_number : value_type }
+        :rtype: dictionary
         """
 
         dict_column_valuetype = {}

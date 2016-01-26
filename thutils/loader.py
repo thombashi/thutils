@@ -25,19 +25,16 @@ class JsonLoader:
     @classmethod
     def load(cls, json_file_path, schema=None):
         """
-        :input:
+        :param str json_file_path:
             json_file_path: path of the json file to be read
             schema: voluptuous schema
-
-        :exception:
-            - ImportError
-            - InvalidFilePathError
-            - FileNotFoundError
-            - RuntimeError
-            - ValueError
-
-        :return value:
-            Dictionary storing the parse results of JSON
+        :return: Dictionary storing the parse results of JSON
+        :rtype: dictionary
+        :raises ImportError:
+        :raises InvalidFilePathError:
+        :raises FileNotFoundError:
+        :raises RuntimeError:
+        :raises ValueError:
         """
 
         gfile.check_file_existence(json_file_path)
@@ -67,14 +64,13 @@ class JsonLoader:
     @classmethod
     def loads(cls, json_text, schema=None):
         """
-        :input:
-            json_text: json text to be read
-            schema: voluptuous schema
-
-        :exception:
-            - ImportError
-            - RuntimeError
-            - ValueError
+        :param str json_text: json text to be parse
+        :param voluptuous.Schema schema: schema of voluptuous
+        :return: Dictionary storing the parse results of JSON
+        :rtype: dictionary
+        :raises ImportError:
+        :raises RuntimeError:
+        :raises ValueError:
         """
 
         try:

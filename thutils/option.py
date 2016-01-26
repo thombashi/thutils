@@ -175,7 +175,7 @@ class ArgumentParserObject(object):
         group = self.add_argument_group(self.GroupName.MISC)
         group.add_argument(
             "--logging", dest="with_no_log", action="store_false", default=True,
-            help="suppress output of execution log files.")
+            help="output execution log to a file (%(prog)s.log).")
         group.add_argument(
             "--stacktrace", action="store_true", default=False,
             help="display stack trace when an error occurred.")
@@ -206,8 +206,7 @@ def getGeneralOptionList(options):
             option_list.append("--dry-run")
     except AttributeError:
         pass
-    # if hasattr(options, "dry_run") and options.dry_run:
-    #    option_list.append("--dry-run")
+
     if not options.with_no_log:
         option_list.append("--logging")
     if options.log_level == logging.DEBUG:
