@@ -1,7 +1,5 @@
 six<=1.8.0
 python-magic
 path.py
-pytest
-pytest-cov
 voluptuous
 sphinx_rtd_theme
