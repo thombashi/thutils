@@ -40,3 +40,8 @@ Installation
 ::
 
     pip install thutils
+
+Documentation
+=============
+
+http://thutils.readthedocs.org/en/latest/ (Under construction)
