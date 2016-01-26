@@ -142,47 +142,6 @@ class Test_is_empty_string:
         assert is_empty_string(value) == expected
 
 
-"""
-class Test_isList:
-
-    @pytest.mark.parametrize(["value"], [
-        [[]],
-        [[1]],
-        [["a", "b"]],
-        [["a"] * 200000],
-    ])
-    def test_normal(self, value):
-        assert __is_list(value)
-
-    @pytest.mark.parametrize(["value"], [
-        [None], [()],
-        [nan], [0], ["aaa"],
-        [True],
-    ])
-    def test_abnormal(self, value):
-        assert not __is_list(value)
-
-class Test_isTuple:
-
-    @pytest.mark.parametrize(["value"], [
-        [()],
-        [(1,)],
-        [("a", "b")],
-        [("a",) * 200000],
-    ])
-    def test_normal(self, value):
-        assert _is_tuple(value)
-
-    @pytest.mark.parametrize(["value"], [
-        [None], [[]],
-        [nan], [0], ["aaa"],
-        [True],
-    ])
-    def test_abnormal(self, value):
-        assert not _is_tuple(value)
-"""
-
-
 class Test_is_list_or_tuple:
 
     @pytest.mark.parametrize(["value", "expected"], [
@@ -295,19 +254,6 @@ class Test_is_install_command:
     def test_linux_normal(self, value, expected):
         with pytest.raises(expected):
             is_install_command(value)
-
-    """
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["dir", False],
-    ])
-    def test_windows(self, monkeypatch, value, expected):
-        def mockreturn():
-            return "Windows"
-
-        monkeypatch.setattr(platform, 'system', mockreturn)
-
-        assert is_install_command(value) == expected
-    """
 
 
 class Test_safe_division:
