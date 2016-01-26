@@ -16,6 +16,11 @@ Python 2.5+ or 3.3+
 - [path.py](https://pypi.python.org/pypi/path.py/)
 - [python-magic](https://pypi.python.org/pypi/python-magic/)
 - [six](https://pypi.python.org/pypi/six/)
+
+## Test dependencies
+- [pytest](https://pypi.python.org/pypi/pytest)
+- [pytest-runner](https://pypi.python.org/pypi/pytest-runner)
+- [tox](https://pypi.python.org/pypi/tox)
 - [voluptuous](https://pypi.python.org/pypi/voluptuous/)
 
 
