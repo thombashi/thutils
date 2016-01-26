@@ -172,12 +172,11 @@ class Test_check_file_existence:
 class Test_sanitize_file_name:
     SANITIZE_CHAR_LIST = [
         "\\", ":", "*", "?", '"', "<", ">", "|",
-        # "/",
     ]
     NOT_SANITIZE_CHAR_LIST = [
-        "!", "#", "$", "%", '&', "'", "_",
+        "!", "#", "$", '&', "'", "_",
         "=", "~", "^", "@", "`", "[", "]", "+", ";", "{", "}",
-        ",", ".", "(", ")",
+        ",", ".", "(", ")", "%",
     ]
     REPLACE_TEXT_LIST = ["", "_"]
 
@@ -206,36 +205,29 @@ class Test_sanitize_file_name:
             sanitize_file_name(value)
 
 
-class Test_adjustFileName:
-    SANITIZE_CHAR_LIST = [
+class Test_replace_symbol:
+    TARGET_CHAR_LIST = [
         "\\", ":", "*", "?", '"', "<", ">", "|",
-        ",", ".", "%", "(", ")",
-        #"/",
+        ",", ".", "%", "(", ")", "/", " ",
     ]
-    NOT_SANITIZE_CHAR_LIST = [
+    NOT_TARGET_CHAR_LIST = [
         "!", "#", "$", '&', "'", "_",
         "=", "~", "^", "@", "`", "[", "]", "+", ";", "{", "}",
     ]
-    REPLACE_TEXT_LIST = [""]
+    REPLACE_TEXT_LIST = ["", "_"]
 
     @pytest.mark.parametrize(
-        ["value", "expected"],
+        ["value", "replace_text", "expected"],
         [
-            ["A" + c + "B", "A" + rep + "B"] for c, rep in itertools.product(
-                SANITIZE_CHAR_LIST, REPLACE_TEXT_LIST)
+            ["A" + c + "B", rep, "A" + rep + "B"] for c, rep in itertools.product(
+                TARGET_CHAR_LIST, REPLACE_TEXT_LIST)
         ] + [
-            ["A" + c + "B", "A" + c + "B"] for c, rep in itertools.product(
-                NOT_SANITIZE_CHAR_LIST, REPLACE_TEXT_LIST)
+            ["A" + c + "B", rep, "A" + c + "B"] for c, rep in itertools.product(
+                NOT_TARGET_CHAR_LIST, REPLACE_TEXT_LIST)
         ]
     )
-    def test_normal_1(self, value, expected):
-        assert adjustFileName(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["A B", "A_B"],
-    ])
-    def test_normal_2(self, value, expected):
-        assert adjustFileName(value) == expected
+    def test_normal_1(self, value, replace_text, expected):
+        assert replace_symbol(value, replace_text) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
         [None, AttributeError],
@@ -244,7 +236,7 @@ class Test_adjustFileName:
     ])
     def test_abnormal(self, value, expected):
         with pytest.raises(expected):
-            adjustFileName(value)
+            replace_symbol(value)
 
 
 class Test_parsePermission3Char:
