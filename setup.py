@@ -31,7 +31,7 @@ setuptools.setup(
     license="GNU Lesser General Public License v3 (LGPLv3)",
     include_package_data=True,
     packages=setuptools.find_packages(exclude=['test*']),
-    install_requires=requirements,
+    install_requires=install_requires,
     setup_requires=["pytest-runner"],
     tests_require=tests_require,
     classifiers=[
