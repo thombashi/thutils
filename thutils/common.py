@@ -173,8 +173,9 @@ def is_not_empty_list_or_tuple(value):
 
 def safe_division(dividend, divisor):
     """
-    :return value:
+    :return:
         nan: invalid arguments
+    :rtype: float
     """
 
     try:
@@ -334,10 +335,9 @@ def _unit_to_byte(unit, kilo_size):
 
 def humanreadable_to_byte(readable_size, kilo_size=1024):
     """
-    :argument:
-        readable size:
-            human readable size (bytes).
-            e.g. 256 M
+    :param str: readable_size. human readable size (bytes). e.g. 256 M
+    :param int: size of kilo. 1024 or 1000
+    :raises: ValueError
     """
 
     size = readable_size[:-1]
@@ -491,10 +491,11 @@ def compare_version(lhs_version, rhs_version):
     """
     <Major>.<Minor>.<Revision> 形式のバージョン文字列を比較する。
 
-    :Return value:
+    :return:
         0<:	LHSがRHSより小さい
         0:	LHS == RHS
         0>:	LHSがRHSより大きい
+    :rtype: int
     """
 
     lhs_major, lhs_minor, lhs_revision = [
