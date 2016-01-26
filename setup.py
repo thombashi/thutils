@@ -6,8 +6,11 @@ import setuptools
 with open("README.rst") as fp:
     long_description = fp.read()
 
-with open("requirements.txt", "r") as fp:
-    requirements = fp.read().splitlines()
+with open("requirements.txt") as f:
+    install_requires = [line.strip() for line in f if line.strip()]
+
+with open("test_requirements.txt") as f:
+    tests_require = [line.strip() for line in f if line.strip()]
 
 major, minor = sys.version_info[:2]
 
@@ -28,13 +31,9 @@ setuptools.setup(
     license="GNU Lesser General Public License v3 (LGPLv3)",
     include_package_data=True,
     packages=setuptools.find_packages(exclude=['test*']),
-    install_requires=requirements,
+    install_requires=install_requires,
     setup_requires=["pytest-runner"],
-    tests_require=[
-        "pytest",
-        "pytest-cov",
-        "voluptuous",
-    ],
+    tests_require=tests_require,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
