@@ -150,7 +150,7 @@ class FileManager:
     @classmethod
     def chmod(cls, path, permission_text):
         """
-        permission_text: "ls -l" style permission: e.g. -rw-r--r--
+        :param str permission_text: "ls -l" style permission string. e.g. -rw-r--r--
         """
 
         try:
@@ -329,13 +329,11 @@ def validate_path(input_path):
 
 def check_file_existence(path):
     """
-    return value:
-        FileType
-
-    raise:
-        - InvalidFilePathError
-        - FileNotFoundError
-        - RuntimeError
+    :return: FileType
+    :rtype: int
+    :raises InvalidFilePathError:
+    :raises FileNotFoundError:
+    :raises RuntimeError:
     """
 
     validate_path(path)
