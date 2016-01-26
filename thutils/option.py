@@ -206,8 +206,7 @@ def getGeneralOptionList(options):
             option_list.append("--dry-run")
     except AttributeError:
         pass
-    # if hasattr(options, "dry_run") and options.dry_run:
-    #    option_list.append("--dry-run")
+
     if not options.with_no_log:
         option_list.append("--logging")
     if options.log_level == logging.DEBUG:
