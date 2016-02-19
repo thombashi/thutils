@@ -335,9 +335,9 @@ def _unit_to_byte(unit, kilo_size):
 
 def humanreadable_to_byte(readable_size, kilo_size=1024):
     """
-    :param str: readable_size. human readable size (bytes). e.g. 256 M
-    :param int: size of kilo. 1024 or 1000
-    :raises: ValueError
+    :param str readable_size: human readable size (bytes). e.g. 256 M
+    :param int kilo_size: size of kilo. 1024 or 1000
+    :raises ValueError:
     """
 
     size = readable_size[:-1]
@@ -352,10 +352,6 @@ def humanreadable_to_byte(readable_size, kilo_size=1024):
     coefficient = _unit_to_byte(unit, kilo_size)
 
     return size * coefficient
-
-
-def humanreadable_to_kb(readable_size):
-    return humanreadable_to_byte(readable_size) / 1024
 
 
 def _get_unit(byte):

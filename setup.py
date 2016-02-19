@@ -13,9 +13,8 @@ with open("test_requirements.txt") as f:
     tests_require = [line.strip() for line in f if line.strip()]
 
 major, minor = sys.version_info[:2]
-
 if major == 2 and minor <= 5:
-    requirements.extend([
+    install_requires.extend([
         "argparse",
         "simplejson",
     ])
