@@ -32,52 +32,6 @@ class NotInstallError(Exception):
     pass
 
 
-class BaseObject(object):
-
-    def __init__(self):
-        pass
-
-    def to_string(self):
-        return "%s: %s" % (
-            self.__class__.__name__, dump_dict(self.__dict__))
-
-    def debug(self, message=""):
-        logger.debug("%s: %s %s" % (
-            self.__class__.__name__, message, dump_dict(self.__dict__)))
-
-
-class MinMaxObject(BaseObject):
-
-    @property
-    def min_value(self):
-        return self.__min_value
-
-    @property
-    def max_value(self):
-        return self.__max_value
-
-    def __init__(self):
-        self.__min_value = None
-        self.__max_value = None
-
-    def diff(self):
-        return self.max_value - self.min_value
-
-    def average(self):
-        return (self.max_value + self.min_value) * 0.5
-
-    def update(self, value):
-        if self.__min_value is None:
-            self.__min_value = value
-        else:
-            self.__min_value = min(self.__min_value, value)
-
-        if self.__max_value is None:
-            self.__max_value = value
-        else:
-            self.__max_value = max(self.__max_value, value)
-
-
 # function ---
 
 def is_integer(value):
@@ -159,8 +113,8 @@ def is_list_or_tuple(value):
     return any([_is_list(value), _is_tuple(value)])
 
 
-def is_empty_list_or_tuple(value):
-    return value is None or (_is_list(value) and len(value) == 0)
+# def is_empty_list_or_tuple(value):
+#    return value is None or (_is_list(value) and len(value) == 0)
 
 
 def is_empty_list_or_tuple(value):
@@ -196,10 +150,9 @@ def get_list_item(input_list, index):
 
     list_size = len(input_list)
     if not (0 <= index < list_size):
-        message = "out of index: list=%s, size=%d, index=%s" % (
-            input_list, list_size, str(index))
+        # message = "out of index: list=%s, size=%d, index=%s" % (
+        #    input_list, list_size, str(index))
         #raise IndexError(message)
-        logger.debug(message)
         return None
 
     try:
@@ -445,8 +398,6 @@ def is_install_command(command):
         search_command, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     is_command_found = proc.wait() == 0
-    if not is_command_found:
-        logger.debug("'%s' command not found" % (command))
 
     return is_command_found
 
@@ -462,8 +413,6 @@ def verify_install_command(command_list):
         message = "command not found: %s" % (
             ", ".join(not_installed_command_list))
         raise NotInstallError(message)
-
-    logger.debug("required commands are installed: " + ", ".join(command_list))
 
 
 def command_to_filename(command, suffix=""):
@@ -551,14 +500,12 @@ def sleep_wrapper(sleep_second, dry_run=False):
 
     sleep_second = float(sleep_second)
     if sleep_second <= 0:
-        logger.debug("skip sleep")
         return 0
 
     if dry_run:
-        logger.debug("dry-run: skip sleep")
         return 0
 
-    logger.debug("sleep %f seconds" % (sleep_second))
+    #logger.debug("sleep %f seconds" % (sleep_second))
     time.sleep(sleep_second)
 
     return sleep_second
@@ -602,8 +549,6 @@ def dump_dict(dict_input, indent=4):
     except ImportError:
         pass
 
-    logger.error("failed to import json library")
-
     try:
         import pprint
         return pprint.pformat(dict_work, indent=indent)
@@ -611,9 +556,3 @@ def dump_dict(dict_input, indent=4):
         pass
 
     return str(dict_work)
-
-
-def debug_dict(dict_input, symbol_table, convert_func=dump_dict):
-    logger.debug("%s keys=%d %s" % (
-        get_var_name(dict_input, symbol_table),
-        len(dict_input), convert_func(dict_input)))

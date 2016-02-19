@@ -70,12 +70,6 @@ class Test_logger_get_log_clear_log:
         assert len(logger.get_log()) == 0
 
 
-class Test_logger_debug_logging_count:
-
-    def test_smoke(self):
-        logger.debug_logging_count()
-
-
 class Test_logger_write:
 
     @pytest.mark.parametrize(["message", "log_level", "caller"], [

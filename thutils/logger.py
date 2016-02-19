@@ -195,11 +195,6 @@ class logger:
         cls.__writer.clear_log()
 
     @classmethod
-    def debug_logging_count(cls):
-        import thutils.common as common
-        common.debug_dict(cls.__dict_logging_count, locals())
-
-    @classmethod
     def write(cls, msg, log_level, caller=None):
         if caller is None:
             caller = logging.getLogger().findCaller()

@@ -275,8 +275,6 @@ class FileManager:
                 result = cls.remove_object(remove_path)
                 dict_result_pathlist.setdefault(result, []).append(remove_path)
 
-        thutils.common.debug_dict(dict_result_pathlist, locals())
-
         return dict_result_pathlist
 
     @classmethod

@@ -85,5 +85,4 @@ class Main:
             return_value = 1
             return return_value
         finally:
-            logger.debug_logging_count()
             logger.debug("exit code: " + str(return_value))
