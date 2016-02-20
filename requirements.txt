@@ -1,4 +1,5 @@
 DataProperty
+DateTimeRange
 python-magic
 path.py
 six<=1.8.0
