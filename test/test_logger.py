@@ -11,7 +11,6 @@ import sys
 
 import pytest
 
-import thutils
 from thutils.logger import logger
 
 
@@ -68,12 +67,6 @@ class Test_logger_get_log_clear_log:
         assert len(logger.get_log()) == 1
         logger.clear_log()
         assert len(logger.get_log()) == 0
-
-
-class Test_logger_debug_logging_count:
-
-    def test_smoke(self):
-        logger.debug_logging_count()
 
 
 class Test_logger_write:

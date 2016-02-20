@@ -11,10 +11,10 @@ import os
 import platform
 from subprocess import PIPE
 
+import dataproperty
 import pytest
 import six
 
-import thutils
 from thutils.subprocwrapper import SubprocessWrapper
 
 os_type = platform.system()
@@ -30,12 +30,12 @@ else:
 
 @pytest.fixture
 def subproc_run():
-    return thutils.subprocwrapper.SubprocessWrapper()
+    return SubprocessWrapper()
 
 
 @pytest.fixture
 def subproc_dryrun():
-    return thutils.subprocwrapper.SubprocessWrapper()
+    return SubprocessWrapper()
 
 
 class Test_SubprocessWrapper_init:
@@ -74,8 +74,8 @@ class Test_SubprocessWrapper_popen_command:
     def test_normal(self, subproc_run, command, std_in, environ, expected):
         proc = subproc_run.popen_command(command, std_in, environ)
         ret_stdout, ret_stderr = proc.communicate()
-        assert thutils.common.is_not_empty_string(ret_stdout)
-        assert thutils.common.is_empty_string(ret_stderr)
+        assert dataproperty.is_not_empty_string(ret_stdout)
+        assert dataproperty.is_empty_string(ret_stderr)
         assert proc.returncode == expected
 
     @pytest.mark.skipif("platform.system() == 'Windows'")
@@ -85,6 +85,6 @@ class Test_SubprocessWrapper_popen_command:
     def test_normal_stdin(self, subproc_run, command, input, environ, expected):
         proc = subproc_run.popen_command(command, PIPE, environ)
         ret_stdout, ret_stderr = proc.communicate(input=six.b(input))
-        assert thutils.common.is_not_empty_string(ret_stdout)
-        assert thutils.common.is_empty_string(ret_stderr)
+        assert dataproperty.is_not_empty_string(ret_stdout)
+        assert dataproperty.is_empty_string(ret_stderr)
         assert proc.returncode == expected

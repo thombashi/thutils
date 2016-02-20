@@ -8,8 +8,9 @@
 import errno
 import logging
 import os
-import platform
 import subprocess
+
+import dataproperty
 
 from thutils.logger import logger
 
@@ -47,7 +48,7 @@ class SubprocessWrapper(object):
         import re
         import thutils.common as common
 
-        if common.is_empty_string(command):
+        if dataproperty.is_empty_string(command):
             logger.error("null command")
             return errno.ENOENT
 
@@ -72,7 +73,7 @@ class SubprocessWrapper(object):
         return_code = proc.returncode
 
         if return_code != 0:
-            if (common.is_not_empty_list_or_tuple(ignore_error_list)
+            if (dataproperty.is_not_empty_list_or_tuple(ignore_error_list)
                     and return_code not in ignore_error_list):
                 logger.error("failed '%s' = %d" % (command, return_code))
             else:

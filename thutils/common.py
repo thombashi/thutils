@@ -9,9 +9,8 @@ import os.path
 import re
 import sys
 
+import dataproperty
 import six
-
-from thutils.logger import logger
 
 
 # Attribute Name ---
@@ -32,143 +31,7 @@ class NotInstallError(Exception):
     pass
 
 
-class BaseObject(object):
-
-    def __init__(self):
-        pass
-
-    def to_string(self):
-        return "%s: %s" % (
-            self.__class__.__name__, dump_dict(self.__dict__))
-
-    def debug(self, message=""):
-        logger.debug("%s: %s %s" % (
-            self.__class__.__name__, message, dump_dict(self.__dict__)))
-
-
-class MinMaxObject(BaseObject):
-
-    @property
-    def min_value(self):
-        return self.__min_value
-
-    @property
-    def max_value(self):
-        return self.__max_value
-
-    def __init__(self):
-        self.__min_value = None
-        self.__max_value = None
-
-    def diff(self):
-        return self.max_value - self.min_value
-
-    def average(self):
-        return (self.max_value + self.min_value) * 0.5
-
-    def update(self, value):
-        if self.__min_value is None:
-            self.__min_value = value
-        else:
-            self.__min_value = min(self.__min_value, value)
-
-        if self.__max_value is None:
-            self.__max_value = value
-        else:
-            self.__max_value = max(self.__max_value, value)
-
-
 # function ---
-
-def is_integer(value):
-    if isinstance(value, six.integer_types):
-        return not isinstance(value, bool)
-
-    try:
-        int(value)
-    except:
-        return False
-
-    if isinstance(value, float):
-        return False
-
-    #text = str(value).strip()
-    # if re.search("[.]|e-", text) is not None:
-    #    return False
-
-    return True
-
-
-def is_hex(value):
-    try:
-        int(value, 16)
-    except (TypeError, ValueError):
-        return False
-
-    return True
-
-
-def is_float(value):
-    if any([isinstance(value, float), value == float("inf")]):
-        return True
-
-    if isinstance(value, bool):
-        return False
-
-    try:
-        work = float(value)
-        if work == float("inf"):
-            return False
-    except:
-        return False
-
-    return True
-
-
-def is_nan(value):
-    return value != value
-
-
-def is_empty_string(value):
-    try:
-        return len(value.strip()) == 0
-    except AttributeError:
-        return True
-
-
-def is_not_empty_string(value):
-    """
-    空白文字(\0, \t, \n)を除いた文字数が0より大きければTrueを返す
-    """
-
-    try:
-        return len(value.strip()) > 0
-    except AttributeError:
-        return False
-
-
-def _is_list(value):
-    return isinstance(value, list)
-
-
-def _is_tuple(value):
-    return isinstance(value, tuple)
-
-
-def is_list_or_tuple(value):
-    return any([_is_list(value), _is_tuple(value)])
-
-
-def is_empty_list_or_tuple(value):
-    return value is None or (_is_list(value) and len(value) == 0)
-
-
-def is_empty_list_or_tuple(value):
-    return value is None or (is_list_or_tuple(value) and len(value) == 0)
-
-
-def is_not_empty_list_or_tuple(value):
-    return is_list_or_tuple(value) and len(value) > 0
 
 
 def safe_division(dividend, divisor):
@@ -191,92 +54,20 @@ def safe_division(dividend, divisor):
 
 
 def get_list_item(input_list, index):
-    if not is_integer(index):
+    if not dataproperty.is_integer(index):
         return None
 
     list_size = len(input_list)
     if not (0 <= index < list_size):
-        message = "out of index: list=%s, size=%d, index=%s" % (
-            input_list, list_size, str(index))
+        # message = "out of index: list=%s, size=%d, index=%s" % (
+        #    input_list, list_size, str(index))
         #raise IndexError(message)
-        logger.debug(message)
         return None
 
     try:
         return input_list[index]
     except TypeError:
         return None
-
-
-def get_integer_digit(value):
-    import math
-
-    abs_value = abs(float(value))
-
-    if abs_value == 0:
-        return 1
-
-    return max(1, int(math.log10(abs_value) + 1.0))
-
-
-def _get_decimal_places(value, integer_digits):
-    import math
-    from collections import namedtuple
-    from six.moves import range
-
-    float_digit_len = 0
-    if is_integer(value):
-        abs_value = abs(int(value))
-    else:
-        abs_value = abs(float(value))
-        text_value = str(abs_value)
-        float_text = 0
-        if text_value.find(".") != -1:
-            float_text = text_value.split(".")[1]
-            float_digit_len = len(float_text)
-        elif text_value.find("e-") != -1:
-            float_text = text_value.split("e-")[1]
-            float_digit_len = int(float_text) - 1
-
-    Threshold = namedtuple("Threshold", "pow digit_len")
-    upper_threshold = Threshold(pow=-2, digit_len=6)
-    min_digit_len = 1
-
-    treshold_list = [
-        Threshold(upper_threshold.pow + i, upper_threshold.digit_len - i)
-        for i, _ in enumerate(range(upper_threshold.digit_len, min_digit_len - 1, -1))
-    ]
-
-    abs_digit = min_digit_len
-    for treshold in treshold_list:
-        if abs_value < math.pow(10, treshold.pow):
-            abs_digit = treshold.digit_len
-            break
-
-    return min(abs_digit, float_digit_len)
-
-
-def get_number_of_digit(value):
-    try:
-        integer_digits = get_integer_digit(value)
-    except (ValueError, TypeError):
-        integer_digits = float("nan")
-
-    try:
-        decimal_places = _get_decimal_places(value, integer_digits)
-    except (ValueError, TypeError):
-        decimal_places = float("nan")
-
-    return (integer_digits, decimal_places)
-
-
-def get_text_len(text):
-    try:
-        return len(str(text))
-    except UnicodeEncodeError:
-        return len(text)
-    except:
-        return 0
 
 
 def removeItemFromList(item_list, item):
@@ -294,9 +85,9 @@ def removeListFromList(input_list, remove_list):
 
 
 def convert_value(value):
-    if is_integer(value):
+    if dataproperty.is_integer(value):
         value = int(value)
-    elif is_float(value):
+    elif dataproperty.is_float(value):
         value = float(value)
 
     return value
@@ -445,8 +236,6 @@ def is_install_command(command):
         search_command, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     is_command_found = proc.wait() == 0
-    if not is_command_found:
-        logger.debug("'%s' command not found" % (command))
 
     return is_command_found
 
@@ -463,8 +252,6 @@ def verify_install_command(command_list):
             ", ".join(not_installed_command_list))
         raise NotInstallError(message)
 
-    logger.debug("required commands are installed: " + ", ".join(command_list))
-
 
 def command_to_filename(command, suffix=""):
     import thutils.gfile as gfile
@@ -477,7 +264,7 @@ def command_to_filename(command, suffix=""):
     filename = filename.strip(sep_char).lstrip(sep_char)
     filename = re.sub("[%s]" % re.escape("/\\"), "-", filename)
     filename = gfile.sanitize_file_name(filename)
-    if is_not_empty_string(suffix):
+    if dataproperty.is_not_empty_string(suffix):
         filename += "_" + suffix
 
     return filename
@@ -521,7 +308,7 @@ def get_execution_command():
     def get_arg_text():
         arg_list = []
         for arg in sys.argv[1:]:
-            if is_integer(arg):
+            if dataproperty.is_integer(arg):
                 arg_list.append(arg)
                 continue
 
@@ -543,7 +330,7 @@ def sleep_wrapper(sleep_second, dry_run=False):
         #   windows: raise OverflowError
         raise OverflowError("sleep length is too large")
 
-    if is_nan(sleep_second):
+    if dataproperty.is_nan(sleep_second):
         # Process to maintain consistency between OS
         #   linux: raise IOError
         #   windows: not raise exception
@@ -551,14 +338,12 @@ def sleep_wrapper(sleep_second, dry_run=False):
 
     sleep_second = float(sleep_second)
     if sleep_second <= 0:
-        logger.debug("skip sleep")
         return 0
 
     if dry_run:
-        logger.debug("dry-run: skip sleep")
         return 0
 
-    logger.debug("sleep %f seconds" % (sleep_second))
+    #logger.debug("sleep %f seconds" % (sleep_second))
     time.sleep(sleep_second)
 
     return sleep_second
@@ -602,8 +387,6 @@ def dump_dict(dict_input, indent=4):
     except ImportError:
         pass
 
-    logger.error("failed to import json library")
-
     try:
         import pprint
         return pprint.pformat(dict_work, indent=indent)
@@ -611,9 +394,3 @@ def dump_dict(dict_input, indent=4):
         pass
 
     return str(dict_work)
-
-
-def debug_dict(dict_input, symbol_table, convert_func=dump_dict):
-    logger.debug("%s keys=%d %s" % (
-        get_var_name(dict_input, symbol_table),
-        len(dict_input), convert_func(dict_input)))

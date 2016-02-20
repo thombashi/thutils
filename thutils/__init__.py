@@ -1,7 +1,6 @@
 
 import thutils.cache
 import thutils.common
-import thutils.data_property
 import thutils.gfile
 import thutils.gtime
 import thutils.loader

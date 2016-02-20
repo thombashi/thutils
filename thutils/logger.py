@@ -7,6 +7,8 @@ import traceback
 import os.path
 import logging
 
+import dataproperty
+
 
 class LogLevelText:
     INFO = "INFO"
@@ -132,7 +134,7 @@ class logger:
         cls.__dict_logging_count = {}
         cls.__print_stack_trace = print_stack_trace
 
-        if common.is_empty_string(output_dir_path) or dry_run:
+        if dataproperty.is_empty_string(output_dir_path) or dry_run:
             output_dir_path = "."
 
         log_format_base = '[%(levelname)s] %(message)s'
@@ -193,11 +195,6 @@ class logger:
     @classmethod
     def clear_log(cls):
         cls.__writer.clear_log()
-
-    @classmethod
-    def debug_logging_count(cls):
-        import thutils.common as common
-        common.debug_dict(cls.__dict_logging_count, locals())
 
     @classmethod
     def write(cls, msg, log_level, caller=None):

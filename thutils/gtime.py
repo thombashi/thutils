@@ -8,9 +8,10 @@ import re
 import sys
 import datetime
 
-from thutils.logger import logger
-import thutils.common as common
+import dataproperty
 import datetimerange
+
+from thutils.logger import logger
 
 
 class RegularExpression:
@@ -198,7 +199,7 @@ def getTimeDeltaSecond(start_datetime, end_datetime):
 
 
 def convertHumanReadableToSecond(readable_time):
-    if common.is_empty_string(readable_time):
+    if dataproperty.is_empty_string(readable_time):
         raise ValueError("empty input")
 
     size = float(readable_time[:-1])
