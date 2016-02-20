@@ -7,8 +7,8 @@ import random
 
 import six
 from six.moves import range
+import dataproperty
 
-import thutils.common as common
 from thutils.logger import logger
 
 
@@ -127,12 +127,12 @@ class BinaryWriter:
         ]
 
     def __verify_size(self, size, min_value=None, max_value=None):
-        if common.is_float(min_value):
+        if dataproperty.is_float(min_value):
             if size < min_value:
                 raise ValueError(
                     "invalid size: expected>%d, value=%d" % (min_value, size))
 
-        if common.is_float(max_value):
+        if dataproperty.is_float(max_value):
             if size > max_value:
                 raise ValueError(
                     "invalid size: expected<%d, value=%d" % (max_value, size))

@@ -4,10 +4,8 @@
 
 import logging
 
-import six
-
-import thutils.common as common
-from thutils.logger import logger
+import dataproperty
+import datetimerange
 
 
 TN_ExecuteOption = "Execute Option"
@@ -51,12 +49,14 @@ class ArgumentParserObject(object):
         return self.parser.parse_args()
 
     def add_argument_group(self, group_name):
-        if common.is_empty_string(group_name):
+        if dataproperty.is_empty_string(group_name):
             raise ValueError("null argument group name")
 
         if group_name not in self.dict_group:
             group = self.parser.add_argument_group(group_name)
             self.dict_group[group_name] = group
+        else:
+            return self.dict_group.get(group_name)
 
         return group
 
@@ -97,13 +97,26 @@ class ArgumentParserObject(object):
 
         return group
 
+    def add_time_range_arg_group(
+            self, start_time_help_msg="", end_time_help_msg=""):
+
+        group = self.add_argument_group(self.GroupName.TIME_RANGE)
+        group.add_argument(
+            "-s", dest="start_datetime", default=None,
+            help=start_time_help_msg)
+        group.add_argument(
+            "-e", dest="end_datetime", default=None,
+            help=end_time_help_msg)
+
+        return group
+
     def add_time_range_argument_group(
             self, valid_time_format_list,
             start_time_help_msg="", end_time_help_msg=""):
 
         import re
 
-        if common.is_empty_list_or_tuple(valid_time_format_list):
+        if dataproperty.is_empty_list_or_tuple(valid_time_format_list):
             raise ValueError("required at least a valid time format")
 
         # convert datetime format to human readable text
@@ -160,21 +173,22 @@ class ArgumentParserObject(object):
         except ValueError:
             return
 
-        options.datetime_range = gtime.DateTimeRange(
+        options.datetime_range = datetimerange.DateTimeRange(
             options.start_datetime, options.end_datetime)
 
         if not is_check_time_inversion:
             return
 
         try:
-            options.datetime_range.verifyTimeRange()
+            options.datetime_range.validate_time_inversion()
         except TypeError:
             pass
 
     def _add_general_argument_group(self):
         group = self.add_argument_group(self.GroupName.MISC)
         group.add_argument(
-            "--logging", dest="with_no_log", action="store_false", default=True,
+            "--logging", dest="with_no_log",
+            action="store_false", default=True,
             help="output execution log to a file (%(prog)s.log).")
         group.add_argument(
             "--stacktrace", action="store_true", default=False,

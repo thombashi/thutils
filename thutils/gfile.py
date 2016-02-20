@@ -9,10 +9,10 @@ import os.path
 import re
 import sys
 
-import six
+import dataproperty
 import path
+import six
 
-import thutils.common
 from thutils.logger import logger
 
 
@@ -173,7 +173,7 @@ class FileManager:
             logger.exception(e)
             return False
 
-        if thutils.common.is_empty_string(dst_path):
+        if dataproperty.is_empty_string(dst_path):
             logger.error("empty destination path")
             return False
 
@@ -258,7 +258,7 @@ class FileManager:
         re_compile_list = [
             re.compile(re_pattern)
             for re_pattern in re_remove_list
-            if thutils.common.is_not_empty_string(remove_fileattern)
+            if dataproperty.is_not_empty_string(remove_fileattern)
         ]
 
         dict_result_pathlist = {}
@@ -315,7 +315,7 @@ class FileManager:
 
 
 def validate_path(input_path):
-    if thutils.common.is_empty_string(input_path):
+    if dataproperty.is_empty_string(input_path):
         raise NullPathError()
 
     match = re.search(
@@ -358,7 +358,7 @@ def findFile(search_root_dir_path, re_pattern_text):
     result = findFileAll(
         search_root_dir_path, os.path.isfile, re_pattern_text, find_count=1)
 
-    if thutils.common.is_empty_list_or_tuple(result):
+    if dataproperty.is_empty_list_or_tuple(result):
         return None
 
     return result[0]
@@ -394,7 +394,7 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     result = findFileAll(
         search_root_dir_path, os.path.isdir, re_pattern, find_count=1)
 
-    if thutils.common.is_empty_list_or_tuple(result):
+    if dataproperty.is_empty_list_or_tuple(result):
         return None
 
     return result[0]

@@ -36,7 +36,6 @@ class Main:
         self.function = function
 
     def __call__(self, *args):
-        import thutils.sqlite as sql
         import thutils.gfile as gfile
 
         return_value = -1
@@ -73,11 +72,6 @@ class Main:
             logger.info(
                 self.KEYBOARD_INTERRUPT_FORMAT % (os.path.basename(__file__)))
             return_value = 1
-            return return_value
-        except sql.DatabaseError:
-            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-            logger.exception(e)
-            return_value = EX_DATAERR
             return return_value
         except Exception:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility

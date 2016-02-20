@@ -15,7 +15,6 @@ import thutils
 from thutils.main import *
 import thutils.common as common
 import thutils.gfile as gfile
-import thutils.sqlite as sql
 
 
 @pytest.fixture
@@ -61,10 +60,6 @@ def raise_KeyboardInterrupt():
     raise KeyboardInterrupt
 
 
-def raise_DatabaseError():
-    raise sql.DatabaseError()
-
-
 class Test_Main:
 
     @pytest.mark.parametrize(["value", "expected"], [
@@ -77,7 +72,6 @@ class Test_Main:
         [raise_ImportError, EX_OSFILE],
         [raise_PermissionError, EX_NOPERM],
         [raise_KeyboardInterrupt, 1],
-        [raise_DatabaseError, EX_DATAERR],
     ])
     def test_normal(self, value, expected):
         main = Main(value)

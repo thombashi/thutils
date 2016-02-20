@@ -11,7 +11,6 @@ import sys
 
 import pytest
 
-import thutils
 from thutils.logger import logger
 
 
