@@ -29,12 +29,6 @@ def setup_module(module):
     locale.setlocale(locale.LC_ALL, 'C')
 
 
-class Test_TimeMeasure:
-
-    def test_smoke(self):
-        TimeMeasure("test")
-
-
 class Test_is_datetime:
 
     @pytest.mark.parametrize(["value", "expected"], [

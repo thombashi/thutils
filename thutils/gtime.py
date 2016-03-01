@@ -9,8 +9,6 @@ import sys
 import datetime
 
 import dataproperty
-import datetimerange
-
 from thutils.logger import logger
 
 
@@ -55,56 +53,6 @@ class Format:
     ]
 
     JST_DATE = "%Y/%m/%d"
-
-
-class TimeMeasure(object):
-    import logging
-
-    # Message Format ---
-    __MF_START = "<start %s> %s"
-    __MF_COMPLETE = "<complete> %s: execution-time=%s"
-
-    @property
-    def message(self):
-        return self.__message
-
-    def __init__(self, message, log_level=logging.INFO):
-        import os
-        import socket
-
-        self.__measurent_emtimerange = None
-        self.__message = message
-        self.__log_level = log_level
-
-        self.start()
-
-        # output message ---
-        hostname = socket.gethostname()
-        try:
-            ip_address = socket.gethostbyname(hostname)
-        except socket.gaierror:
-            ip_address = "na"
-
-        header = "%s(%s) %s$ " % (hostname, ip_address, os.getcwd())
-        write_message = self.__MF_START % (
-            self.__start_datetime.strftime(Format.ISO.DATETIME),
-            header + self.message)
-        logger.write(write_message, self.__log_level)
-
-    def start(self):
-        self.__start_datetime = datetime.datetime.now()
-
-    def stop(self):
-        end_datetime = datetime.datetime.now()
-        self.__measurent_emtimerange = datetimerange.DateTimeRange(
-            self.__start_datetime, end_datetime)
-
-        return self.__measurent_emtimerange
-
-    def __del__(self):
-        datetimerange = self.stop()
-        complete_msg = self.__MF_COMPLETE % (self.message, datetimerange)
-        logger.write(complete_msg, self.__log_level)
 
 
 def is_datetime(value):

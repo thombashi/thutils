@@ -13,6 +13,10 @@ from thutils.logger import logger
 
 
 class BinaryWriter:
+    """
+    TODO: rename BinaryWriter to DummyBinaryWriter
+    """
+
     __TABLE_SIZE = 16
     __DEFAULT_IO_SIZE = 64 * 1024  # [byte]
     __MAX_IO_SIZE = 1 * 1024 ** 2  # [byte]

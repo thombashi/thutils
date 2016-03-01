@@ -5,7 +5,6 @@
 import logging
 
 import dataproperty
-import datetimerange
 
 
 TN_ExecuteOption = "Execute Option"
@@ -97,7 +96,7 @@ class ArgumentParserObject(object):
 
         return group
 
-    def add_time_range_arg_group(
+    def add_time_range_argument_group(
             self, start_time_help_msg="", end_time_help_msg=""):
 
         group = self.add_argument_group(self.GroupName.TIME_RANGE)
@@ -107,41 +106,6 @@ class ArgumentParserObject(object):
         group.add_argument(
             "-e", dest="end_datetime", default=None,
             help=end_time_help_msg)
-
-        return group
-
-    def add_time_range_argument_group(
-            self, valid_time_format_list,
-            start_time_help_msg="", end_time_help_msg=""):
-
-        import re
-
-        if dataproperty.is_empty_list_or_tuple(valid_time_format_list):
-            raise ValueError("required at least a valid time format")
-
-        # convert datetime format to human readable text
-        help_time_format_list = []
-        for time_format in valid_time_format_list:
-            time_format = re.sub(re.escape("%Y"), "YYYY", time_format)
-            time_format = re.sub(re.escape("%y"), "YY", time_format)
-            time_format = re.sub(re.escape("%m"), "MM", time_format)
-            time_format = re.sub(re.escape("%d"), "DD", time_format)
-            time_format = re.sub(re.escape("%H"), "hh", time_format)
-            time_format = re.sub(re.escape("%M"), "mm", time_format)
-            time_format = re.sub(re.escape("%S"), "ss", time_format)
-            help_time_format_list.append(time_format)
-
-        help_text_format = "%s (valid time format: %s)"
-
-        group = self.add_argument_group(self.GroupName.TIME_RANGE)
-        group.add_argument(
-            "-s", dest="start_time",
-            help=help_text_format % (
-                start_time_help_msg, " | ".join(help_time_format_list)))
-        group.add_argument(
-            "-e", dest="end_time",
-            help=help_text_format % (
-                end_time_help_msg, " | ".join(help_time_format_list)))
 
         return group
 
@@ -157,32 +121,6 @@ class ArgumentParserObject(object):
             "--overwrite", dest=dest, action="store_const",
             const=MakeOption.OVERWRITE, default=MakeOption.MAKE,
             help="overwrite existing file")
-
-    @staticmethod
-    def validate_time_range_option(
-            options, valid_time_format_list,
-            is_check_time_inversion=True):
-
-        import thutils.gtime as gtime
-
-        try:
-            options.start_datetime = gtime.toDateTimeEx(
-                options.start_time, valid_time_format_list)
-            options.end_datetime = gtime.toDateTimeEx(
-                options.end_time, valid_time_format_list)
-        except ValueError:
-            return
-
-        options.datetime_range = datetimerange.DateTimeRange(
-            options.start_datetime, options.end_datetime)
-
-        if not is_check_time_inversion:
-            return
-
-        try:
-            options.datetime_range.validate_time_inversion()
-        except TypeError:
-            pass
 
     def _add_general_argument_group(self):
         group = self.add_argument_group(self.GroupName.MISC)

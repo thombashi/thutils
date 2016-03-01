@@ -17,10 +17,6 @@ class NotInstallError(Exception):
     pass
 
 
-class PermissionError(Exception):
-    pass
-
-
 def initialize_library(
         program_filename, options, output_dir_path="."):
 
