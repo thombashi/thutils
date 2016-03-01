@@ -63,11 +63,6 @@ class Main:
             logger.exception(e)
             return_value = EX_OSFILE
             return return_value
-        except thutils.PermissionError:
-            _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-            logger.exception(e)
-            return_value = EX_NOPERM
-            return return_value
         except KeyboardInterrupt:
             logger.info(
                 self.KEYBOARD_INTERRUPT_FORMAT % (os.path.basename(__file__)))

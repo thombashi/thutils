@@ -100,31 +100,14 @@ class Test_ArgumentParserObject_add_time_argument_group:
 
 class Test_ArgumentParserObject_add_time_range_argument_group:
 
-    @pytest.mark.parametrize(
-        ["valid_time_format_list", "start_time_help_msg", "end_time_help_msg"],
-        [
-            [Format.DATETIME_LIST, "", ""],
-        ])
+    @pytest.mark.parametrize(["start_time_help_msg", "end_time_help_msg"],
+                             [
+        ["", ""],
+    ])
     def test_normal(
-            self, maked_parser, valid_time_format_list,
-            start_time_help_msg, end_time_help_msg):
+            self, maked_parser, start_time_help_msg, end_time_help_msg):
         maked_parser.add_time_range_argument_group(
-            valid_time_format_list, start_time_help_msg, end_time_help_msg)
-
-    @pytest.mark.parametrize(
-        ["valid_time_format_list", "start_time_help_msg",
-            "end_time_help_msg", "expected"],
-        [
-            [None, "", "", ValueError],
-            [[], "", "", ValueError],
-            [1, "", "", TypeError],
-        ])
-    def test_exception(
-            self, maked_parser, valid_time_format_list,
-            start_time_help_msg, end_time_help_msg, expected):
-        with pytest.raises(expected):
-            maked_parser.add_time_range_argument_group(
-                valid_time_format_list, start_time_help_msg, end_time_help_msg)
+            start_time_help_msg, end_time_help_msg)
 
 
 class Test_ArgumentParserObject_addMakeArgumentGroup:

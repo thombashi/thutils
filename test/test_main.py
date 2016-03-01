@@ -52,10 +52,6 @@ def raise_ImportError():
     raise ImportError()
 
 
-def raise_PermissionError():
-    raise thutils.PermissionError()
-
-
 def raise_KeyboardInterrupt():
     raise KeyboardInterrupt
 
@@ -70,7 +66,6 @@ class Test_Main:
         [raise_IOError, EX_IOERR],
         [raise_ValueError, EX_SOFTWARE],
         [raise_ImportError, EX_OSFILE],
-        [raise_PermissionError, EX_NOPERM],
         [raise_KeyboardInterrupt, 1],
     ])
     def test_normal(self, value, expected):
