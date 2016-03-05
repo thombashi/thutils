@@ -12,11 +12,7 @@ import dataproperty
 from thutils.logger import logger
 
 
-class BinaryWriter:
-    """
-    TODO: rename BinaryWriter to DummyBinaryWriter
-    """
-
+class DummyBinaryDataWriter:
     __TABLE_SIZE = 16
     __DEFAULT_IO_SIZE = 64 * 1024  # [byte]
     __MAX_IO_SIZE = 1 * 1024 ** 2  # [byte]
@@ -43,7 +39,7 @@ class BinaryWriter:
 
             self.__min_data_block_size = int(self.__min_data_block_size / 2)
 
-        logger.debug("""BinaryWriter initialize:
+        logger.debug("""DummyBinaryDataWriter initialize:
             io-size=%d[byte]
             min-block-size=%d[byte]
         """ % (io_size_byte, self.__min_data_block_size)

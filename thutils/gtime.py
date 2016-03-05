@@ -55,70 +55,6 @@ class Format:
     JST_DATE = "%Y/%m/%d"
 
 
-def is_datetime(value):
-    return value is not None and isinstance(value, datetime.datetime)
-
-
-def is_valid_time_format(datetime_string, time_format):
-    try:
-        datetime.datetime.strptime(datetime_string, time_format)
-    except (TypeError, ValueError):
-        _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-        logger.debug(e)
-        return False
-
-    return True
-
-
-def toDateTime(datetime_string, time_format, timezone=""):
-    try:
-        datetime_string = str(datetime_string)
-    except UnicodeEncodeError:
-        return None
-
-    try:
-        return_datetime = datetime.datetime.strptime(
-            datetime_string.strip(), time_format)
-    except ValueError:
-        _, e, _ = sys.exc_info()  # for python 2.5 compatibility
-        logger.debug(e)
-        return None
-
-    match = re.search(RegularExpression.ISO.TIMEZONE, timezone)
-    if match is not None:
-        tz = match.group()
-        op = tz[0]
-        hours = int(tz[1:3])
-        minutes = int(tz[3:5])
-        td = datetime.timedelta(hours=hours, minutes=minutes)
-        if op == "+":
-            return_datetime += td
-        else:
-            return_datetime -= td
-
-    return return_datetime
-
-
-def toDateTimeEx(datetime_string, time_format_list):
-    time_format = findValidTimeFormat(
-        datetime_string, time_format_list)
-
-    if time_format is None:
-        raise ValueError(
-            "there is no matching time format: valid-format=%s, input=%s" % (
-                "|".join(time_format_list), datetime_string))
-
-    return toDateTime(datetime_string, time_format)
-
-
-def findValidTimeFormat(datetime_string, time_format_list):
-    for time_format in time_format_list:
-        if is_valid_time_format(datetime_string, time_format):
-            return time_format
-
-    return None
-
-
 def getTimeUnitSecondsCoefficient(unit):
     unit = unit.lower()
 
@@ -136,14 +72,6 @@ def getTimeUnitSecondsCoefficient(unit):
         raise ValueError("invalid unit: " + str(unit))
 
     return coef_second
-
-
-def getTimeDeltaSecond(start_datetime, end_datetime):
-    deltatime = (end_datetime - start_datetime)
-    return (
-        deltatime.days * getTimeUnitSecondsCoefficient("d") +
-        float(deltatime.seconds) +
-        float(deltatime.microseconds / (1000.0 ** 2)))
 
 
 def convertHumanReadableToSecond(readable_time):

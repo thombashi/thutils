@@ -57,12 +57,18 @@ class Test_SubprocessWrapper_run:
         [list_command + " not_exist_dir", [], list_command_errno],
         [list_command + " not_exist_dir",
             [list_command_errno], list_command_errno],
-        ["not_exist_command", [], list_command_errno],
-        ["", [], errno.ENOENT],
-        [None, [], errno.ENOENT],
     ])
     def test_normal(self, subproc_run, command, ignore_error_list, expected):
         assert subproc_run.run(command, ignore_error_list) == expected
+
+    @pytest.mark.parametrize(["command", "ignore_error_list", "expected"], [
+        ["", [], ValueError],
+        [None, [], ValueError],
+        ["not_exist_command", [], RuntimeError],
+    ])
+    def test_exception(self, subproc_run, command, ignore_error_list, expected):
+        with pytest.raises(expected):
+            subproc_run.run(command, ignore_error_list)
 
 
 class Test_SubprocessWrapper_popen_command:
