@@ -5,13 +5,11 @@
 '''
 
 
-import errno
 import logging
 import os
 import subprocess
 
 import dataproperty
-
 from thutils.logger import logger
 
 
@@ -49,8 +47,7 @@ class SubprocessWrapper(object):
         import thutils.common as common
 
         if dataproperty.is_empty_string(command):
-            logger.error("null command")
-            return errno.ENOENT
+            raise ValueError("null command")
 
         self.__show_command(command)
         if self.dry_run:
@@ -58,23 +55,20 @@ class SubprocessWrapper(object):
 
         if re.search("\(.*\)", command) is None:
             if not common.is_install_command(command.split()[0]):
-                logger.error("command not found: " + command)
-                return errno.ENOENT
+                raise RuntimeError("command not found: " + command)
 
         tmp_environ = dict(os.environ)
         tmp_environ["LC_ALL"] = "C"
 
         proc = subprocess.Popen(command, shell=True, env=tmp_environ)
-        # proc	= subprocess.Popen(command, shell=True, env=tmp_environ,
-        #			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #return_code = proc.wait()
-
         _ret_stdout, _ret_stderr = proc.communicate()
         return_code = proc.returncode
 
         if return_code != 0:
-            if (dataproperty.is_not_empty_list_or_tuple(ignore_error_list)
-                    and return_code not in ignore_error_list):
+            if all([
+                dataproperty.is_not_empty_list_or_tuple(ignore_error_list),
+                return_code not in ignore_error_list
+            ]):
                 logger.error("failed '%s' = %d" % (command, return_code))
             else:
                 logger.debug(

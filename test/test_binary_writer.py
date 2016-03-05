@@ -23,7 +23,7 @@ def subproc_wrapper():
 
 @pytest.fixture
 def bin_writer():
-    return BinaryWriter()
+    return DummyBinaryDataWriter()
 
 
 TEST_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +40,7 @@ class Test_BinaryWriter:
         [True],  # io_size_byte==1と判断される
     ])
     def test_new(self, io_size_byte):
-        BinaryWriter(io_size_byte)
+        DummyBinaryDataWriter(io_size_byte)
 
     @pytest.mark.parametrize(["io_size_byte", "expected"], [
         [None, TypeError],
@@ -50,7 +50,7 @@ class Test_BinaryWriter:
     ])
     def test_new_exception(self, tmpdir, io_size_byte, expected):
         with pytest.raises(expected):
-            BinaryWriter(io_size_byte)
+            DummyBinaryDataWriter(io_size_byte)
 
     @pytest.mark.parametrize(["write_size", "expected"], [
         [None, TypeError],
@@ -60,7 +60,7 @@ class Test_BinaryWriter:
             self, tmpdir, write_size, expected):
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
-        bin_writer = BinaryWriter()
+        bin_writer = DummyBinaryDataWriter()
 
         with pytest.raises(expected):
             bin_writer.write_binary(
@@ -77,7 +77,7 @@ class Test_LinuxBinaryWriter:
     def test_normal(
             self, monkeypatch, tmpdir, write_size, expected):
 
-        bin_writer = BinaryWriter()
+        bin_writer = DummyBinaryDataWriter()
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
         assert not os.path.isfile(write_path)
@@ -100,7 +100,7 @@ class Test_WindowsBinaryWriter:
         os.O_BINARY = 32768
         os.O_SEQUENTIAL = 32
 
-        bin_writer = BinaryWriter()
+        bin_writer = DummyBinaryDataWriter()
 
         write_path = str(tmpdir.join(TEST_FILE_NAME))
         assert not os.path.isfile(write_path)
