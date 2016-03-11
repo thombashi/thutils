@@ -1,4 +1,4 @@
 DataProperty
 python-magic
 path.py
-six<=1.8.0
+six
