@@ -1,16 +1,22 @@
 from __future__ import with_statement
+import os.path
 import sys
 import setuptools
+
+
+MISC_DIR = "misc"
+REQUIREMENT_DIR = "requirements"
 
 
 with open("README.rst") as fp:
     long_description = fp.read()
 
-with open("requirements.txt") as f:
+with open(os.path.join(REQUIREMENT_DIR, "requirements.txt")) as f:
     install_requires = [line.strip() for line in f if line.strip()]
 
-with open("test_requirements.txt") as f:
+with open(os.path.join(REQUIREMENT_DIR, "test_requirements.txt")) as f:
     tests_require = [line.strip() for line in f if line.strip()]
+
 
 major, minor = sys.version_info[:2]
 if major == 2 and minor <= 5:
@@ -21,7 +27,7 @@ if major == 2 and minor <= 5:
 
 setuptools.setup(
     name="thutils",
-    version="0.1.18",
+    version="0.1.19",
     author="Tsuyoshi Hombashi",
     author_email="gogogo.vm@gmail.com",
     url="https://github.com/thombashi/thutils",
