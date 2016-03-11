@@ -1,8 +1,5 @@
 '''
 @author: Tsuyoshi Hombashi
-
-:required:
-    https://pypi.python.org/pypi/pytest
 '''
 
 import os
