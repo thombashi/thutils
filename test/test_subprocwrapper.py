@@ -61,6 +61,7 @@ class Test_SubprocessWrapper_run:
     def test_normal(self, subproc_run, command, ignore_error_list, expected):
         assert subproc_run.run(command, ignore_error_list) == expected
 
+    @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["command", "ignore_error_list", "expected"], [
         ["", [], ValueError],
         [None, [], ValueError],
