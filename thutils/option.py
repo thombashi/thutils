@@ -7,9 +7,6 @@ import logging
 import dataproperty
 
 
-TN_ExecuteOption = "Execute Option"
-
-
 class MakeOption:
     MAKE = "make"
     OVERWRITE = "overwrite"
