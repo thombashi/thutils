@@ -19,10 +19,21 @@ class SubprocessWrapper(object):
     def dry_run(self):
         return self.__dry_run
 
+    @property
+    def stdout_text(self):
+        self.__stdout_text = None
+
+    @property
+    def stderr_text(self):
+        self.__stderr_text = None
+
     def __init__(self, dry_run=False):
         self.__dry_run = dry_run
         self.is_show_timestamp = False
         self.command_log_level = logging.DEBUG
+
+        self.__stdout_text = None
+        self.__stderr_text = None
 
     def __get_env(self, env=None):
         if env is not None:
@@ -64,7 +75,7 @@ class SubprocessWrapper(object):
                 raise RuntimeError("command not found: " + command)
 
         proc = subprocess.Popen(command, shell=True, env=self.__get_env())
-        _ret_stdout, _ret_stderr = proc.communicate()
+        self.__stdout_text, self.__stderr_text = proc.communicate()
         return_code = proc.returncode
 
         if return_code != 0:
