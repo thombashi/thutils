@@ -69,6 +69,11 @@ class JsonLoader:
         """
 
         try:
+            json_text = json_text.decode("ascii")
+        except AttributeError:
+            pass
+
+        try:
             dict_json = json.loads(json_text)
         except ValueError:
             _, e, _ = sys.exc_info()  # for python 2.5 compatibility
