@@ -67,7 +67,7 @@ class Test_SubprocessWrapper_run:
     ])
     def test_stdout(self, subproc_run, command, expected):
         assert subproc_run.run(command) == 0
-        assert subproc_run.stdout_text.strip() == expected
+        assert subproc_run.stdout_text.strip() == six.b(expected)
 
     @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["command", "ignore_error_list", "expected"], [
