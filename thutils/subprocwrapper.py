@@ -25,11 +25,11 @@ class SubprocessWrapper(object):
 
     @property
     def stdout_text(self):
-        self.__stdout_text = None
+        return self.__stdout_text
 
     @property
     def stderr_text(self):
-        self.__stderr_text = None
+        return self.__stderr_text
 
     def __init__(self, dry_run=False):
         self.__dry_run = dry_run
@@ -64,23 +64,27 @@ class SubprocessWrapper(object):
         elif self.command_log_level == logging.DEBUG:
             logger.debug(output)
 
-    def run(self, command, ignore_error_list=()):
+    def __validate_command(self):
         import re
         import thutils.common as common
 
-        if dataproperty.is_empty_string(command):
+        if dataproperty.is_empty_string(self.command):
             raise ValueError("null command")
 
+        if re.search("\(.*\)", self.command) is None:
+            if not common.is_install_command(self.command.split()[0]):
+                raise RuntimeError("command not found: " + self.command)
+
+    def run(self, command, ignore_error_list=()):
         self.__command = command
-        self.__show_command(command)
+        self.__validate_command()
+        self.__show_command()
         if self.dry_run:
             return 0
 
-        if re.search("\(.*\)", command) is None:
-            if not common.is_install_command(command.split()[0]):
-                raise RuntimeError("command not found: " + command)
-
-        proc = subprocess.Popen(command, shell=True, env=self.__get_env())
+        proc = subprocess.Popen(
+            command, shell=True, env=self.__get_env(),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.__stdout_text, self.__stderr_text = proc.communicate()
         return_code = proc.returncode
 
@@ -98,7 +102,8 @@ class SubprocessWrapper(object):
 
     def popen_command(self, command, std_in=None, environ=None):
         self.__command = command
-        self.__show_command(command)
+        self.__validate_command()
+        self.__show_command()
         if self.dry_run:
             return None
 
