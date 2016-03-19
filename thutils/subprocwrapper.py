@@ -41,10 +41,15 @@ class SubprocessWrapper(object):
         self.__stderr_text = None
 
     def __get_env(self, env=None):
+        import platform
+
         if env is not None:
             return env
 
-        return dict(os.environ, LC_ALL="C")
+        if platform.system() == "Linux":
+            return dict(os.environ, LC_ALL="C")
+
+        return os.environ
 
     def __show_command(self):
         import datetime
