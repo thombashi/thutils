@@ -17,7 +17,7 @@ from thutils.loader import JsonLoader
 
 
 TEMP_FILE_NAME = "tmp.json"
-TEST_JSON =             """
+TEST_JSON = """
 {
     "comment"           : "comment",
     "operation"         : "write",
@@ -26,6 +26,25 @@ TEST_JSON =             """
     "access_percentage" : 100
 }
 """
+TEST_JSON_B = six.b("""
+{
+    "comment"           : "comment",
+    "operation"         : "write",
+    "thread"            : 8,
+    "io_size"           : "8k",
+    "access_percentage" : 100
+}
+""")
+TEST_JSON_U = six.u("""
+{
+    "comment"           : "comment",
+    "operation"         : "write",
+    "thread"            : 8,
+    "io_size"           : "8k",
+    "access_percentage" : 100
+}
+""")
+
 EXPECTED = {
     "comment": "comment",
     "operation": "write",
@@ -58,6 +77,16 @@ class Test_JsonLoader_load:
         ],
         [
             TEST_JSON,
+            SCHEMA,
+            EXPECTED,
+        ],
+        [
+            TEST_JSON_B,
+            SCHEMA,
+            EXPECTED,
+        ],
+        [
+            TEST_JSON_U,
             SCHEMA,
             EXPECTED,
         ],
