@@ -24,6 +24,12 @@ class SubprocessWrapper(object):
         self.is_show_timestamp = False
         self.command_log_level = logging.DEBUG
 
+    def __get_env(self, env=None):
+        if env is not None:
+            return env
+
+        return dict(os.environ, LC_ALL="C")
+
     def __show_command(self, command):
         import datetime
 
@@ -57,10 +63,7 @@ class SubprocessWrapper(object):
             if not common.is_install_command(command.split()[0]):
                 raise RuntimeError("command not found: " + command)
 
-        tmp_environ = dict(os.environ)
-        tmp_environ["LC_ALL"] = "C"
-
-        proc = subprocess.Popen(command, shell=True, env=tmp_environ)
+        proc = subprocess.Popen(command, shell=True, env=self.__get_env())
         _ret_stdout, _ret_stderr = proc.communicate()
         return_code = proc.returncode
 
@@ -81,14 +84,8 @@ class SubprocessWrapper(object):
         if self.dry_run:
             return None
 
-        if environ is not None:
-            tmp_environ = environ
-        else:
-            tmp_environ = dict(os.environ)
-            tmp_environ["LC_ALL"] = "C"
-
         process = subprocess.Popen(
-            command, env=tmp_environ, shell=True,
+            command, env=self.__get_env(environ), shell=True,
             stdin=std_in, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         logger.debug(
