@@ -20,6 +20,10 @@ class SubprocessWrapper(object):
         return self.__dry_run
 
     @property
+    def command(self):
+        return self.__command
+
+    @property
     def stdout_text(self):
         self.__stdout_text = None
 
@@ -32,6 +36,7 @@ class SubprocessWrapper(object):
         self.is_show_timestamp = False
         self.command_log_level = logging.DEBUG
 
+        self.__command = None
         self.__stdout_text = None
         self.__stderr_text = None
 
@@ -41,7 +46,7 @@ class SubprocessWrapper(object):
 
         return dict(os.environ, LC_ALL="C")
 
-    def __show_command(self, command):
+    def __show_command(self):
         import datetime
 
         log_level = logging.getLogger('').getEffectiveLevel()
@@ -50,9 +55,9 @@ class SubprocessWrapper(object):
             return
 
         if self.is_show_timestamp:
-            output = str(datetime.datetime.now()) + ": " + command
+            output = str(datetime.datetime.now()) + ": " + self.command
         else:
-            output = command
+            output = self.command
 
         if self.command_log_level == logging.INFO:
             logger.info(output)
@@ -66,6 +71,7 @@ class SubprocessWrapper(object):
         if dataproperty.is_empty_string(command):
             raise ValueError("null command")
 
+        self.__command = command
         self.__show_command(command)
         if self.dry_run:
             return 0
@@ -91,6 +97,7 @@ class SubprocessWrapper(object):
         return return_code
 
     def popen_command(self, command, std_in=None, environ=None):
+        self.__command = command
         self.__show_command(command)
         if self.dry_run:
             return None
