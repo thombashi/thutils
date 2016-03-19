@@ -60,3 +60,4 @@ convert_readme.sh
 desktop.ini
 README.md
 *.ipynb
+upgrade.sh
