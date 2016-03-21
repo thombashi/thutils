@@ -2,9 +2,6 @@
 
 '''
 @author: Tsuyoshi Hombashi
-
-:required:
-    https://pypi.python.org/pypi/pytest
 '''
 
 import platform
@@ -84,51 +81,6 @@ class Test_safe_division:
     ])
     def test_abnormal_2(self, dividend, divisor, expected):
         assert safe_division(dividend, divisor) == expected
-
-
-class Test_get_list_item:
-    input_list = [1, 2, 3]
-
-    @pytest.mark.parametrize(['input_list', "index", "expected"], [
-        [input_list, 0, 1],
-        [input_list, 2, 3],
-
-        [input_list, -1, None],
-        [input_list, 4, None],
-
-        [input_list, 1.0, None],
-        [input_list, True, None],
-        [input_list, None, None],
-        [input_list, nan, None],
-        [input_list, inf, None],
-    ])
-    def test(self, input_list, index, expected):
-        assert get_list_item(input_list, index) == expected
-
-
-class Test_convert_value:
-
-    def test_normal_1(self):
-        assert convert_value("0") == 0
-        assert convert_value("9999999999") == 9999999999
-        assert convert_value("-9999999999") == -9999999999
-        assert convert_value(0) == 0
-        assert convert_value(9999999999) == 9999999999
-        assert convert_value(-9999999999) == -9999999999
-
-    def test_normal_2(self):
-        assert convert_value("0.0") == 0
-        assert convert_value(0.0) == 0
-
-    def test_normal_3(self):
-        assert convert_value("aaaaa") == "aaaaa"
-
-    def test_abnormal_1(self):
-        assert convert_value(None) is None
-
-    def test_abnormal_2(self):
-        assert dataproperty.is_nan(convert_value(nan))
-        assert convert_value(inf) == inf
 
 
 class Test_removeItemFromList:
@@ -406,7 +358,7 @@ class Test_verify_install_command:
     @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["value", "expected"], [
         [None, TypeError],
-        ["__not_existing_command__", NotInstallError],
+        ["__not_existing_command__", OSError],
     ])
     def test_exception(self, value, expected):
         with pytest.raises(expected):

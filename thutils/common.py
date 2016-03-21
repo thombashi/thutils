@@ -13,27 +13,6 @@ import dataproperty
 import six
 
 
-# Attribute Name ---
-
-AN_GENERAL_KEY = "key"
-AN_GENEARAL_VALUE = "value"
-KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
-
-
-# Regular Expression ---
-
-RE_SPACE = re.compile("[\s]+")
-
-
-# class ---
-
-class NotInstallError(Exception):
-    pass
-
-
-# function ---
-
-
 def safe_division(dividend, divisor):
     """
     :return:
@@ -53,23 +32,6 @@ def safe_division(dividend, divisor):
         return float("nan")
 
 
-def get_list_item(input_list, index):
-    if not dataproperty.is_integer(index):
-        return None
-
-    list_size = len(input_list)
-    if not (0 <= index < list_size):
-        # message = "out of index: list=%s, size=%d, index=%s" % (
-        #    input_list, list_size, str(index))
-        #raise IndexError(message)
-        return None
-
-    try:
-        return input_list[index]
-    except TypeError:
-        return None
-
-
 def removeItemFromList(item_list, item):
     is_remove = False
     if item in item_list:
@@ -82,15 +44,6 @@ def removeItemFromList(item_list, item):
 def removeListFromList(input_list, remove_list):
     for remove_item in remove_list:
         removeItemFromList(input_list, remove_item)
-
-
-def convert_value(value):
-    if dataproperty.is_integer(value):
-        value = int(value)
-    elif dataproperty.is_float(value):
-        value = float(value)
-
-    return value
 
 
 def diffItemList(item_list, remove_list):
@@ -250,7 +203,7 @@ def verify_install_command(command_list):
     if len(not_installed_command_list) > 0:
         message = "command not found: %s" % (
             ", ".join(not_installed_command_list))
-        raise NotInstallError(message)
+        raise OSError(message)
 
 
 def command_to_filename(command, suffix=""):
@@ -312,7 +265,7 @@ def get_execution_command():
                 arg_list.append(arg)
                 continue
 
-            if RE_SPACE.search(arg):
+            if re.search("[\s]+", arg) is not None:
                 arg = "'%s'" % (arg)
             arg_list.append(arg)
 
@@ -343,7 +296,6 @@ def sleep_wrapper(sleep_second, dry_run=False):
     if dry_run:
         return 0
 
-    #logger.debug("sleep %f seconds" % (sleep_second))
     time.sleep(sleep_second)
 
     return sleep_second

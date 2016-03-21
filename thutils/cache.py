@@ -6,6 +6,7 @@
 
 import datetime
 import os
+import sys
 
 import thutils
 from thutils.logger import logger
@@ -26,6 +27,9 @@ class memoize:
 
 
 class CommandCache:
+
+    __CACHE_ROOT_DIR = "/tmp/__thutils__"
+
     cache_lifetime_sec = 0
 
     @classmethod
@@ -34,8 +38,6 @@ class CommandCache:
 
     @classmethod
     def clear(cls):
-        logger.debug("clear command cache")
-
         cache_dir_path = cls.__get_command_cache_store_dir()
 
         try:
@@ -56,7 +58,8 @@ class CommandCache:
 
         cache_dir_path = cls.__get_command_cache_store_dir()
         output_cache_path = os.path.join(
-            cache_dir_path, common.command_to_filename(command, suffix) + ".txt")
+            cache_dir_path,
+            common.command_to_filename(command, suffix) + ".txt")
 
         if os.path.exists(output_cache_path):
             if cls.__is_cache_expire(output_cache_path):
@@ -76,7 +79,7 @@ class CommandCache:
     @classmethod
     def __get_command_cache_store_dir(cls):
         cache_dir_path = os.path.join(
-            thutils.LIB_TMP_DIR, "__thutils_command_cache__")
+            cls.__CACHE_ROOT_DIR, "__thutils_command_cache__")
 
         thutils.gfile.FileManager.make_directory(cache_dir_path, force=True)
 
