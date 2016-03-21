@@ -46,15 +46,6 @@ def removeListFromList(input_list, remove_list):
         removeItemFromList(input_list, remove_item)
 
 
-def convert_value(value):
-    if dataproperty.is_integer(value):
-        value = int(value)
-    elif dataproperty.is_float(value):
-        value = float(value)
-
-    return value
-
-
 def diffItemList(item_list, remove_list):
     # return list(set(item_list).difference(set(remove_list)))
     work_list = list(item_list)

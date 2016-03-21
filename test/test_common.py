@@ -83,31 +83,6 @@ class Test_safe_division:
         assert safe_division(dividend, divisor) == expected
 
 
-class Test_convert_value:
-
-    def test_normal_1(self):
-        assert convert_value("0") == 0
-        assert convert_value("9999999999") == 9999999999
-        assert convert_value("-9999999999") == -9999999999
-        assert convert_value(0) == 0
-        assert convert_value(9999999999) == 9999999999
-        assert convert_value(-9999999999) == -9999999999
-
-    def test_normal_2(self):
-        assert convert_value("0.0") == 0
-        assert convert_value(0.0) == 0
-
-    def test_normal_3(self):
-        assert convert_value("aaaaa") == "aaaaa"
-
-    def test_abnormal_1(self):
-        assert convert_value(None) is None
-
-    def test_abnormal_2(self):
-        assert dataproperty.is_nan(convert_value(nan))
-        assert convert_value(inf) == inf
-
-
 class Test_removeItemFromList:
 
     def test_normal_1(self):
