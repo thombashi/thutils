@@ -4,12 +4,8 @@
 @author: Tsuyoshi Hombashi
 '''
 
-import re
-import sys
-import datetime
 
 import dataproperty
-from thutils.logger import logger
 
 
 class RegularExpression:

@@ -10,13 +10,6 @@ import thutils.option
 import thutils.subprocwrapper
 
 
-LIB_TMP_DIR = "/tmp/__golib__"
-
-
-class NotInstallError(Exception):
-    pass
-
-
 def initialize_library(
         program_filename, options, output_dir_path="."):
 
@@ -32,7 +25,7 @@ def initialize_library(
     except AttributeError:
         pass
 
-    return_value = logger.logger.initialize(
+    return_value = thutils.logger.logger.initialize(
         program_filename,
         dry_run=dry_run,
         stdout_log_level=options.log_level,
@@ -41,11 +34,12 @@ def initialize_library(
         output_dir_path=output_dir_path,
     )
 
-    gfile.FileManager.initialize(dry_run)
-    cache.CommandCache.initialize()
+    thutils.gfile.FileManager.initialize(dry_run)
+    thutils.cache.CommandCache.initialize()
 
-    logger.logger.debug(
+    thutils.logger.logger.debug(
         "complete initialize library: hostname=" + socket.gethostname())
-    logger.logger.debug("options: " + common.dump_dict(options.__dict__))
+    thutils.logger.logger.debug(
+        "options: " + thutils.common.dump_dict(options.__dict__))
 
     return return_value

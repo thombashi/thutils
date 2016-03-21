@@ -13,27 +13,6 @@ import dataproperty
 import six
 
 
-# Attribute Name ---
-
-AN_GENERAL_KEY = "key"
-AN_GENEARAL_VALUE = "value"
-KEY_VALUE_HEADER = [AN_GENERAL_KEY, AN_GENEARAL_VALUE]
-
-
-# Regular Expression ---
-
-RE_SPACE = re.compile("[\s]+")
-
-
-# class ---
-
-class NotInstallError(Exception):
-    pass
-
-
-# function ---
-
-
 def safe_division(dividend, divisor):
     """
     :return:
@@ -250,7 +229,7 @@ def verify_install_command(command_list):
     if len(not_installed_command_list) > 0:
         message = "command not found: %s" % (
             ", ".join(not_installed_command_list))
-        raise NotInstallError(message)
+        raise OSError(message)
 
 
 def command_to_filename(command, suffix=""):
@@ -343,7 +322,6 @@ def sleep_wrapper(sleep_second, dry_run=False):
     if dry_run:
         return 0
 
-    #logger.debug("sleep %f seconds" % (sleep_second))
     time.sleep(sleep_second)
 
     return sleep_second

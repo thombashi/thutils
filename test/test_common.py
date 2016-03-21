@@ -406,7 +406,7 @@ class Test_verify_install_command:
     @pytest.mark.skipif("platform.system() == 'Windows'")
     @pytest.mark.parametrize(["value", "expected"], [
         [None, TypeError],
-        ["__not_existing_command__", NotInstallError],
+        ["__not_existing_command__", OSError],
     ])
     def test_exception(self, value, expected):
         with pytest.raises(expected):
