@@ -265,7 +265,7 @@ def get_execution_command():
                 arg_list.append(arg)
                 continue
 
-            if RE_SPACE.search(arg):
+            if re.search("[\s]+", arg) is not None:
                 arg = "'%s'" % (arg)
             arg_list.append(arg)
 
