@@ -2,9 +2,6 @@
 
 '''
 @author: Tsuyoshi Hombashi
-
-:required:
-    https://pypi.python.org/pypi/pytest
 '''
 
 import platform
@@ -84,26 +81,6 @@ class Test_safe_division:
     ])
     def test_abnormal_2(self, dividend, divisor, expected):
         assert safe_division(dividend, divisor) == expected
-
-
-class Test_get_list_item:
-    input_list = [1, 2, 3]
-
-    @pytest.mark.parametrize(['input_list', "index", "expected"], [
-        [input_list, 0, 1],
-        [input_list, 2, 3],
-
-        [input_list, -1, None],
-        [input_list, 4, None],
-
-        [input_list, 1.0, None],
-        [input_list, True, None],
-        [input_list, None, None],
-        [input_list, nan, None],
-        [input_list, inf, None],
-    ])
-    def test(self, input_list, index, expected):
-        assert get_list_item(input_list, index) == expected
 
 
 class Test_convert_value:

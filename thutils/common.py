@@ -32,23 +32,6 @@ def safe_division(dividend, divisor):
         return float("nan")
 
 
-def get_list_item(input_list, index):
-    if not dataproperty.is_integer(index):
-        return None
-
-    list_size = len(input_list)
-    if not (0 <= index < list_size):
-        # message = "out of index: list=%s, size=%d, index=%s" % (
-        #    input_list, list_size, str(index))
-        #raise IndexError(message)
-        return None
-
-    try:
-        return input_list[index]
-    except TypeError:
-        return None
-
-
 def removeItemFromList(item_list, item):
     is_remove = False
     if item in item_list:
