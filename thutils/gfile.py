@@ -400,22 +400,6 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
     return result[0]
 
 
-def sanitize_file_name(path, replacement_text=""):
-    path = path.strip()
-    re_replace = re.compile("[%s]" % re.escape(__INVALID_PATH_CHARS))
-
-    return re_replace.sub(replacement_text, path)
-
-
-def replace_symbol(file_name, replacement_text=""):
-    fname = sanitize_file_name(file_name, replacement_text)
-    if fname is None:
-        return None
-
-    re_replace = re.compile("[%s]" % re.escape(" ,.%()/"))
-    return re_replace.sub(replacement_text, fname)
-
-
 def parsePermission3Char(permission):
     """
     'rwx' 形式のアクセス権限文字列 permission を8進数形式に変換する
