@@ -1,4 +1,5 @@
 DataProperty
-python-magic
+pathvalidate
 path.py
+python-magic
 six
