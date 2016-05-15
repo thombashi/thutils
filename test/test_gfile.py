@@ -84,54 +84,11 @@ class Test_FileManager_make_directory:
         assert os.path.isdir(target_path)
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
+        [None, ValueError],
     ])
     def test_exception(self, tmpdir, value, expected):
         with pytest.raises(expected):
             FileManager.make_directory(value)
-
-
-class Test_validatePath:
-
-    @pytest.mark.parametrize(["value"], [
-        ["/not/existing/file/__path__/"],
-        ["/not/existing/file/__path__"],
-        [
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        ],
-    ])
-    def test_normal(self, value):
-        validate_path(value)
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
-        [1.1, NullPathError],
-        [True, NullPathError],
-        ["/test/aa:aa", InvalidFilePathError],
-        ["/test/aa*aa", InvalidFilePathError],
-        ["/test/aa?aa", InvalidFilePathError],
-        ["/test/aa\"aa", InvalidFilePathError],
-        ["/test/aa<aa", InvalidFilePathError],
-        ["/test/aa>aa", InvalidFilePathError],
-        ["/test/aa|aa", InvalidFilePathError],
-
-        ["c:\\aa:aa", InvalidFilePathError],
-        ["c:\\aa*aa", InvalidFilePathError],
-        ["c:\\aa?aa", InvalidFilePathError],
-        ["c:\\aa\"aa", InvalidFilePathError],
-        ["c:\\aa<aa", InvalidFilePathError],
-        ["c:\\aa>aa", InvalidFilePathError],
-        ["c:\\aa|aa", InvalidFilePathError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            validate_path(value)
 
 
 class Test_check_file_existence:
@@ -155,85 +112,15 @@ class Test_check_file_existence:
         assert check_file_existence(str(tmpdir)) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
-        [1.1, NullPathError],
-        [True, NullPathError],
-        ["", NullPathError],
+        [None, ValueError],
+        [1.1, ValueError],
+        [True, ValueError],
+        ["", ValueError],
         ["/not/existing/file/__path__", FileNotFoundError],
     ])
     def test_exception(self, value, expected):
         with pytest.raises(expected):
             assert check_file_existence(value)
-
-
-class Test_sanitize_file_name:
-    SANITIZE_CHAR_LIST = [
-        "\\", ":", "*", "?", '"', "<", ">", "|",
-    ]
-    NOT_SANITIZE_CHAR_LIST = [
-        "!", "#", "$", '&', "'", "_",
-        "=", "~", "^", "@", "`", "[", "]", "+", ";", "{", "}",
-        ",", ".", "(", ")", "%",
-    ]
-    REPLACE_TEXT_LIST = ["", "_"]
-
-    @pytest.mark.parametrize(
-        ["value", "replace_text", "expected"],
-        [
-            ["A" + c + "B", rep, "A" + rep + "B"]
-            for c, rep in itertools.product(
-                SANITIZE_CHAR_LIST, REPLACE_TEXT_LIST)
-        ] + [
-            ["A" + c + "B", rep, "A" + c + "B"]
-            for c, rep in itertools.product(
-                NOT_SANITIZE_CHAR_LIST, REPLACE_TEXT_LIST)
-        ]
-    )
-    def test_normal(self, value, replace_text, expected):
-        assert sanitize_file_name(value, replace_text) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, AttributeError],
-        [1, AttributeError],
-        [True, AttributeError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            sanitize_file_name(value)
-
-
-class Test_replace_symbol:
-    TARGET_CHAR_LIST = [
-        "\\", ":", "*", "?", '"', "<", ">", "|",
-        ",", ".", "%", "(", ")", "/", " ",
-    ]
-    NOT_TARGET_CHAR_LIST = [
-        "!", "#", "$", '&', "'", "_",
-        "=", "~", "^", "@", "`", "[", "]", "+", ";", "{", "}",
-    ]
-    REPLACE_TEXT_LIST = ["", "_"]
-
-    @pytest.mark.parametrize(
-        ["value", "replace_text", "expected"],
-        [
-            ["A" + c + "B", rep, "A" + rep + "B"] for c, rep in itertools.product(
-                TARGET_CHAR_LIST, REPLACE_TEXT_LIST)
-        ] + [
-            ["A" + c + "B", rep, "A" + c + "B"] for c, rep in itertools.product(
-                NOT_TARGET_CHAR_LIST, REPLACE_TEXT_LIST)
-        ]
-    )
-    def test_normal_1(self, value, replace_text, expected):
-        assert replace_symbol(value, replace_text) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, AttributeError],
-        [1, AttributeError],
-        [True, AttributeError],
-    ])
-    def test_abnormal(self, value, expected):
-        with pytest.raises(expected):
-            replace_symbol(value)
 
 
 class Test_parsePermission3Char:

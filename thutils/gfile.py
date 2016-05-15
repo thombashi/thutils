@@ -11,12 +11,10 @@ import sys
 
 import dataproperty
 import path
+import pathvalidate
 import six
 
 from thutils.logger import logger
-
-
-__INVALID_PATH_CHARS = '\:*?"<>|'
 
 
 class FileType:
@@ -258,7 +256,7 @@ class FileManager:
         re_compile_list = [
             re.compile(re_pattern)
             for re_pattern in re_remove_list
-            if dataproperty.is_not_empty_string(remove_fileattern)
+            if dataproperty.is_not_empty_string(re_pattern)
         ]
 
         dict_result_pathlist = {}
@@ -314,17 +312,6 @@ class FileManager:
         return dict_result_pathlist
 
 
-def validate_path(input_path):
-    if dataproperty.is_empty_string(input_path):
-        raise NullPathError()
-
-    match = re.search(
-        "[%s]" % (re.escape(__INVALID_PATH_CHARS)), os.path.basename(input_path))
-    if match is not None:
-        raise InvalidFilePathError(
-            "invalid char found in file name: '%s'" % (re.escape(match.group())))
-
-
 def check_file_existence(path):
     """
     :return: FileType
@@ -334,7 +321,7 @@ def check_file_existence(path):
     :raises RuntimeError:
     """
 
-    validate_path(path)
+    pathvalidate.validate_filename(path)
 
     if not os.path.lexists(path):
         raise FileNotFoundError(path)
@@ -398,22 +385,6 @@ def findDirectory(search_root_dir_path, re_pattern, find_count=-1):
         return None
 
     return result[0]
-
-
-def sanitize_file_name(path, replacement_text=""):
-    path = path.strip()
-    re_replace = re.compile("[%s]" % re.escape(__INVALID_PATH_CHARS))
-
-    return re_replace.sub(replacement_text, path)
-
-
-def replace_symbol(file_name, replacement_text=""):
-    fname = sanitize_file_name(file_name, replacement_text)
-    if fname is None:
-        return None
-
-    re_replace = re.compile("[%s]" % re.escape(" ,.%()/"))
-    return re_replace.sub(replacement_text, fname)
 
 
 def parsePermission3Char(permission):
