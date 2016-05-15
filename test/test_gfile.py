@@ -84,54 +84,11 @@ class Test_FileManager_make_directory:
         assert os.path.isdir(target_path)
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
+        [None, ValueError],
     ])
     def test_exception(self, tmpdir, value, expected):
         with pytest.raises(expected):
             FileManager.make_directory(value)
-
-
-class Test_validatePath:
-
-    @pytest.mark.parametrize(["value"], [
-        ["/not/existing/file/__path__/"],
-        ["/not/existing/file/__path__"],
-        [
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-            "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        ],
-    ])
-    def test_normal(self, value):
-        validate_path(value)
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
-        [1.1, NullPathError],
-        [True, NullPathError],
-        ["/test/aa:aa", InvalidFilePathError],
-        ["/test/aa*aa", InvalidFilePathError],
-        ["/test/aa?aa", InvalidFilePathError],
-        ["/test/aa\"aa", InvalidFilePathError],
-        ["/test/aa<aa", InvalidFilePathError],
-        ["/test/aa>aa", InvalidFilePathError],
-        ["/test/aa|aa", InvalidFilePathError],
-
-        ["c:\\aa:aa", InvalidFilePathError],
-        ["c:\\aa*aa", InvalidFilePathError],
-        ["c:\\aa?aa", InvalidFilePathError],
-        ["c:\\aa\"aa", InvalidFilePathError],
-        ["c:\\aa<aa", InvalidFilePathError],
-        ["c:\\aa>aa", InvalidFilePathError],
-        ["c:\\aa|aa", InvalidFilePathError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            validate_path(value)
 
 
 class Test_check_file_existence:
@@ -155,10 +112,10 @@ class Test_check_file_existence:
         assert check_file_existence(str(tmpdir)) == expected
 
     @pytest.mark.parametrize(["value", "expected"], [
-        [None, NullPathError],
-        [1.1, NullPathError],
-        [True, NullPathError],
-        ["", NullPathError],
+        [None, ValueError],
+        [1.1, ValueError],
+        [True, ValueError],
+        ["", ValueError],
         ["/not/existing/file/__path__", FileNotFoundError],
     ])
     def test_exception(self, value, expected):

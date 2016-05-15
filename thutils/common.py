@@ -6,6 +6,7 @@
 
 from __future__ import with_statement
 import os.path
+import pathvalidate
 import re
 import sys
 
@@ -207,8 +208,6 @@ def verify_install_command(command_list):
 
 
 def command_to_filename(command, suffix=""):
-    import thutils.gfile as gfile
-
     sep_char = "/\\"
 
     command = command.strip()
@@ -216,7 +215,7 @@ def command_to_filename(command, suffix=""):
     filename = filename.replace("-", "")
     filename = filename.strip(sep_char).lstrip(sep_char)
     filename = re.sub("[%s]" % re.escape("/\\"), "-", filename)
-    filename = gfile.sanitize_file_name(filename)
+    filename = pathvalidate.sanitize_filename(filename)
     if dataproperty.is_not_empty_string(suffix):
         filename += "_" + suffix
 
