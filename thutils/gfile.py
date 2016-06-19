@@ -321,7 +321,7 @@ def check_file_existence(path):
     :raises RuntimeError:
     """
 
-    pathvalidate.validate_filename(path)
+    pathvalidate.validate_file_path(path)
 
     if not os.path.lexists(path):
         raise FileNotFoundError(path)
