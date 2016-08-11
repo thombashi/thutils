@@ -133,24 +133,6 @@ def bytes_to_humanreadable(byte):
     return value + " " + unit
 
 
-def strtobool_wrapper(value):
-    """
-    try:
-        import distutils.util
-        return bool(distutils.util.strtobool(value))
-    except ImportError:
-    """
-
-    re_true = re.compile("^true$", re.IGNORECASE)
-    re_false = re.compile("^false$", re.IGNORECASE)
-    if re_true.match(value):
-        return True
-    if re_false.match(value):
-        return False
-
-    raise ValueError("can not convert '%s' to bool" % (value))
-
-
 def split_line_list(
         line_list, re_line_separator=re.compile("^$"),
         is_include_matched_line=False, is_strip=True):

@@ -208,34 +208,6 @@ class Test_bytes_to_humanreadable:
             bytes_to_humanreadable(value)
 
 
-class Test_strtobool_wrapper:
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["true", True],
-        ["True", True],
-        ["TRUE", True],
-        ["false", False],
-        ["False", False],
-        ["FALSE", False],
-    ])
-    def test_normal(self, value, expected):
-        assert strtobool_wrapper(value) == expected
-
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["falsea", ValueError],
-        ["aFalse", ValueError],
-        ["aFALSEa", ValueError],
-        ["Ｔｒｕｅ", ValueError],
-
-        [1.0, TypeError],
-        [None, TypeError],
-        [nan, TypeError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            strtobool_wrapper(value)
-
-
 class Test_split_line_list:
 
     @pytest.mark.parametrize(
