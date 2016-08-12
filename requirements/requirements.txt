@@ -3,3 +3,4 @@ pathvalidate
 path.py
 python-magic
 six
+subprocrunner

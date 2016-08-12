@@ -10,6 +10,7 @@ import sys
 
 import thutils
 from thutils.logger import logger
+from subprocrunner import SubprocessRunner
 
 
 class memoize:
@@ -31,10 +32,6 @@ class CommandCache:
     __CACHE_ROOT_DIR = "/tmp/__thutils__"
 
     cache_lifetime_sec = 0
-
-    @classmethod
-    def initialize(cls):
-        cls.__sys_wrapper = thutils.subprocwrapper.SubprocessWrapper()
 
     @classmethod
     def clear(cls):
@@ -72,7 +69,7 @@ class CommandCache:
             logger.debug("cache miss: " + output_cache_path)
 
         collect_command = "%s > %s 2>&1" % (command, output_cache_path)
-        cls.__sys_wrapper.run(collect_command, ignore_error_list=None)
+        CommandCache(collect_command).run()
 
         return output_cache_path
 

@@ -2,9 +2,6 @@
 
 '''
 @author: Tsuyoshi Hombashi
-
-:required:
-    https://pypi.python.org/pypi/pytest
 '''
 
 import os
@@ -13,13 +10,8 @@ import pytest
 
 import thutils
 from thutils.main import *
-import thutils.common as common
 import thutils.gfile as gfile
 
-
-@pytest.fixture
-def subproc_wrapper():
-    return thutils.subprocwrapper.SubprocessWrapper()
 
 TEST_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 

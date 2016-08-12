@@ -7,7 +7,6 @@ import thutils.loader
 import thutils.logger
 import thutils.main
 import thutils.option
-import thutils.subprocwrapper
 
 
 def initialize_library(
@@ -35,7 +34,6 @@ def initialize_library(
     )
 
     thutils.gfile.FileManager.initialize(dry_run)
-    thutils.cache.CommandCache.initialize()
 
     thutils.logger.logger.debug(
         "complete initialize library: hostname=" + socket.gethostname())
