@@ -56,49 +56,6 @@ def diffItemList(item_list, remove_list):
     return work_list
 
 
-def _unit_to_byte(unit, kilo_size):
-    if kilo_size not in [1000, 1024]:
-        raise ValueError("invalid kilo size: " + str(kilo_size))
-
-    re_exp_pair_list = [
-        [re.compile("^b$", re.IGNORECASE), 0],
-        [re.compile("^k$", re.IGNORECASE), 1],
-        [re.compile("^m$", re.IGNORECASE), 2],
-        [re.compile("^g$", re.IGNORECASE), 3],
-        [re.compile("^t$", re.IGNORECASE), 4],
-        [re.compile("^p$", re.IGNORECASE), 5],
-    ]
-
-    for re_exp_pair in re_exp_pair_list:
-        re_pattern, exp = re_exp_pair
-
-        if re_pattern.search(unit):
-            return kilo_size ** exp
-
-    raise ValueError("unknown unit: %s" % (unit))
-
-
-def humanreadable_to_byte(readable_size, kilo_size=1024):
-    """
-    :param str readable_size: human readable size (bytes). e.g. 256 M
-    :param int kilo_size: size of kilo. 1024 or 1000
-    :raises ValueError:
-    """
-
-    size = readable_size[:-1]
-    unit = readable_size[-1]
-
-    size = float(size)
-    unit = unit.lower()
-
-    if size < 0:
-        raise ValueError("minus size")
-
-    coefficient = _unit_to_byte(unit, kilo_size)
-
-    return size * coefficient
-
-
 def _get_unit(byte):
     kilo = 1024
 
