@@ -7,8 +7,8 @@ import sys
 MISC_DIR = "misc"
 REQUIREMENT_DIR = "requirements"
 
-needs_pytest = set(['pytest', 'test', 'ptr']).intersection(sys.argv)
-pytest_runner = ['pytest-runner'] if needs_pytest else []
+needs_pytest = set(["pytest", "test", "ptr"]).intersection(sys.argv)
+pytest_runner = ["pytest-runner"] if needs_pytest else []
 
 
 with open("README.rst") as fp:
@@ -29,7 +29,7 @@ if major == 2 and minor <= 5:
 
 setuptools.setup(
     name="thutils",
-    version="0.1.24",
+    version="0.2.0",
     author="Tsuyoshi Hombashi",
     author_email="gogogo.vm@gmail.com",
     url="https://github.com/thombashi/thutils",
