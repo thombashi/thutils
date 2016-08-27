@@ -17,26 +17,6 @@ nan = float("nan")
 inf = float("inf")
 
 
-class Test_is_install_command:
-
-    @pytest.mark.skipif("platform.system() == 'Windows'")
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["hostname", True],
-        ["テスト", False],
-        ["__not_existing_command__", False],
-    ])
-    def test_linux_normal(self, value, expected):
-        assert is_install_command(value) == expected
-
-    @pytest.mark.skipif("platform.system() == 'Windows'")
-    @pytest.mark.parametrize(["value", "expected"], [
-        ["", IndexError],
-    ])
-    def test_windows_normal(self, value, expected):
-        with pytest.raises(expected):
-            is_install_command(value)
-
-
 class Test_safe_division:
 
     @pytest.mark.parametrize(['dividend', "divisor", "expected"], [
@@ -142,24 +122,6 @@ class Test_bytes_to_humanreadable:
     def test_exception(self, value, expected):
         with pytest.raises(expected):
             bytes_to_humanreadable(value)
-
-
-class Test_verify_install_command:
-
-    @pytest.mark.parametrize(["value"], [
-        [[]],
-    ])
-    def test_normal(self, value):
-        verify_install_command(value)
-
-    @pytest.mark.skipif("platform.system() == 'Windows'")
-    @pytest.mark.parametrize(["value", "expected"], [
-        [None, TypeError],
-        ["__not_existing_command__", OSError],
-    ])
-    def test_exception(self, value, expected):
-        with pytest.raises(expected):
-            verify_install_command(value)
 
 
 class Test_command_to_filename:

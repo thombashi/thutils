@@ -90,35 +90,6 @@ def bytes_to_humanreadable(byte):
     return value + " " + unit
 
 
-def is_install_command(command):
-    import subprocess
-    import platform
-
-    if platform.system() != "Linux":
-        return True
-
-    search_command = "type " + command.split()[0]
-    proc = subprocess.Popen(
-        search_command, shell=True,
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    is_command_found = proc.wait() == 0
-
-    return is_command_found
-
-
-def verify_install_command(command_list):
-    not_installed_command_list = []
-
-    for command in command_list:
-        if not is_install_command(command):
-            not_installed_command_list.append(command)
-
-    if len(not_installed_command_list) > 0:
-        message = "command not found: %s" % (
-            ", ".join(not_installed_command_list))
-        raise OSError(message)
-
-
 def command_to_filename(command, suffix=""):
     sep_char = "/\\"
 
